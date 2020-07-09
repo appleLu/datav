@@ -10,7 +10,6 @@ Datav is forked from @grafana, but changed a lot, e.g :
 - large screen supported
 - using antd for ui components
 
-Feel free to try datav at https://demo.datav.dev
 
 ## Design Philosophy
 Contrary to Grafana's big and all, DataV's design goal is small and beautiful.We support 90% of common usage scenarios.In these scenarios, DataV can ensure that it is simple enough and easy to use. Plug-in development will also be very simple. 
