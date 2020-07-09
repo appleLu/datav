@@ -5,10 +5,11 @@ The open-source platform for monitoring and observability.
 Datav is forked from @grafana, but changed a lot, e.g :
 - remove angular dependency, using pure react
 - much cleaner code 
-- a smaller plugin system
+- a smaller but more extensible plugin system
 - multi spoken languages supported
 - large screen supported
 - using antd for ui components
+- **no enterprise version, 100% open-source**
 
 
 ## Design Philosophy
