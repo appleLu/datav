@@ -2,7 +2,7 @@
 
 The open-source platform for monitoring and observability. 
 
-Datav is forked from @grafana, but changed a lot, e.g :
+Datav is forked from **@grafana**, but changed a lot, e.g :
 - remove angular dependency, using pure react
 - much cleaner code 
 - a smaller but more extensible plugin system
@@ -39,4 +39,3 @@ Contrary to Grafana's big and all, DataV's design goal is small and beautiful.We
 - **Alerting** Visually define alert rules for your most important metrics
 - **Powerful Iframe API** Embed datav to your website With powerful iframe api
 - **Variables**  Global and Dashboard, global vars can help you achieve personalized features such as multiple environments
-- **Excellent code design** Pure Typescript + React + Go，re-programming based on source code will be very simple
