@@ -1,3 +1,4 @@
+/*eslint-disable*/
 import React, { PureComponent } from 'react';
 import { getTagColorsFromName, Icon, Tooltip } from 'src/packages/datav-core';
 

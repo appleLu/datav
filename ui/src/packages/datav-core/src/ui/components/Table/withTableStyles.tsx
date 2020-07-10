@@ -1,6 +1,7 @@
+// eslint-disable-next-line
 import { CellComponent, TableCellProps } from './types';
 import { TableStyles } from './styles';
-
+ 
 export const withTableStyles = (
   CellComponent: CellComponent,
   getExtendedStyles: (props: TableCellProps) => TableStyles

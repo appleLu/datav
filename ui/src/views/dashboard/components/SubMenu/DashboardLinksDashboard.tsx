@@ -1,3 +1,4 @@
+/*eslint-disable*/
 import React, { PureComponent } from 'react';
 import { Icon, Tooltip } from 'src/packages/datav-core';
 import { textUtil} from 'src/packages/datav-core';

@@ -59,7 +59,6 @@ export function RadioButtonGroup<T>({
     (option: SelectableValue<T>) => {
       return () => {
         if (onChange) {
-            console.log(option.value)
           onChange(option.value);
         }
       };

@@ -88,7 +88,7 @@ export class DashboardModel {
             canEdit: true
         }
         this.links = data.links || [];
-        
+
         this.schemaVersion = data.schemaVersion || 0;
         this.version = data.version || 0;
         
@@ -273,6 +273,16 @@ export class DashboardModel {
     }
   }
   
+  removeRow(row: PanelModel, removePanels: boolean) {
+    const needToogle = (!removePanels && row.collapsed) || (removePanels && !row.collapsed);
+
+    if (needToogle) {
+      this.toggleRow(row);
+    }
+
+    this.removePanel(row);
+  }
+  
   expandRows() {
     for (let i = 0; i < this.panels.length; i++) {
       const panel = this.panels[i];
@@ -286,7 +296,19 @@ export class DashboardModel {
       }
     }
   }
+  collapseRows() {
+    for (let i = 0; i < this.panels.length; i++) {
+      const panel = this.panels[i];
 
+      if (panel.type !== 'row') {
+        continue;
+      }
+
+      if (!panel.collapsed) {
+        this.toggleRow(panel);
+      }
+    }
+  }
   toggleRow(row: PanelModel) {
     const rowIndex = _.indexOf(this.panels, row);
 

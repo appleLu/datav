@@ -1,12 +1,11 @@
 import React, { ChangeEvent, FormEvent, PureComponent } from 'react';
 import isEqual from 'lodash/isEqual';
-import { AppEvents, VariableType } from 'src/packages/datav-core';
+import {VariableType } from 'src/packages/datav-core';
 import { InlineFormLabel } from 'src/packages/datav-core';
 
 import { variableAdapters } from '../adapters';
 import { NEW_VARIABLE_ID, toVariablePayload, VariableIdentifier } from '../state/types';
 import { VariableHide, VariableModel } from 'src/types';
-import { appEvents } from 'src/core/library/utils/app_events';
 import { VariableValuesPreview } from './VariableValuesPreview';
 import { changeVariableName, onEditorAdd, onEditorUpdate, variableEditorMount, variableEditorUnMount } from './actions';
 import { MapDispatchToProps, MapStateToProps } from 'react-redux';
@@ -16,7 +15,7 @@ import { getVariable } from '../state/selectors';
 import { connectWithStore } from 'src/core/library/utils/connectWithReduxStore';
 import { OnPropChangeArguments } from './types';
 import { changeVariableProp, changeVariableType } from '../state/sharedReducer';
-import { Button } from 'antd';
+import { Button, notification } from 'antd';
 
 export interface OwnProps {
   identifier: VariableIdentifier;
@@ -44,10 +43,14 @@ export class VariableEditorEditorUnConnected extends PureComponent<Props> {
     this.props.variableEditorMount(this.props.identifier);
   }
 
-  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<{}>, snapshot?: any): void {
+  componentDidUpdate(prevProps: Readonly<Props>): void {
     if (!isEqual(prevProps.editor.errors, this.props.editor.errors)) {
       Object.values(this.props.editor.errors).forEach(error => {
-        appEvents.emit(AppEvents.alertWarning, ['Validation', error]);
+        notification['error']({
+          message: 'Validation',
+          description: error,
+          duration: 10
+        });
       });
     }
   }

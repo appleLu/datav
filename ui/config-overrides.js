@@ -16,7 +16,7 @@
 const fs = require('fs');
 const webpack = require('webpack');
 
-const { fixBabelImports, addLessLoader, override ,addWebpackPlugin,addWebpackAlias,addWebpackExternals} = require('customize-cra');
+const { fixBabelImports, addLessLoader, override ,addWebpackPlugin,addWebpackAlias,useEslintRc} = require('customize-cra');
 
   
 const path = require('path')
@@ -56,6 +56,7 @@ const options = {
 }
 
 module.exports = override(
+  // useEslintRc('.eslintrc.js'),
   fixBabelImports('import', {
     libraryName: 'antd',
     libraryDirectory: 'es',
@@ -69,7 +70,7 @@ module.exports = override(
       '@zindex-modal': 1100,
       '@zindex-modal-mask': 1100,
       '@zindex-message':1040,
-      '@zindex-notification': 1040
+      '@zindex-notification': 1110
     }
   }),
   addWebpackAlias({

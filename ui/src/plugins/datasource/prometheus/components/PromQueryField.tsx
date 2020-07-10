@@ -149,7 +149,6 @@ class PromQueryField extends React.PureComponent<PromQueryFieldProps, PromQueryF
   }
 
   componentDidMount() {
-    console.log(this.props.datasource.languageProvider)
     if (this.props.datasource.languageProvider) {
       this.refreshMetrics();
     }

@@ -7,7 +7,6 @@ import { Form, Input, Button, Switch, Row, Col, Card, Alert, Popconfirm, message
 import Page from 'src/views/Layouts/Page/Page';
 import { loadDataSourcePlugin, testDataSource } from 'src/plugins/loader';
 import { PluginSettings } from './PluginSettings'
-import appEvents from 'src/core/library/utils/app_events';
 import globalEvents from 'src/views/App/globalEvents';
 
 type GenericDataSourcePlugin = DataSourcePlugin<DataSourceApi<DataQuery, DataSourceJsonData>>;
@@ -92,7 +91,7 @@ export class EditDataSourcePage extends PureComponent<Props & any, State> {
     }
 
     async componentWillMount() {
-        if (this.state.mode == DatasourceMode.Edit) {
+        if (this.state.mode === DatasourceMode.Edit) {
             const res = await getBackendSrv().get(`/api/datasources/${this.props.match.params.datasourceID}`)
             const ds: DataSourceSettings = res.data
             const meta = getBootConfig().datasourceMetas[ds.type]
@@ -140,7 +139,7 @@ export class EditDataSourcePage extends PureComponent<Props & any, State> {
 
     async onFinish() {
         // save options to backend
-        if (this.state.mode == DatasourceMode.New) {
+        if (this.state.mode === DatasourceMode.New) {
             const res = await getBackendSrv().post('/api/datasources/new', this.state.dataSource)
             this.setState({
                 ...this.state,
@@ -196,8 +195,8 @@ export class EditDataSourcePage extends PureComponent<Props & any, State> {
                                         <Col span="14">
                                             <Form.Item
                                                 label="Name"
-                                            >
-                                                <Input placeholder="Name" defaultValue={this.state.dataSource.name} onChange={(e) => { this.state.dataSource.name = e.currentTarget.value }} />
+                                            >   
+                                                <Input placeholder="Name" defaultValue={this.state.dataSource.name} onChange={(e) => { this.setState({...this.state,dataSource: {...this.state.dataSource,name: e.currentTarget.value }})}} />
                                             </Form.Item>
                                         </Col>
 
@@ -206,7 +205,7 @@ export class EditDataSourcePage extends PureComponent<Props & any, State> {
                                                 label={<span>Default</span>}
                                                 valuePropName="checked"
                                             >
-                                                <Switch defaultChecked={this.state.dataSource.isDefault} onChange={(v) => { this.state.dataSource.isDefault = v }} />
+                                                <Switch defaultChecked={this.state.dataSource.isDefault} onChange={(v) => {this.setState({...this.state,dataSource: {...this.state.dataSource,isDefault: v }})}} />
                                             </Form.Item>
                                         </Col>
                                     </Row>
@@ -221,7 +220,7 @@ export class EditDataSourcePage extends PureComponent<Props & any, State> {
                                             <Form.Item
                                                 label="URL"
                                             >
-                                                <Input placeholder="http://10.77.64.59:9090" defaultValue={this.state.dataSource.url} onChange={(e) => { this.state.dataSource.url = e.currentTarget.value }} />
+                                                <Input placeholder="http://10.77.64.59:9090" defaultValue={this.state.dataSource.url} onChange={(e) => { this.setState({...this.state,dataSource: {...this.state.dataSource,url: e.currentTarget.value }})}} />
                                             </Form.Item>
                                         </Col>
                                     </Row>

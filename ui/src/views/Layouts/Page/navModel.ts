@@ -19,7 +19,6 @@ function getNotFoundModel(): NavModel {
 }
 
 export function getNavModel(id: string, parentID: string): NavModel {
-    console.log(id,parentID)
     // find main node
     let main: MenuItem;
     menuItems.forEach((item) => {
@@ -43,7 +42,6 @@ export function getNavModel(id: string, parentID: string): NavModel {
         item.active = false
     })
 
-    console.log(main.children)
     if(!node) {
         return getNotFoundModel();
     }

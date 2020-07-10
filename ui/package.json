@@ -132,7 +132,7 @@
     "eslint-config-react-app": "3.0.7",
     "eslint-plugin-flowtype": "^3.4.2",
     "eslint-plugin-import": "2.16.0",
-    "eslint-plugin-jsx-a11y": "6.2.1",
+    "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-react": "7.12.4",
     "http-proxy-middleware": "^0.19.1",
     "jsdom": "13.2.0",
@@ -140,7 +140,7 @@
     "prettier": "1.18.2",
     "source-map-explorer": "^1.6.0",
     "tether-drop": "https://github.com/torkelo/drop/tarball/master"
-  },
+  }, 
   "scripts": {
     "analyze": "source-map-explorer build/static/js/main.*",
     "build": "REACT_APP_VSN_STATE=$(../../scripts/get-tracking-version.js) react-app-rewired build",
@@ -156,12 +156,6 @@
     "prettier-lint": "prettier --list-different '{.,scripts}/*.{js,json,md,ts,tsx}' 'packages/*/{src,demo/src}/**/!(layout.worker.bundled|react-vis).{css,js,json,md,ts,tsx}' 'packages/*/*.{css,js,json,md,ts,tsx}'",
     "eslint": "eslint --cache 'scripts/*.{js,ts,tsx}' 'packages/*/src/**/*.{js,ts,tsx}' 'packages/*/*.{js,ts,tsx}'",
     "lint": "npm-run-all -ln --parallel prettier-lint tsc-lint eslint check-license"
-  },
-  "prettier": {
-    "printWidth": 110,
-    "proseWrap": "never",
-    "singleQuote": true,
-    "trailingComma": "es5"
   },
   "browserslist": [
     ">0.5%",

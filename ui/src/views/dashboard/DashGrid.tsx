@@ -8,8 +8,10 @@ import {DashboardModel} from './model/DashboardModel'
 import { GRID_CELL_HEIGHT, GRID_CELL_VMARGIN, GRID_COLUMN_COUNT } from 'src/core/constants';
 import PanelWrapper from './PanelWrapper'
 import {AddPanelWidget} from './components/AddPanelWidget/AddPanelWidget'
+import {DashboardRow} from './components/Row/Row'
 
 import './DashGrid.less'
+import { CoreEvents } from 'src/types';
 
 interface GridWrapperProps {
     size: { width: number };
@@ -97,21 +99,20 @@ export class DashboardGrid extends PureComponent<Props> {
   
     componentDidMount() {
       const { dashboard } = this.props;
-      console.log(_.cloneDeep(dashboard))
       dashboard.on(panelAdded, this.triggerForceUpdate);
       dashboard.on(panelRemoved, this.triggerForceUpdate);
-      // dashboard.on(CoreEvents.repeatsProcessed, this.triggerForceUpdate);
-      // dashboard.on(CoreEvents.rowCollapsed, this.triggerForceUpdate);
-      // dashboard.on(CoreEvents.rowExpanded, this.triggerForceUpdate);
+      dashboard.on(CoreEvents.repeatsProcessed, this.triggerForceUpdate);
+      dashboard.on(CoreEvents.rowCollapsed, this.triggerForceUpdate);
+      dashboard.on(CoreEvents.rowExpanded, this.triggerForceUpdate);
     }
   
     componentWillUnmount() {
       const { dashboard } = this.props;
       dashboard.off(panelAdded, this.triggerForceUpdate);
       dashboard.off(panelRemoved, this.triggerForceUpdate);
-    // dashboard.off(CoreEvents.repeatsProcessed, this.triggerForceUpdate);
-    // dashboard.off(CoreEvents.rowCollapsed, this.triggerForceUpdate);
-    // dashboard.off(CoreEvents.rowExpanded, this.triggerForceUpdate);
+      dashboard.off(CoreEvents.repeatsProcessed, this.triggerForceUpdate);
+      dashboard.off(CoreEvents.rowCollapsed, this.triggerForceUpdate);
+      dashboard.off(CoreEvents.rowExpanded, this.triggerForceUpdate);
     }
   
     buildLayout() {
@@ -245,9 +246,9 @@ export class DashboardGrid extends PureComponent<Props> {
     }
   
     renderPanel(panel: PanelModel) {
-    //   if (panel.type === 'row') {
-    //     return <DashboardRow panel={panel} dashboard={this.props.dashboard} />;
-    //   }
+      if (panel.type === 'row') {
+        return <DashboardRow panel={panel} dashboard={this.props.dashboard} />;
+      }
   
       if (panel.type === 'add-panel') {
         return <AddPanelWidget panel={panel} dashboard={this.props.dashboard} />;

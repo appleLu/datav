@@ -112,7 +112,6 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
 
     const delAnnotation = (v) => {
       _.remove(this.ctrl.annotations, (n: any) => n.id === v.id);
-      console.log(this.ctrl.annotations)
     }
 
     drop = new Drop({
@@ -511,11 +510,9 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
     if (this.shouldAbortRender()) {
       return;
     }
-    console.log(this.props)
     this.ctrl.updateOptions(this.props.options)
     if (this.currentProps.data !== this.props.data) {
       this.ctrl.prepareRenderData(this.props)
-      console.log("graph data changed")
     }
     this.currentProps = this.props
     this.ctrl.buildFlotPairs(this.ctrl.seriesList);
@@ -546,7 +543,6 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
 
    setTimeout(() => {
       this.currentRenderTimer = null;
-      console.log('render graph')
       this.callPlot(options)
     }, 100)
 

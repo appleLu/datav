@@ -96,7 +96,6 @@ export class DashboardSettings extends PureComponent<Props> {
     for (const section of this.sections) {
       const sectionParams = _.defaults({ settingTab: section.id }, params);
       section.url = url + '?' + $.param(sectionParams);
-      console.log(section.url)
     }
   }
 

@@ -123,7 +123,6 @@ export class Edge {
   export class Graph {
     nodes: any = {};
   
-    constructor() {}
   
     createNode(name: string): Node {
       const n = new Node(name);

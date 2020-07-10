@@ -25,10 +25,13 @@ const ModalService = (props:Props) =>{
                 }
             )
         });
-        appEvents.on(CoreEvents.showModal, ({props,component}) => {
+        appEvents.on(CoreEvents.showModal, ({title,component,onConfirm}) => {
             Modal.info({
-                title: props.title,
-                content: component
+                title: title,
+                content: component,
+                onOk() {
+                    onConfirm()
+                }
             })
         });
         return () => {}

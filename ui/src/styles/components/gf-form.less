@@ -1,14 +1,15 @@
-@import "~antd/lib/style/themes/default.less";
+@import "../vars.less";
 
 @input-line-height: 18px;
   // text areas should be scrollable
 textarea {
     overflow: auto;
     white-space: pre-wrap;
-    padding: 6px @padding-sm;
-    min-height: @input-height-lg;
+    padding: 6px 8px;
+    min-height: @height-base;
     height: auto;
-  }
+}
+
 .gf-form {
   display: flex;
   flex-direction: row;
@@ -190,7 +191,7 @@ textarea {
   display: block;
   width: 100%;
   height: @input-height-base;
-  padding: 0 8px;
+  padding: 6px 8px;
   line-height: 18px;
   color: @text-color;
   background-color: @component-background;
@@ -202,7 +203,7 @@ textarea {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-
+  
 
 
   // Unstyle the caret on `<select>`s in IE10+.

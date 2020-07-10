@@ -8,10 +8,6 @@ interface Props {
   width?: number;
 }
 
-function formatCreateLabel(input: string) {
-  return `Custom unit: ${input}`;
-}
-
 export class UnitPicker extends PureComponent<Props> {
   onChange = (value) => {
     this.props.onChange(value);

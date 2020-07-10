@@ -139,6 +139,7 @@ export function SelectBase<T>({
       }
       onChange(value);
     },
+    // eslint-disable-next-line
     [isMulti, value, onChange]
   );
   let ReactSelectComponent: ReactSelect | Creatable = ReactSelect;

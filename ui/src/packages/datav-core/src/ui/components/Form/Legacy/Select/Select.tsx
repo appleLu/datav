@@ -8,8 +8,6 @@ import { default as ReactSelect } from '@torkelo/react-select';
 // @ts-ignore
 import Creatable from '@torkelo/react-select/creatable';
 // @ts-ignore
-import { CreatableProps } from 'react-select';
-// @ts-ignore
 import { default as ReactAsyncSelect } from '@torkelo/react-select/async';
 // @ts-ignore
 import { components } from '@torkelo/react-select';

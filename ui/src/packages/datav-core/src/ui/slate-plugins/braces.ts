@@ -105,6 +105,7 @@ export function BracesPlugin(): Plugin {
               .focus();
             return true;
           }
+          break
         }
 
         default: {

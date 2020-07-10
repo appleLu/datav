@@ -81,7 +81,6 @@ const AnnotationEditor = (props: Props) => {
     }
     
     const timeFormated = new DashboardModel({}).formatDate(props.rawEvent.time)
-    console.log(props.rawEvent.id)
     return (
         <div className="graph-annotation">
             <div className="graph-annotation__header">

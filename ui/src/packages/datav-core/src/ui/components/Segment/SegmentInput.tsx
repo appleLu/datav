@@ -1,4 +1,5 @@
 //@ts-nocheck
+/*eslint-disable*/
 import React, { useRef, useState } from 'react';
 import { cx, css } from 'emotion';
 import useClickAway from 'react-use/lib/useClickAway';

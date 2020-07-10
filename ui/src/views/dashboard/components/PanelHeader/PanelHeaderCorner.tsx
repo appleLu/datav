@@ -93,7 +93,6 @@ export class PanelHeaderCorner extends Component<Props> {
   render() {
     const { error } = this.props;
     const infoMode: InfoMode | undefined = this.getInfoMode();
-    console.log(infoMode)
     if (!infoMode) {
       return null;
     }
@@ -103,7 +102,6 @@ export class PanelHeaderCorner extends Component<Props> {
     }
 
     if (infoMode === InfoMode.Info || infoMode === InfoMode.Links) {
-      console.log(this.getInfoContent())
       return this.renderCornerType(infoMode, this.getInfoContent);
     }
 

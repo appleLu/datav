@@ -5,10 +5,6 @@ import { ThresholdsEditor } from '../ThresholdsEditor/ThresholdsEditor';
 export class ThresholdsValueEditor extends React.PureComponent<
   FieldConfigEditorProps<ThresholdsConfig, ThresholdsFieldConfigSettings>
 > {
-  constructor(props: FieldConfigEditorProps<ThresholdsConfig, ThresholdsFieldConfigSettings>) {
-    super(props);
-  }
-
   render() {
     const { onChange } = this.props;
     let value = this.props.value;

@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useContext, useRef, RefObject, memo, useEffect } from 'react';
+import React, { useState, useMemo,  useRef, RefObject, memo, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { DataLinkSuggestions } from './DataLinkSuggestions';
-import { ThemeContext, makeValue } from '../../index';
+import {  makeValue } from '../../index';
 import { SelectionReference } from './SelectionReference';
 import { Portal, getFormStyles } from '../index';
 
@@ -82,6 +82,7 @@ export const DataLinkInput: React.FC<DataLinkInputProps> = memo(
     stateRef.current = { showingSuggestions, suggestions, suggestionsIndex, linkUrl, onChange };
 
     // SelectionReference is used to position the variables suggestion relatively to current DOM selection
+    // eslint-disable-next-line
     const selectionRef = useMemo(() => new SelectionReference(), [setShowingSuggestions, linkUrl]);
 
     const onKeyDown = React.useCallback((event: KeyboardEvent, next: () => any) => {
@@ -110,6 +111,7 @@ export const DataLinkInput: React.FC<DataLinkInputProps> = memo(
         default:
           return next();
       }
+    // eslint-disable-next-line
     }, []);
 
     useEffect(() => {
@@ -129,6 +131,7 @@ export const DataLinkInput: React.FC<DataLinkInputProps> = memo(
     const onVariableSelect = (item: VariableSuggestion, editor = editorRef.current!) => {
       const includeDollarSign = Plain.serialize(editor.value).slice(-1) !== '$';
       if (item.origin !== VariableOrigin.Template || item.value === DataLinkBuiltInVars.includeVars) {
+        // eslint-disable-next-line
         editor.insertText(`${includeDollarSign ? '$' : ''}\{${item.value}}`);
       } else {
         editor.insertText(`var-${item.value}=$\{${item.value}}`);

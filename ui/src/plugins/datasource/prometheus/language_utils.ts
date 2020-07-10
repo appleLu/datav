@@ -115,9 +115,11 @@ export function expandRecordingRules(query: string, mapping: { [name: string]: s
   const expandedQuery = query.replace(rulesRegex, (match, pre, name, post) => `${pre}${mapping[name]}${post}`);
 
   // Split query into array, so if query uses operators, we can correctly add labels to each individual part.
+  // eslint-disable-next-line
   const queryArray = expandedQuery.split(/(\+|\-|\*|\/|\%|\^)/);
 
   // Regex that matches occurences of ){ or }{ or ]{ which is a sign of incorrecly added labels.
+  // eslint-disable-next-line
   const invalidLabelsRegex = /(\)\{|\}\{|\]\{)/;
   const correctlyExpandedQueryArray = queryArray.map(query => {
     let expression = query;

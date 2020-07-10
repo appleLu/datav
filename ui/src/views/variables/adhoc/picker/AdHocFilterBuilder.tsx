@@ -1,3 +1,4 @@
+/*eslint-disable*/
 import React, { FC, ReactElement, useState } from 'react';
 import { SegmentAsync, Icon } from 'src/packages/datav-core';
 import { OperatorSegment } from './OperatorSegment';

@@ -156,10 +156,8 @@ export class Panel extends PureComponent<Props, State> {
   }
 
   onRefresh = (fromEvents?: boolean) => {
-    console.log('panel onrefresh,from events: ' + fromEvents)
     const { panel, isInView, width } = this.props;
     if (!isInView) {
-      console.log('Refresh when panel is visible', panel.id);
       this.setState({ refreshWhenInView: true });
       return;
     }

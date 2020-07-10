@@ -17,8 +17,9 @@ export interface LocationChangePayload {
 }
 
 export interface ShowModalPayload {
-  component: React.ComponentType;
-  props?: any;
+  component: any;
+  title?: string;
+  onConfirm?: () => void;
 }
 
 export interface ShowConfirmModalPayload {

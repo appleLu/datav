@@ -1,11 +1,10 @@
-import { AppEvents, DataSourcePluginMeta, DataSourceSelectItem } from 'src/packages/datav-core';
+import { DataSourcePluginMeta, DataSourceSelectItem } from 'src/packages/datav-core';
 import { validateVariableSelectionState } from '../state/actions';
 import { QueryVariableModel, VariableRefresh } from 'src/types';
 import { ThunkResult } from '../../../types';
 import { getDatasourceSrv } from 'src/core/services/datasource';
 import templateSrv from 'src/core/services/templating';
 import { getTimeSrv } from 'src/core/services/time';
-import appEvents from 'src/core/library/utils/app_events';
 import { importDataSourcePlugin } from 'src/plugins/loader';
 import DefaultVariableQueryEditor from '../../templating/DefaultVariableQueryEditor';
 import { getVariable } from '../state/selectors';
@@ -14,6 +13,7 @@ import { variableAdapters } from '../adapters';
 import { changeVariableProp } from '../state/sharedReducer';
 import { updateVariableOptions, updateVariableTags } from './reducer';
 import { toVariableIdentifier, toVariablePayload, VariableIdentifier } from '../state/types';
+
 
 export const updateQueryVariableOptions = (
   identifier: VariableIdentifier,
@@ -46,17 +46,13 @@ export const updateQueryVariableOptions = (
 
       await dispatch(validateVariableSelectionState(toVariableIdentifier(variableInState)));
     } catch (err) {
-      console.error(err);
+      console.log(err);
       if (err.data && err.data.message) {
         err.message = err.data.message;
       }
       if (getState().templating.editor.id === variableInState.id) {
         dispatch(addVariableEditorError({ errorProp: 'update', errorText: err.message }));
       }
-      appEvents.emit(AppEvents.alertError, [
-        'Templating',
-        'Template variables could not be initialized: ' + err.message,
-      ]);
     }
   };
 };
@@ -112,6 +108,7 @@ export const changeQueryVariableQuery = (
   dispatch(removeVariableEditorError({ errorProp: 'query' }));
   dispatch(changeVariableProp(toVariablePayload(identifier, { propName: 'query', propValue: query })));
   dispatch(changeVariableProp(toVariablePayload(identifier, { propName: 'definition', propValue: definition })));
+
   await variableAdapters.get(identifier.type).updateOptions(variableInState);
 };
 

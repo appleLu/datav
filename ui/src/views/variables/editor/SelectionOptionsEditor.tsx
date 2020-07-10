@@ -1,3 +1,4 @@
+/*eslint-disable*/
 import React, { FunctionComponent, useCallback } from 'react';
 import { LegacyForms } from 'src/packages/datav-core';
 
