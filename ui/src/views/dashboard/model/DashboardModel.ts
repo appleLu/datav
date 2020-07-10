@@ -35,7 +35,7 @@ export class DashboardModel {
     title: string;
     editable: boolean;
     panels: PanelModel[];
-
+    tags: string[];
     panelInEdit?: PanelModel;
     panelInView: PanelModel;
     graphTooltip: any;
@@ -43,7 +43,7 @@ export class DashboardModel {
     annotations: { list: any[] };
     templating: { list: any[] };
     links: DashboardLink[];
-
+    description: string;
     schemaVersion: number;
     version: number;
     private originalTemplating: any;
@@ -78,8 +78,10 @@ export class DashboardModel {
         this.uid = data.uid || null;
         this.title = data.title || 'No Title';
         this.graphTooltip = data.graphTooltip || 0;
+        this.tags = data.tags || [];
         this.editable = data.editable !== false;
         this.panels =  _.map(data.panels || [], (panelData: any) => new PanelModel(panelData));
+        this.description = data.description || 'A new dashboard';
 
         this.templating = this.ensureListExist(data.templating);
         this.annotations = this.ensureListExist(data.annotations);

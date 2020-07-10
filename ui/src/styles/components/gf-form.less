@@ -42,6 +42,11 @@ textarea {
       padding: 4px 0;
     }
   }
+
+  .ant-tag {
+    height: @height-base;
+    line-height: @height-base;
+  }
 }
 
 .gf-form--has-input-icon {
@@ -190,9 +195,9 @@ textarea {
 .gf-form-input {
   display: block;
   width: 100%;
-  height: @input-height-base;
+  height: @height-base;
   padding: 6px 8px;
-  line-height: 18px;
+  line-height: @height-base;
   color: @text-color;
   background-color: @component-background;
   background-image: none;

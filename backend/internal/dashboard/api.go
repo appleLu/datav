@@ -62,7 +62,6 @@ func SaveDashboard(c *gin.Context) {
 
 	jsonData, err := dash.Data.Encode()
 
-
 	if (!update) {
 		res, err := db.SQL.Exec(`INSERT INTO dashboard (uid, title, version, created_by, folder_id, data,created,updated) VALUES (?,?,?,?,?,?,?,?)`,
 		dash.Uid, dash.Title, dash.Version, dash.CreatedBy, dash.FolderId, jsonData, dash.Created, dash.Updated)
@@ -75,8 +74,8 @@ func SaveDashboard(c *gin.Context) {
 		id, _ := res.LastInsertId()
 		dash.Id = id
 	} else {
-		_, err := db.SQL.Exec(`UPDATE dashboard SET title=?, version=?, folder_id=?, data=?,updated=? WHERE id=?`,
-		 dash.Title, dash.Version, dash.FolderId, jsonData,dash.Updated, dash.Id)
+		_, err := db.SQL.Exec(`UPDATE dashboard SET uid=?, title=?, version=?, folder_id=?, data=?,updated=? WHERE id=?`,
+		 dash.Uid, dash.Title, dash.Version, dash.FolderId, jsonData,dash.Updated, dash.Id)
 		if err != nil {
 			logger.Warn("update dashboard error", "error", err)
 			c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))

@@ -67,6 +67,8 @@ export {Table} from './Table/Table'
 export {ClipboardButton} from './ClipboardButton/ClipboardButton'
 export {CallToActionCard} from './CallToActionCard/CallToActionCard'
 export * from './Segment/index'
+export * from './DynamicTagList/DynamicTagList'
+
 const LegacyForms = {
     LegacyInput,
     LegacySwitch,

@@ -14,8 +14,8 @@ import { store } from 'src/store/store';
 import { getUrlParams } from 'src/core/library/utils/url';
 import { cx } from 'emotion'
 import { VariableEditorContainer } from 'src/views/variables/editor/VariableEditorContainer';
-
-
+import GeneralSetting from './General'
+import JsonSetting from './JsonSetting'
 export interface Props {
   dashboard: DashboardModel | null;
   viewId: string
@@ -144,6 +144,12 @@ export class DashboardSettings extends PureComponent<Props> {
                 <div className="dashboard-settings__content">
                 {
                   this.props.viewId === 'variables' && <VariableEditorContainer />
+                }
+                {
+                  this.props.viewId === 'general' && <GeneralSetting dashboard={this.props.dashboard} />
+                }
+                {
+                  this.props.viewId === 'dashboard_json' && <JsonSetting dashboard={this.props.dashboard} />
                 }
                 </div>
             </div>

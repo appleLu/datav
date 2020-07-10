@@ -44,7 +44,7 @@ interface State {
 }
 
 const pathToUID = {
-    '/dashboard': 'eQfaaPMGz',
+    '/dashboard': 'test',
 }
 
 class DashboardPage extends React.PureComponent<DashboardPageProps & any, State> {
@@ -106,7 +106,7 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & any, State>
                 <Button icon={<Icon name="panel-add" />} onClick={() => this.onAddPanel()} />
                 <Button icon={<SaveOutlined onClick={() => this.saveDashboard()} />} />
                 <Button icon={<SettingOutlined />} onClick={
-                    () => store.dispatch(updateLocation({ query: { settingTab: 'variables' }, partial: true }))
+                    () => store.dispatch(updateLocation({ query: { settingTab: 'general' }, partial: true }))
                 } />
             </>)
 
