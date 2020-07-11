@@ -18,6 +18,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/apm-ai/datav/backend/internal/plugins"
 	"github.com/apm-ai/datav/backend/internal/dashboard"
+	"github.com/apm-ai/datav/backend/internal/search"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -47,6 +48,9 @@ func (s *Server) Start() error {
 		return err
 	}
 
+	// init search cache
+	search.InitCache()
+
 	go func() {
 		gin.SetMode(gin.ReleaseMode)
 		r := gin.New()
@@ -75,6 +79,9 @@ func (s *Server) Start() error {
 
 			authR.POST("/api/dashboard/save", dashboard.SaveDashboard)
 			authR.GET("/api/dashboard/uid/:uid", dashboard.GetDashboard)
+			authR.POST("/api/dashboard/import", dashboard.ImportDashboard)
+
+			authR.GET("/api/search/dashboard", search.Dashboard)
 		}
 
 		r.Run(config.Data.Web.Addr)

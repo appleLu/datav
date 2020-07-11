@@ -114,19 +114,27 @@ export const menuItems: MenuItem[] = [
 
     // these two are core menu items, be careful to modify
     {
-        id: 'create',
-        url: null,
-        text: 'Create',
+        id: 'new',
+        url: '/new',
+        text: 'New',
+        title: 'Add something new',
         icon: 'plus',
         showPosition: MenuPosition.Bottom,
-        redirectTo: null,
+        redirectTo: '/new/dashboard',
         children: [
             {
                 icon: 'database',
                 id: 'create-dashboard',
-                url: '/new/dashboard',
+                url: '/dashboard',
                 text: 'New Dashboard',
                 component: React.lazy(() => import('src/views/dashboard/DashboardPage'))
+            },
+            {
+                icon: 'database',
+                id: 'import',
+                url: '/import',
+                text: 'Import Dashboard',
+                component: React.lazy(() => import('src/views/dashboard/ImportPage'))
             },
         ],
         sortWeight:-100

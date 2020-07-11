@@ -1,6 +1,7 @@
 import { GrafanaConfig, RawTimeRange, ScopedVars } from '../types';
 import { urlUtil } from './url';
 import { textUtil } from '../text';
+import { config } from '../config';
 
 let grafanaConfig: () => GrafanaConfig;
 let getTimeRangeUrlParams: () => RawTimeRange;
@@ -12,7 +13,7 @@ let getVariablesUrlParams: (params?: Record<string, any>, scopedVars?: ScopedVar
  * @internal
  */
 const stripBaseFromUrl = (url: string): string => {
-  const appSubUrl = grafanaConfig ? grafanaConfig().appSubUrl : '';
+  const appSubUrl = config.appSubUrl ?? '';
   const stripExtraChars = appSubUrl.endsWith('/') ? 1 : 0;
   const urlWithoutBase =
     url.length > 0 && url.indexOf(appSubUrl) === 0 ? url.slice(appSubUrl.length - stripExtraChars) : url;

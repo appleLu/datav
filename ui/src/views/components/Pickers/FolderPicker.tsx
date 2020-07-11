@@ -59,7 +59,7 @@ export class FolderPicker extends PureComponent<Props, State> {
       permission: 'Edit',
     };
 
-    // TODO: move search to BackendSrv interface
+    // @todo: 修改为查询folders的接口
     // @ts-ignore
     const searchHits = (await getBackendSrv().search(params)) as DashboardSearchHit[];
     const options: Array<SelectableValue<number>> = searchHits.map(hit => ({ label: hit.title, value: hit.id }));

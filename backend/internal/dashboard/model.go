@@ -10,21 +10,21 @@ import (
 )
 // Dashboard model
 type Dashboard struct {
-	Id       int64
-	Uid      string
-	Slug     string
-	Title    string
-	Version  int
+	Id       int64 `json:"id"`
+	Uid      string `json:"uid"`
+	Slug     string `json:"slug,omitempty"`
+	Title    string `json:"title"`
+	Version  int `json:"version,omitempty"`
+ 
+	Created  time.Time `json:"created,omitempty"`
+	Updated  time.Time `json:"updated,omitempty"`
 
-	Created  time.Time
-	Updated  time.Time
-
-	CreatedBy string
-	FolderId  int64
-	IsFolder  bool
+	CreatedBy string `json:"createdBy,omitempty"`
+	FolderId  int64 `json:"folderId,omitempty"`
+	IsFolder  bool `json:"isFolder,omitempty"`
 
 
-	Data  *simplejson.Json
+	Data  *simplejson.Json `json:"data,omitempty"`
 }
 
 func (d *Dashboard) SetId(id int64) {
