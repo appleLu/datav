@@ -117,20 +117,20 @@ export function getPanelMenu(
   if (panel.plugin && !panel.plugin.meta.skipDataQuery) {
     inspectMenu.push({
       text: 'Data',
-      onClick: (e: React.MouseEvent<any>) => onInspectPanel('data'),
+      onClick: (e: React.MouseEvent<any>) => onInspectPanel(e,'data'),
     });
 
     if (dashboard.meta.canEdit) {
       inspectMenu.push({
         text: 'Query',
-        onClick: (e: React.MouseEvent<any>) => onInspectPanel('query'),
+        onClick: (e: React.MouseEvent<any>) => onInspectPanel(e,'query'),
       });
     }
   }
 
   inspectMenu.push({
     text: 'Panel JSON',
-    onClick: (e: React.MouseEvent<any>) => onInspectPanel('json'),
+    onClick: (e: React.MouseEvent<any>) => onInspectPanel(e,'json'),
   });
 
   menu.push({

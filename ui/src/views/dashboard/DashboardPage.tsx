@@ -25,12 +25,15 @@ import { DashboardSettings } from './components/Setting/Setting'
 import { updateLocation } from 'src/store/reducers/location';
 import { SubMenu } from './components/SubMenu/SubMenu';
 import { BackButton } from '../components/BackButton/BackButton';
+import { PanelInspector, InspectTab } from '../components/Inspector/PanelInspector';
 
 interface DashboardPageProps {
     dashboard: DashboardModel | null;
-    editPanelId?: string
-    viewPanelId?: string
+    editPanelId?: string | null 
+    viewPanelId?: string | null
     settingView?: string | null
+    inspectPanelId?: string | null 
+    inspectTab? : InspectTab
     initDashboard: typeof initDashboard
 }
 
@@ -249,18 +252,36 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
         this.props.dashboard?.startRefresh()
     }
 
+
+    getInspectPanel() {
+        const { dashboard, inspectPanelId } = this.props;
+        if (!dashboard || !inspectPanelId) {
+        return null;
+        }
+
+        const inspectPanel = dashboard.getPanelById(parseInt(inspectPanelId, 10));
+
+        // cannot inspect panels plugin is not already loaded
+        if (!inspectPanel) {
+        return null;
+        }
+
+        return inspectPanel;
+    }
+
     setScrollTop = (e: React.MouseEvent<HTMLElement>): void => {
         const target = e.target as HTMLElement;
         this.setState({ scrollTop: target.scrollTop, updateScrollTop: null });
     };
 
     render() {
-        const { dashboard, settingView } = this.props
+        const { dashboard, settingView,inspectTab } = this.props
         const { updateScrollTop, scrollTop, editPanel, viewPanel } = this.state
         if (!dashboard) {
             return null
         }
         const approximateScrollTop = Math.round(scrollTop / 25) * 25;
+        const inspectPanel = this.getInspectPanel();
         const gridWrapperClasses = classNames({
             'dashboard-container': true,
             'dashboard-container--has-submenu': dashboard.meta.submenuEnabled,
@@ -286,7 +307,8 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
                         </div>
                     </CustomScrollbar>
                 </div>
-
+                
+                {inspectPanel && <PanelInspector dashboard={dashboard} panel={inspectPanel} defaultTab={inspectTab} />}
                 {editPanel && <PanelEditor dashboard={dashboard} sourcePanel={editPanel} />}
                 {settingView && <DashboardSettings dashboard={dashboard} viewId={this.props.settingView} />}
             </div>
@@ -304,6 +326,8 @@ export const mapStateToProps = (state: StoreState) => {
         settingView: state.location.query.settingView,
         dashboard: state.dashboard.dashboard,
         isPanelEditorOpen: state.panelEditor.isOpen,
+        inspectPanelId: state.location.query.inspect,
+        inspectTab: state.location.query.inspectTab,
     }
 }
 

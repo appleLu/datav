@@ -3,7 +3,7 @@ import { catchError, filter, map, mergeMap, share, takeUntil, tap, throwIfEmpty 
 import { fromFetch } from 'rxjs/fetch';
 import { BackendSrv as BackendService, BackendSrvRequest, config } from 'src/packages/datav-core';
 
-import { DataSourceResponse } from 'src/types';
+import { DataSourceResponse, CoreEvents } from 'src/types';
 import { DashboardSearchHit } from 'src/types/search';
 import { DashboardDTO, FolderInfo, DashboardDataDTO } from 'src/types';
 import { parseInitFromOptions, parseUrlFromOptions } from 'src/core/library/utils/fetch';
@@ -12,6 +12,7 @@ import { logout } from 'src/core/library/utils/user';
 import { message } from 'antd';
 import { store } from 'src/store/store'
 import localeAllData from 'src/core/library/locale'
+import appEvents from '../library/utils/app_events';
 export interface DatasourceRequestOptions {
   retry?: number;
   method?: string;
@@ -208,7 +209,9 @@ export class BackendSrv implements BackendService {
       }),
       tap(res => {
         if (!options.silent) {
-
+          if (!options.silent) {
+            appEvents.emit(CoreEvents.dsRequestResponse, res);
+          }
         }
       })
     );
