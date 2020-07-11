@@ -34,10 +34,18 @@ function HeaderWrapper(props: Props) {
        }
    })
 
+   const [backButtonComponent, setBackButtonComponent] = useState(null)
+   appEvents.on('set-panel-viewing-back-button',(component) => {
+    if (!backButtonComponent) {
+        setBackButtonComponent(component)
+    }
+    })
+   
     return (
         <Header className="datav-header">
             <div className='datav-header-inner'>
                 <div>
+                    <div className="ub-mr1">{backButtonComponent}</div>
                     <BreadcrumbWrapper text={props.breadcrumbText}/>
                 </div>
                 <div>

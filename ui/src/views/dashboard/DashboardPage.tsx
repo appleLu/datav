@@ -6,11 +6,11 @@ import { DashboardModel } from './model/DashboardModel'
 import { Button } from 'antd'
 import { DashboardGrid } from './DashGrid'
 import { getTimeSrv } from 'src/core/services/time'
-import { TimeRange, CustomScrollbar, Icon,config} from 'src/packages/datav-core'
+import { TimeRange, CustomScrollbar, Icon, config } from 'src/packages/datav-core'
 
 import './DashboardPage.less'
 import { initDashboard } from './model/initDashboard';
-import { withRouter } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { PanelModel } from './model';
 import { PanelEditor } from './components/PanelEditor/PanelEditor'
 import { store } from 'src/store/store';
@@ -24,12 +24,13 @@ import tracker from 'src/core/services/changeTracker'
 import { DashboardSettings } from './components/Setting/Setting'
 import { updateLocation } from 'src/store/reducers/location';
 import { SubMenu } from './components/SubMenu/SubMenu';
+import { BackButton } from '../components/BackButton/BackButton';
 
 interface DashboardPageProps {
     dashboard: DashboardModel | null;
     editPanelId?: string
     viewPanelId?: string
-    settingTab?: string | null
+    settingView?: string | null
     initDashboard: typeof initDashboard
 }
 
@@ -47,7 +48,7 @@ const pathToUID = {
     '/dashboard': 'test',
 }
 
-class DashboardPage extends React.PureComponent<DashboardPageProps & any, State> {
+class DashboardPage extends React.PureComponent<DashboardPageProps & RouteComponentProps, State> {
     // first init dashboard or just saved dashboard
     originDash: DashboardModel;
 
@@ -67,7 +68,7 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & any, State>
 
     // uid有两种方式传入：路径名的一部分或者通过路径名去查询uid
     getUID() {
-        return this.props.match.params.uid || pathToUID[this.props.location.pathname] || null
+        return this.props.match.params['uid'] || pathToUID[this.props.location.pathname] || null
     }
 
     async componentDidMount() {
@@ -106,7 +107,7 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & any, State>
                 <Button icon={<Icon name="panel-add" />} onClick={() => this.onAddPanel()} />
                 <Button icon={<SaveOutlined onClick={() => this.saveDashboard()} />} />
                 <Button icon={<SettingOutlined />} onClick={
-                    () => store.dispatch(updateLocation({ query: { settingTab: 'general' }, partial: true }))
+                    () => store.dispatch(updateLocation({ query: { settingView: 'general' }, partial: true }))
                 } />
             </>)
 
@@ -129,14 +130,13 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & any, State>
     }
 
     componentDidUpdate() {
-        const { dashboard } = this.props
+        const { dashboard, editPanelId, viewPanelId } = this.props
+        const { editPanel, viewPanel } = this.state
 
-        const { editPanel } = this.state
         if (!dashboard) {
             return
         }
 
-        const { editPanelId } = this.props
         if (!editPanel && editPanelId) {
             const panel = this.getPanelByIdFromUrlParam(editPanelId)
             this.setState({
@@ -153,6 +153,31 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & any, State>
             });
         }
 
+        // entering view mode
+        if (!viewPanel && viewPanelId) {
+            const panel = this.getPanelByIdFromUrlParam(viewPanelId)
+            this.setPanelFullscreenClass(true);
+            dashboard.initViewPanel(panel);
+            this.setState({
+                viewPanel: panel,
+                rememberScrollTop: this.state.scrollTop,
+            });
+            appEvents.emit('set-panel-viewing-back-button',
+                <>
+                    <BackButton onClick={() => store.dispatch(updateLocation({ query: { viewPanel: null }, partial: true }))} surface="panel" />
+                </>)
+        }
+
+        // leaving view mode
+        if (viewPanel && !viewPanelId) {
+            this.setPanelFullscreenClass(false);
+            dashboard.exitViewPanel(viewPanel);
+            this.setState(
+                { viewPanel: null, updateScrollTop: this.state.rememberScrollTop },
+                this.triggerPanelsRendering.bind(this)
+            );
+            appEvents.emit('set-panel-viewing-back-button',null)
+        }
     }
 
 
@@ -170,6 +195,19 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & any, State>
     triggerForceUpdate = () => {
         this.forceUpdate();
     };
+
+    triggerPanelsRendering() {
+        try {
+            this.props.dashboard!.render();
+        } catch (err) {
+            console.error(err);
+            //   this.props.notifyApp(createErrorNotification(`Panel rendering error`, err));
+        }
+    }
+
+    setPanelFullscreenClass(isFullscreen: boolean) {
+        $('body').toggleClass('panel-in-fullscreen', isFullscreen);
+    }
 
     onAddPanel = () => {
         const { dashboard } = this.props;
@@ -217,8 +255,8 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & any, State>
     };
 
     render() {
-        const { dashboard, settingTab } = this.props
-        const { updateScrollTop, scrollTop, editPanel } = this.state
+        const { dashboard, settingView } = this.props
+        const { updateScrollTop, scrollTop, editPanel, viewPanel } = this.state
         if (!dashboard) {
             return null
         }
@@ -226,8 +264,8 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & any, State>
         const gridWrapperClasses = classNames({
             'dashboard-container': true,
             'dashboard-container--has-submenu': dashboard.meta.submenuEnabled,
-          });
-          
+        });
+
         return (
             <div>
                 <div className="scroll-canvas scroll-canvas--dashboard">
@@ -242,7 +280,7 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & any, State>
                             {!editPanel && config.featureToggles.newVariables && <SubMenu dashboard={dashboard} />}
                             <DashboardGrid
                                 dashboard={dashboard}
-                                viewPanel={null}
+                                viewPanel={viewPanel}
                                 scrollTop={approximateScrollTop}
                             />
                         </div>
@@ -250,7 +288,7 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & any, State>
                 </div>
 
                 {editPanel && <PanelEditor dashboard={dashboard} sourcePanel={editPanel} />}
-                {settingTab && <DashboardSettings dashboard={dashboard} viewId={this.props.settingTab}/>}
+                {settingView && <DashboardSettings dashboard={dashboard} viewId={this.props.settingView} />}
             </div>
         )
     }
@@ -263,7 +301,7 @@ export const mapStateToProps = (state: StoreState) => {
         isInitSlow: state.dashboard.isInitSlow,
         editPanelId: state.location.query.editPanel,
         viewPanelId: state.location.query.viewPanel,
-        settingTab: state.location.query.settingTab,
+        settingView: state.location.query.settingView,
         dashboard: state.dashboard.dashboard,
         isPanelEditorOpen: state.panelEditor.isOpen,
     }

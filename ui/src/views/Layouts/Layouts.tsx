@@ -33,7 +33,7 @@ const Layouts = () => {
   return (
     <Layout className={appClasses}>
       <SideMenu  />
-      <Layout className="datav-layout" style={{position:"absolute",width:'calc(100% - 60px)',height:'100%',overflow:'auto'}}>
+      <Layout className="datav-layout">
         {headerShow && <HeaderWrapper />}
         <ContentWrapper routers={routers} />
       </Layout>

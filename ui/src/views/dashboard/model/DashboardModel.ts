@@ -391,7 +391,7 @@ export class DashboardModel {
       }
     }
   }
-  
+
   cleanUpRowRepeats(rowPanels: PanelModel[]) {
     const panelsToRemove = [];
     for (let i = 0; i < rowPanels.length; i++) {
@@ -727,6 +727,24 @@ export class DashboardModel {
       this.events.removeAllListeners();
       for (const panel of this.panels) {
         panel.destroy();
+      }
+    }
+
+    initViewPanel(panel: PanelModel) {
+      this.panelInView = panel;
+      panel.setIsViewing(true);
+    }
+
+    exitViewPanel(panel: PanelModel) {
+      this.panelInView = undefined;
+      panel.setIsViewing(false);
+    }
+    
+    render() {
+      this.events.emit(PanelEvents.render);
+  
+      for (const panel of this.panels) {
+        panel.render();
       }
     }
     

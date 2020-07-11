@@ -94,14 +94,14 @@ export class DashboardSettings extends PureComponent<Props> {
     const url = window.location.pathname;
 
     for (const section of this.sections) {
-      const sectionParams = _.defaults({ settingTab: section.id }, params);
+      const sectionParams = _.defaults({ settingView: section.id }, params);
       section.url = url + '?' + $.param(sectionParams);
     }
   }
 
   onClose = () => {
     store.dispatch(updateLocation({
-      query: { settingTab: null },
+      query: { settingView: null },
       partial: true,
     }));
   };
@@ -131,7 +131,7 @@ export class DashboardSettings extends PureComponent<Props> {
                     return (
                       <span
                         key={item.id}
-                        onClick={() => store.dispatch(updateLocation({ query: { settingTab: item.id }, partial: true }))}
+                        onClick={() => store.dispatch(updateLocation({ query: { settingView: item.id }, partial: true }))}
                         className={cx("pointer","dashboard-settings__nav-item", (this.props.viewId === item.id) && 'active')}
                       >
                         <Icon name={item.icon} style={{ marginRight: '4px' }} />

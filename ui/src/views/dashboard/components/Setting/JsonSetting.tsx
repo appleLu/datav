@@ -33,7 +33,7 @@ const JsonSetting = (props: Props) => {
                     placeholder="Placeholder Text"
                     mode="json"
                     theme={currentTheme === ThemeType.Light ?"solarized_light" : "tomorrow_night_blue"}
-                    name="blah2"
+                    name="dashboard-json-editor"
 
                     fontSize={14}
                     showPrintMargin={false}
@@ -57,7 +57,7 @@ const JsonSetting = (props: Props) => {
                         folderId: props.dashboard.meta.folderId || parsedJson.folderId,
                       }).then((res) => {
                         const newUrl = locationUtil.stripBaseFromUrl(res.data.url);
-                        window.location.href = newUrl + '?settingTab=dashboard_json'
+                        window.location.href = newUrl + '?settingView=dashboard_json'
                       })
                 }}>
                     Save Changes

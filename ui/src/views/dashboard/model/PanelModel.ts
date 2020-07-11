@@ -213,6 +213,10 @@ export class PanelModel {
         this.events.emit(PanelEvents.refresh);
     }
 
+    setIsViewing(isViewing: boolean) {
+        this.isViewing = isViewing;
+    }
+
     getQueryRunner(): PanelQueryRunner {
         if (!this.queryRunner) {
             this.queryRunner = new PanelQueryRunner(this);
