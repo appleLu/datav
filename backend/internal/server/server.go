@@ -19,6 +19,7 @@ import (
 	"github.com/apm-ai/datav/backend/internal/plugins"
 	"github.com/apm-ai/datav/backend/internal/dashboard"
 	"github.com/apm-ai/datav/backend/internal/search"
+	"github.com/apm-ai/datav/backend/internal/folders"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -67,21 +68,40 @@ func (s *Server) Start() error {
 		// auth apis
 		authR := r.Group("",Auth())
 		{
-			authR.GET("/api/plugins", plugins.GetPlugins)
-			authR.GET("/api/plugins/setting", plugins.GetPluginSetting)
-			authR.GET("/api/plugins/markdown", plugins.GetPluginMarkdown)
+			pluginR := authR.Group("/api/plugins")
+			{
+				pluginR.GET("", plugins.GetPlugins)
+				pluginR.GET("/setting", plugins.GetPluginSetting)
+				pluginR.GET("/markdown", plugins.GetPluginMarkdown)
+			}
 
-			authR.GET("/api/datasources", datasources.GetDataSources)
-			authR.GET("/api/datasources/:dataSourceID", datasources.GetDataSource)
-			authR.DELETE("/api/datasources/:dataSourceID", datasources.DeleteDataSource)
-			authR.POST("/api/datasources/new", datasources.NewDataSource)
-			authR.PUT("/api/datasources/edit", datasources.EditDataSource)
+			datasourceR := authR.Group("/api/datasources")
+			{
+				datasourceR.GET("", datasources.GetDataSources)
+				datasourceR.GET("/:dataSourceID", datasources.GetDataSource)
+				datasourceR.DELETE("/:dataSourceID", datasources.DeleteDataSource)
+				datasourceR.POST("/new", datasources.NewDataSource)
+				datasourceR.PUT("/edit", datasources.EditDataSource)
+			}
 
-			authR.POST("/api/dashboard/save", dashboard.SaveDashboard)
-			authR.GET("/api/dashboard/uid/:uid", dashboard.GetDashboard)
-			authR.POST("/api/dashboard/import", dashboard.ImportDashboard)
+			dashboardR := authR.Group("/api/dashboard")
+			{
+				dashboardR.POST("/save", dashboard.SaveDashboard)
+				dashboardR.GET("/uid/:uid", dashboard.GetDashboard)
+				dashboardR.POST("/import", dashboard.ImportDashboard)
+			}
 
-			authR.GET("/api/search/dashboard", search.Dashboard)
+			searchR := authR.Group("/api/search") 
+			{
+				searchR.GET("", search.Search)
+				searchR.GET("/dashboard", search.Dashboard)
+			}
+
+			folderR := authR.Group("/api/folder") 
+			{
+				folderR.GET("/byName", folders.GetByName)
+				folderR.POST("/new",folders.NewFolder)
+			}
 		}
 
 		r.Run(config.Data.Web.Addr)

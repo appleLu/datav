@@ -1,6 +1,7 @@
 import React, { FC } from 'react';
 import { cx, css } from 'emotion';
 import { Icon } from '../Icon/Icon';
+import { Spin } from 'antd';
 
 const getStyles = (size: number, inline: boolean) => {
   return {
@@ -27,7 +28,7 @@ export const Spinner: FC<Props> = (props: Props) => {
   const styles = getStyles(size, inline);
   return (
     <div style={style} className={cx(styles.wrapper, className)}>
-      <Icon className={cx('fa-spin', iconClassName)} name="fa fa-spinner" />
+      <Spin size="large"  />
     </div>
   );
 };

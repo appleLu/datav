@@ -8,6 +8,8 @@ export * from './folder'
 export * from './templating'
 export * from './search'
 export * from './plugins'
+export * from './acl'
+export * from './folder'
 
 export type KeyValuePair = {
     key: string;

@@ -1,5 +1,8 @@
 import kbn from '../library/utils/kbn';
 import {config} from 'src/packages/datav-core'
+import { isEmpty } from 'lodash';
+import { getToken } from '../library/utils/auth';
+import {store} from 'src/store/store'
 
 export class User {
   id: string;
@@ -14,6 +17,8 @@ export class ContextSrv {
   isEditor: boolean;
   sidemenuSmallBreakpoint = false;
   minRefreshInterval: string;
+  isSignedIn: boolean;
+  hasEditPermissionInFolders: boolean;
 
   constructor(id:string,role:string) {
     this.user = {
@@ -24,7 +29,11 @@ export class ContextSrv {
     this.isAdmin = this.hasRole('Admin')
     this.isEditor = this.hasRole('Editor') || this.hasRole('Admin');
     this.minRefreshInterval = '5s';
+    //@todo : 完善权限
+    this.hasEditPermissionInFolders = true;
+    this.isSignedIn = !(isEmpty(getToken()) || !store.getState().user.id)
   }
+  
 
   hasRole(role: string) {
     return this.user.role === role;
@@ -54,7 +63,7 @@ export class ContextSrv {
   }
 }
 
-let contextSrv;
+let contextSrv: ContextSrv;
 
 export const setContextSrv = (id,role) => {
   contextSrv = new ContextSrv(id,role)

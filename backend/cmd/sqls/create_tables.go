@@ -81,6 +81,21 @@ var CreateTableSqls = []string{
 		ON dashboard (uid);
 	CREATE INDEX IF NOT EXISTS dashboard_createdBy
 		ON dashboard (created_by);
+	CREATE INDEX IF NOT EXISTS dashboard_folder_id
+		ON dashboard (folder_id);
+	`,
+
+	`CREATE TABLE IF NOT EXISTS folder (
+		id 					INTEGER PRIMARY KEY AUTOINCREMENT,
+		parent_id           INT NOT NULL,
+		uid                 VARCHAR(40) NOT NULL UNIQUE,
+		title                VARCHAR(255) NOT NULL UNIQUE,
+		created_by 			VARCHAR(255) NOT NULL,
+		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
+		updated 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+	);
+	CREATE INDEX IF NOT EXISTS folder_parent_id
+		ON folder (parent_id);
 	`,
 }
 

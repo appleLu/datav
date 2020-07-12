@@ -1,3 +1,6 @@
 package models
 
-const RootFolderName = "General"
+const (
+	RootFolderId = 0
+	RootFolderName = "General"
+)

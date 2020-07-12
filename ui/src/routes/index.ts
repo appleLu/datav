@@ -163,6 +163,13 @@ export const menuItems: MenuItem[] = [
                 component: React.lazy(() => import('src/views/cfg/plugins/Plugins'))
             },
             {
+                icon: "folder",
+                id: "folders",
+                text: "Folders",
+                url: "/folders",
+                component: React.lazy(() => import('src/views/cfg/folders/FoldersPage'))
+            },
+            {
                 icon: "users-alt",
                 id: "users",
                 text: "Users",

@@ -43,6 +43,7 @@ export * from './ButtonCascader/ButtonCascader'
 export * from './Cascader/Cascader'
 export * from './IconButton/IconButton'
 export * from './Select/Select';
+export { default as resetSelectStyles } from './Select/resetSelectStyles';
 export { ButtonSelect } from './Select/ButtonSelect';
 export * from './Input/Input'
 export * from './TextArea/TextArea'
@@ -68,6 +69,9 @@ export {ClipboardButton} from './ClipboardButton/ClipboardButton'
 export {CallToActionCard} from './CallToActionCard/CallToActionCard'
 export * from './Segment/index'
 export * from './DynamicTagList/DynamicTagList'
+export * from './Spinner/Spinner'
+export { Tag } from './Tags/Tag';
+export { TagList } from './Tags/TagList';
 
 const LegacyForms = {
     LegacyInput,

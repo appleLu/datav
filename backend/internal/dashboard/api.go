@@ -21,7 +21,7 @@ import (
 type ReqDashboardData struct {
 	Dashboard *simplejson.Json `json:"dashboard"`
 	Overwrite bool             `json:"overwrite"`
-	FolderId  int64            `json:"folderId"`
+	FolderId  int            `json:"folderId"`
 	IsFolder  bool             `json:"isFolder"`
 }
 

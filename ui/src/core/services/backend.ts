@@ -244,7 +244,7 @@ export class BackendSrv implements BackendService {
   }
 
 
-  search(query: any): Promise<DashboardSearchHit[]> {
+  search(query: any) {
     return this.get('/api/search', query);
   }
 

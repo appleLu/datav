@@ -91,7 +91,8 @@
     "tinycolor2": "1.4.1",
     "typescript": "^3.9.5",
     "u-basscss": "^2.0.1",
-    "xss": "1.0.6"
+    "xss": "1.0.6",
+    "search-query-parser": "1.5.4"
   },
   "devDependencies": {
     "@types/classnames": "^2.2.7",

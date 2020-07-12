@@ -87,6 +87,7 @@ export const config = {
     defaultDatasource: 'Prometheus',
     disableSanitizeHtml: false,
     alertingEnabled: true,
+    rootFolderName: 'General',
     user: {
         lightTheme: true
     },
