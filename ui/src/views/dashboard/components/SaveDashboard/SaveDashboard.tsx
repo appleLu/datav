@@ -1,29 +1,49 @@
-import React from 'react'
-import { Modal, Form, Input, Button, message } from 'antd'
-import { DashboardModel, PanelModel } from 'src/views/dashboard/model'
+import React, { useState, useEffect } from 'react'
+import { Modal, Form, Input, Button, message,Select} from 'antd'
+import {  DashboardModel,PanelModel } from 'src/views/dashboard/model'
 import { getBackendSrv } from 'src/core/services/backend';
 
 import { locationUtil } from 'src/packages/datav-core/src';
 import { useHistory } from 'react-router-dom';
 import appEvents from 'src/core/library/utils/app_events';
-import { CoreEvents } from 'src/types';
+import { CoreEvents, FolderDTO } from 'src/types';
 import globalEvents from 'src/views/App/globalEvents';
+
+const {Option} = Select
 
 interface Props {
     setDashboard: any
-    dashboard: any
+    dashboard: DashboardModel
 }
 
 
 const SaveDashboard = (props: Props) => {
+    const [folders,setFolders] = useState([])
+
+    
     const dashboard = props.dashboard
     const history = useHistory()
     const isNew = dashboard.id === null
 
+
+    const getFolders= async () => {
+        const res = await getBackendSrv().get('/api/folder/all')
+        const folders:FolderDTO[]  = res.data
+        setFolders(folders)
+    }
+
+    useEffect(() => {
+        getFolders()
+    },[])
+
+
     const saveDashboard = async (val) => {
+        dashboard.title = val.title 
+        dashboard.meta.folderId = val.folderId
         const clone = getSaveAsDashboardClone(dashboard);
-        clone.title = val.title
-        const res = await  getBackendSrv().saveDashboard(clone)
+
+        
+        const res = await  getBackendSrv().saveDashboard(clone,{folderId:val.folderId})
 
         appEvents.emit(CoreEvents.dashboardSaved, dashboard);
 
@@ -37,10 +57,12 @@ const SaveDashboard = (props: Props) => {
 
     const defaultValues = {
         title: `${dashboard.title} Copy`,
+        folderId: 0
     };
-
+    console.log(dashboard)
     const initialValues = !isNew ? {
-        title: dashboard.title
+        title: dashboard.title,
+        folderId: dashboard.meta.folderId
     } : defaultValues
     
     return (
@@ -57,10 +79,23 @@ const SaveDashboard = (props: Props) => {
                     onFinish={saveDashboard}
                 >
                     <Form.Item
-                        label="Dashboard Title"
+                        label="Title"
                         name="title"
                     >
                         <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Folder"
+                        name="folderId"
+                    >
+                        <Select>
+                            {
+                                folders.map((f:FolderDTO) => {
+                                return  <Option value={f.id} key={f.id}>{f.title}</Option>
+                                })
+                            }
+                        </Select>
                     </Form.Item>
 
                     <Form.Item>

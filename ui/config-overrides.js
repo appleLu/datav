@@ -67,10 +67,10 @@ module.exports = override(
   addLessLoader({
     javascriptEnabled: true,
     modifyVars: {
-      '@zindex-modal': 1100,
-      '@zindex-modal-mask': 1100,
+      '@zindex-modal': 1050,
+      '@zindex-modal-mask': 1050,
       '@zindex-message':1040,
-      '@zindex-notification': 1110
+      '@zindex-notification': 1050
     }
   }),
   addWebpackAlias({

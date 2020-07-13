@@ -319,7 +319,8 @@ export class BackendSrv implements BackendService {
   }
 
   private async moveDashboard(uid: string, toFolder: FolderInfo) {
-    const fullDash: DashboardDTO = await this.getDashboardByUid(uid);
+    const res = await this.getDashboardByUid(uid);
+    const fullDash: DashboardDTO  = res.data
 
     if ((!fullDash.meta.folderId && toFolder.id === 0) || fullDash.meta.folderId === toFolder.id) {
       return { alreadyInFolder: true };

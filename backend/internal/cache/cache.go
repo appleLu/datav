@@ -19,7 +19,7 @@ func InitCache() {
 			rows,err := db.SQL.Query(`SELECT id,title,uid,folder_id FROM dashboard`)
 			if err != nil {
 				logger.Warn("load dashboard into search cache,query error","error",err)
-				time.Sleep(30 * time.Second)
+				time.Sleep(5 * time.Second)
 				continue 
 			}
 
@@ -44,7 +44,7 @@ func InitCache() {
 			rows,err = db.SQL.Query(`SELECT id,title,uid,parent_id FROM folder`)
 			if err != nil {
 				logger.Warn("load dashboard into search cache,query error","error",err)
-				time.Sleep(30 * time.Second)
+				time.Sleep(5 * time.Second)
 				continue 
 			}
 
@@ -64,7 +64,7 @@ func InitCache() {
 				}
 			}
 
-			time.Sleep(30 * time.Second)
+			time.Sleep(5 * time.Second)
 		}
 	}()
 }

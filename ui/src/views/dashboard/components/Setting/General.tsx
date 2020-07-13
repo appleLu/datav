@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { DashboardModel } from '../../model';
-import { Tooltip} from 'antd';
+import { Tooltip,Switch} from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { DynamicTagList } from 'src/packages/datav-core/src';
 
@@ -27,6 +27,10 @@ const GeneralSetting = (props: Props) => {
                 <div className="gf-form">
                     <label className="gf-form-label width-7">Tags<Tooltip title="Press enter to add a tag"><InfoCircleOutlined /></Tooltip></label>
                     <DynamicTagList color="#9933cc" tags={props.dashboard.tags} onConfirm={(tags) => {props.dashboard.tags = tags}} />
+                </div>
+                <div className="gf-form">
+                    <label className="gf-form-label width-7">Editable<Tooltip title="Uncheck, then save and reload to disable editing of this dashboard"><InfoCircleOutlined /></Tooltip></label>
+                    <Switch defaultChecked={props.dashboard.editable} onChange={(checked) => props.dashboard.editable = checked}/>
                 </div>
             </div>
         </>

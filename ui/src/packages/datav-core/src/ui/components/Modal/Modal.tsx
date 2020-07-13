@@ -5,7 +5,8 @@ import { IconName} from '../../types';
 import { getModalStyles } from './getModalStyles';
 import { ModalHeader } from './ModalHeader';
 import { IconButton } from '../IconButton/IconButton';
-import {DatavTheme} from '../../../data'
+import {DatavTheme, currentTheme} from '../../../data'
+import { getTheme } from '../..';
 
 export interface ModalProps {
   theme?: DatavTheme;
@@ -39,7 +40,8 @@ export class UnthemedModal extends React.PureComponent<ModalProps> {
   }
 
   render() {
-    const { title, isOpen = false, theme, className } = this.props;
+    const theme =  getTheme(currentTheme)
+    const { title, isOpen = false, className } = this.props;
     const styles = getModalStyles(theme);
 
     if (!isOpen) {

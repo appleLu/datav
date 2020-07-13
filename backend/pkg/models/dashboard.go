@@ -13,7 +13,9 @@ type Dashboard struct {
 	Slug     string `json:"slug,omitempty"`
 	Title    string `json:"title"`
 	Version  int `json:"version,omitempty"`
- 
+	
+	Editable bool `json:"editable,omitempty"`
+	
 	Created  time.Time `json:"created,omitempty"`
 	Updated  time.Time `json:"updated,omitempty"`
 

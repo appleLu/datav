@@ -86,7 +86,7 @@ export class DashboardModel {
         this.templating = this.ensureListExist(data.templating);
         this.annotations = this.ensureListExist(data.annotations);
 
-        this.meta = {
+        this.meta = meta || {
             canEdit: true
         }
         this.links = data.links || [];

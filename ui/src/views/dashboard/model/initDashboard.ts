@@ -19,7 +19,7 @@ export function initDashboard(uid: string | undefined,initOrigin: any): ThunkRes
       const res = await getBackendSrv().get(`/api/dashboard/uid/${uid}`)
       ds = new DashboardModel(res.data.dashboard,res.data.meta)
     }
-    
+
     // template values service needs to initialize completely before
     // the rest of the dashboard can load
     try {
@@ -62,37 +62,6 @@ function getNewDashboardModelData(): DashboardDTO {
         },
       ],
       templating: {
-        "list": [{
-          "allValue": null,
-          "current": {
-            "selected": true,
-            "tags": [],
-            "text": "hello",
-            "value": ["hello"]
-          },
-          "hide": 0,
-          "includeAll": true,
-          "label": "",
-          "multi": true,
-          "name": "test",
-          "options": [{
-            "selected": false,
-            "text": "All",
-            "value": "$__all"
-          }, {
-            "selected": true,
-            "text": "hello",
-            "value": "hello"
-          }, {
-            "selected": false,
-            "text": "world",
-            "value": "world"
-          }],
-          "query": "hello,world",
-          "queryValue": "",
-          "skipUrlSync": false,
-          "type": "custom"
-        }]
       }
     },
   };

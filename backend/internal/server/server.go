@@ -103,6 +103,7 @@ func (s *Server) Start() error {
 				folderR.GET("/checkExistByName", folders.CheckExistByName)
 				folderR.GET("/uid/:uid", folders.GetByUid)
 				folderR.POST("/new",folders.NewFolder)
+				folderR.GET("/all",folders.GetAll)
 			}
 		}
 

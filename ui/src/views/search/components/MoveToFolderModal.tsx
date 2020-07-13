@@ -9,6 +9,7 @@ import { backendSrv } from 'src/core/services/backend';
 import { DashboardSection, OnMoveItems } from '../types';
 import { getCheckedDashboards } from '../utils';
 import appEvents from 'src/core/library/utils/app_events';
+import { notification } from 'antd';
 
 interface Props {
   onMoveItems: OnMoveItems;
@@ -26,17 +27,25 @@ export const MoveToFolderModal: FC<Props> = ({ results, onMoveItems, isOpen, onD
   const moveTo = () => {
     if (folder && selectedDashboards.length) {
       const folderTitle = folder.title ?? 'General';
-
       backendSrv.moveDashboards(selectedDashboards.map(d => d.uid) as string[], folder).then((result: any) => {
         if (result.successCount > 0) {
           const ending = result.successCount === 1 ? '' : 's';
           const header = `Dashboard${ending} Moved`;
           const msg = `${result.successCount} dashboard${ending} moved to ${folderTitle}`;
-          appEvents.emit(AppEvents.alertSuccess, [header, msg]);
+          notification['success']({
+            message: header,
+            description: msg,
+            duration: 5
+          });
         }
 
         if (result.totalCount === result.alreadyInFolderCount) {
-          appEvents.emit(AppEvents.alertError, ['Error', `Dashboard already belongs to folder ${folderTitle}`]);
+          notification['error']({
+            message: 'Error',
+            description: `Dashboard already belongs to folder ${folderTitle}`,
+            duration: 5
+          });
+
         } else {
           onMoveItems(selectedDashboards, folder);
         }

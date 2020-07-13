@@ -6,7 +6,7 @@ import { getBackendSrv } from 'src/packages/datav-core';
 
 import appEvents from 'src/core/library/utils/app_events';
 import { contextSrv } from 'src/core/services/context';
-import {DashboardSearchHit} from 'src/types'
+import {DashboardSearchHit, FolderDTO} from 'src/types'
 
 export interface Props {
   onChange: ($folder: { title: string; id: number }) => void;
@@ -61,8 +61,15 @@ export class FolderPicker extends PureComponent<Props, State> {
 
     // @todo: 修改为查询folders的接口
     // @ts-ignore
-    const searchHits = (await getBackendSrv().search(params)) as DashboardSearchHit[];
-    const options: Array<SelectableValue<number>> = searchHits.map(hit => ({ label: hit.title, value: hit.id }));
+    const res = await getBackendSrv().get('/api/folder/all')
+    let folders: FolderDTO[] = res.data
+    folders = folders.filter((f) => f.id != 0)
+    const options: Array<SelectableValue<number>> = folders.map(f => {
+      if (f.id == 0) {
+        return 
+      }
+      return { label: f.title, value: f.id }
+    });
     if (contextSrv.isEditor && rootName?.toLowerCase().startsWith(query.toLowerCase())) {
       options.unshift({ label: rootName, value: 0 });
     }

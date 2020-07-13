@@ -107,3 +107,9 @@ func NewFolder(c *gin.Context) {
 		"url": folder.Url,
 	}))
 }
+
+
+func GetAll(c *gin.Context) {
+	folders := QueryAll()
+	c.JSON(200, common.ResponseSuccess(folders))
+}

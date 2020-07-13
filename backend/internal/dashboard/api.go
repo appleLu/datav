@@ -2,7 +2,7 @@ package dashboard
 
 import (
 	"database/sql"
-	// "fmt"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -61,7 +61,8 @@ func SaveDashboard(c *gin.Context) {
 	dash.Updated = time.Now()
 
 	dash.FolderId = dsData.FolderId
-	dash.IsFolder = dsData.IsFolder
+	fmt.Println(dash.FolderId)
+
 
 	jsonData, err := dash.Data.Encode()
 
@@ -125,6 +126,9 @@ func GetDashboard(c *gin.Context) {
 	data.Set("id", id)
 	data.Set("uid", uid)
 
+	//@todo : acl control
+	dashMeta.CanEdit = true
+	
 	c.JSON(200, common.ResponseSuccess(utils.Map{
 		"dashboard": data,
 		"meta":      dashMeta,

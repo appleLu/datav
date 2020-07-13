@@ -110,7 +110,7 @@ export class DashboardSettings extends PureComponent<Props> {
     const { dashboard } = this.props;
     const folderTitle = dashboard.meta.folderTitle;
     const haveFolder = dashboard.meta.folderId > 0;
-
+    
     return (
       <div className="dashboard-settings">
         <div className="navbar navbar--edit">

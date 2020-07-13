@@ -5,6 +5,7 @@ import { useTheme, TagList, styleMixins, stylesFactory } from 'src/packages/data
 import { DashboardSectionItem, OnToggleChecked } from '../types';
 import { SearchCheckbox } from './SearchCheckbox';
 import { SEARCH_ITEM_HEIGHT, SEARCH_ITEM_MARGIN } from '../constants';
+import { Link } from 'react-router-dom';
 
 export interface Props {
   item: DashboardSectionItem;
@@ -41,12 +42,12 @@ export const SearchItem: FC<Props> = ({ item, editable, onToggleChecked, onTagSe
     >
       <SearchCheckbox editable={editable} checked={item.checked} onClick={toggleItem} />
 
-      <a href={item.url} className={styles.link}>
+      <Link to={item.url} className={styles.link}>
         <div className={styles.body}>
           <span>{item.title}</span>
           <span className={styles.folderTitle}>{item.folderTitle}</span>
         </div>
-      </a>
+      </Link>
       <TagList tags={item.tags} onClick={tagSelected} className={styles.tags} />
     </div>
   );
@@ -55,6 +56,7 @@ export const SearchItem: FC<Props> = ({ item, editable, onToggleChecked, onTagSe
 const getResultsItemStyles = stylesFactory((theme: DatavTheme) => ({
   wrapper: css`
     ${styleMixins.listItem(theme)};
+    label: search-item;
     display: flex;
     align-items: center;
     height: ${SEARCH_ITEM_HEIGHT}px;
