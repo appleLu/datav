@@ -28,7 +28,7 @@ export const Spinner: FC<Props> = (props: Props) => {
   const styles = getStyles(size, inline);
   return (
     <div style={style} className={cx(styles.wrapper, className)}>
-      <Spin size="large"  />
+      <Spin size="large" />
     </div>
   );
 };

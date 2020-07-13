@@ -2,10 +2,11 @@ import React, { FC, useCallback } from 'react';
 import { css, cx } from 'emotion';
 import { useLocalStorage } from 'react-use';
 import { DatavTheme } from 'src/packages/datav-core';
-import { Icon, Spinner, stylesFactory, useTheme } from 'src/packages/datav-core';
+import { Icon, stylesFactory, useTheme } from 'src/packages/datav-core';
 import { DashboardSection, OnToggleChecked } from '../types';
 import { SearchCheckbox } from './SearchCheckbox';
 import { getSectionIcon, getSectionStorageKey } from '../utils';
+import { Spin } from 'antd';
 
 interface SectionHeaderProps {
   editable?: boolean;
@@ -54,7 +55,7 @@ export const SectionHeader: FC<SectionHeaderProps> = ({
           <Icon name="cog" />
         </a>
       )}
-      {section.itemsFetching ? <Spinner /> : <Icon name={section.expanded ? 'angle-down' : 'angle-right'} />}
+      {section.itemsFetching ? <Spin style={{height: '16px',width:'16px'}} /> : <Icon name={section.expanded ? 'angle-down' : 'angle-right'} />}
     </div>
   );
 };

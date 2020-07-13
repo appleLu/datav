@@ -61,6 +61,7 @@ export const DashboardActions: FC<Props> = ({ folderId, isEditor, canEdit }) => 
           title="New Dashboard Folder"
           visible={newFolderVisible}
           footer={null}
+          onCancel={() => setNewFolderVisible(false)}
         >
           <Form defaultValues={initialFormModel} onSubmit={newFolder}>
             {({ register, errors }) => (

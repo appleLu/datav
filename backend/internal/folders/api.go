@@ -12,7 +12,7 @@ import (
 	"github.com/apm-ai/datav/backend/pkg/models"
 	"github.com/gin-gonic/gin"
 )
-
+ 
 func GetByName(c *gin.Context) {
 	name := c.Query("name")
 
@@ -38,7 +38,7 @@ func GetByName(c *gin.Context) {
 }
 
 func NewFolder(c *gin.Context) {
-	folder := &Folder{}
+	folder := &models.Folder{}
 	c.Bind(&folder)
 	folder.InitNew()
 

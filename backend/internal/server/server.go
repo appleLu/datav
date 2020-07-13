@@ -18,6 +18,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/apm-ai/datav/backend/internal/plugins"
 	"github.com/apm-ai/datav/backend/internal/dashboard"
+	"github.com/apm-ai/datav/backend/internal/cache"
 	"github.com/apm-ai/datav/backend/internal/search"
 	"github.com/apm-ai/datav/backend/internal/folders"
 	"github.com/gin-gonic/gin"
@@ -28,7 +29,7 @@ import (
 type Server struct {
 }
 
-// New ...
+// New ... 
 func New() *Server {
 	return &Server{}
 }
@@ -50,7 +51,7 @@ func (s *Server) Start() error {
 	}
 
 	// init search cache
-	search.InitCache()
+	cache.InitCache()
 
 	go func() {
 		gin.SetMode(gin.ReleaseMode)

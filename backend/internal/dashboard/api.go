@@ -36,7 +36,7 @@ func SaveDashboard(c *gin.Context) {
 		return
 	}
 
-	dash := &Dashboard{}
+	dash := &models.Dashboard{}
 	if id, err := dsData.Dashboard.Get("id").Float64(); err == nil {
 		dash.Id = int64(id)
 	}
@@ -100,7 +100,7 @@ func GetDashboard(c *gin.Context) {
 
 	var rawJSON []byte
 	var id int64
-	dashMeta := &DashboardMeta{}
+	dashMeta := &models.DashboardMeta{}
 	err := db.SQL.QueryRow(`SELECT id,version, created_by, folder_id, data,created,updated FROM dashboard WHERE uid=?`, uid).Scan(
 		&id, &dashMeta.Version, &dashMeta.CreatedBy, &dashMeta.FolderId, &rawJSON, &dashMeta.Created, &dashMeta.Updated,
 	)
@@ -142,7 +142,7 @@ func ImportDashboard(c *gin.Context) {
 		return
 	}
 
-	dash := &Dashboard{}
+	dash := &models.Dashboard{}
 	dash.Data = dsData.Dashboard
 	dash.Title = strings.TrimSpace(dsData.Dashboard.Get("title").MustString())
 	dash.Uid = strings.TrimSpace(dsData.Dashboard.Get("uid").MustString())
@@ -183,7 +183,7 @@ func ImportDashboard(c *gin.Context) {
 
 
 
-
+ 
 
 	jsonData, err := dash.Data.Encode()
 

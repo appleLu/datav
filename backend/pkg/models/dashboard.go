@@ -1,4 +1,4 @@
-package dashboard
+package models
 
 import (
 	"github.com/apm-ai/datav/backend/pkg/utils"
