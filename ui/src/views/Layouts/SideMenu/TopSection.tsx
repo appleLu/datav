@@ -3,6 +3,7 @@ import _ from 'lodash';
 import TopSectionItem from './TopSectionItem';
 import { menuItems,MenuItem, MenuPosition } from 'src/routes';
 import { addParamToUrl } from 'src/core/library/utils/url';
+import { getLocationSrv } from 'src/packages/datav-core/src';
 
 
 const TopSection = () => {
@@ -15,7 +16,7 @@ const TopSection = () => {
   };
 
   const onOpenSearch = () => {
-    addParamToUrl({ search: 'open' });
+    getLocationSrv().update({ query: { search: 'open' }, partial: true });
   };
 
   return (

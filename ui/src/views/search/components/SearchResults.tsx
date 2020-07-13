@@ -97,10 +97,12 @@ const getSectionStyles = stylesFactory((theme: DatavTheme) => {
 
   return {
     wrapper: css`
+      label: search-results;
       display: flex;
       flex-direction: column;
     `,
     section: css`
+      label: search-section;
       display: flex;
       flex-direction: column;
       background: ${theme.colors.panelBg};
@@ -131,6 +133,7 @@ const getSectionStyles = stylesFactory((theme: DatavTheme) => {
       margin-top: ${theme.spacing.md};
     `,
     listModeWrapper: css`
+      label: search-list-wrapper;
       position: relative;
       height: 100%;
       padding: ${md};

@@ -167,7 +167,7 @@ export const menuItems: MenuItem[] = [
                 id: "folders",
                 text: "Folders",
                 url: "/folders",
-                component: React.lazy(() => import('src/views/cfg/folders/FoldersPage'))
+                component: React.lazy(() => import('src/views/search/components/DashboardListPage'))
             },
             {
                 icon: "users-alt",
@@ -182,6 +182,31 @@ export const menuItems: MenuItem[] = [
                 text: "Teams",
                 url: "/teams",
                 component: Test
+            },
+        ]
+    },
+    {
+        id: 'folder',
+        url: null,
+        text: 'Folder',
+        icon: 'folder-open',
+        title: 'Manage folder dashboards & permissions',
+        showPosition: null,
+        redirectTo: null,
+        children: [
+            {
+                icon: "th-large",
+                id: "folder-dashboard",
+                text: "Dashboards",
+                url: "/f/:uid/dashboards",
+                component: React.lazy(() => import('src/views/search/components/DashboardListPage'))
+            },
+            {
+                icon: "cog",
+                id: "folder-settings",
+                text: "Settings",
+                url: "/f/:uid/settings",
+                component: React.lazy(() => import('src/views/search/components/DashboardListPage'))
             },
         ]
     },

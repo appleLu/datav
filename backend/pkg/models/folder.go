@@ -24,6 +24,8 @@ type Folder struct {
 	Type string `json:"type"`
 	Tags []string `json:"tags"`
 
+	CreatedBy string `json:"createdBy,omitempty"`
+	
 	Created time.Time `json:"created,omitempty"`
 	Updated time.Time `json:"updated,omitempty"`
 
@@ -48,5 +50,5 @@ func (folder *Folder) UpdatSlug() {
 
 // UpdateUrl updates the url
 func (folder *Folder) UpdateUrl() {
-	folder.Url = fmt.Sprintf("/f/%s/%s",  folder.Uid, folder.Slug)
+	folder.Url = fmt.Sprintf("/f/%s/dashboards",  folder.Uid)
 }

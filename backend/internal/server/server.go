@@ -100,7 +100,8 @@ func (s *Server) Start() error {
 
 			folderR := authR.Group("/api/folder") 
 			{
-				folderR.GET("/byName", folders.GetByName)
+				folderR.GET("/checkExistByName", folders.CheckExistByName)
+				folderR.GET("/uid/:uid", folders.GetByUid)
 				folderR.POST("/new",folders.NewFolder)
 			}
 		}

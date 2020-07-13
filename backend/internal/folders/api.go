@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
  
-func GetByName(c *gin.Context) {
+func CheckExistByName(c *gin.Context) {
 	name := c.Query("name")
 
 	if strings.TrimSpace(name) == "" {
@@ -35,6 +35,31 @@ func GetByName(c *gin.Context) {
 		}
 	}
 	c.JSON(200, common.ResponseSuccess(id))
+}
+
+func GetByUid(c *gin.Context) {
+	uid := c.Param("uid")
+
+	if strings.TrimSpace(uid) == "" {
+		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "Folder uid cannot be empty"))
+		return
+	}
+
+	folder := &models.Folder{}
+	err := db.SQL.QueryRow("SELECT id,title,created_by,created,updated from folder WHERE uid=?", 
+		uid).Scan(&folder.Id,&folder.Title,&folder.CreatedBy,&folder.Created,&folder.Updated)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, "Server Internal Error"))
+			return
+		}
+	}
+
+	folder.Uid = uid
+	folder.UpdatSlug()
+	folder.UpdateUrl()
+
+	c.JSON(200, common.ResponseSuccess(folder))
 }
 
 func NewFolder(c *gin.Context) {

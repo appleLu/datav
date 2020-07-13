@@ -44,7 +44,7 @@ export const DashboardActions: FC<Props> = ({ folderId, isEditor, canEdit }) => 
       return `Cannot use 'General' as folder name`
     }
 
-    const res = await getBackendSrv().get('/api/folder/byName',{name: name})
+    const res = await getBackendSrv().get('/api/folder/checkExistByName',{name: name})
     if (res.data == -1) {
       return true
     }

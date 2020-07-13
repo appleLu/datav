@@ -16,7 +16,7 @@ import { SearchResults } from './SearchResults';
 import { DashboardActions } from './DashboardActions';
 
 export interface Props {
-  folder?: FolderDTO;
+  folder: FolderDTO;
 }
 
 const { isEditor } = contextSrv;
@@ -35,6 +35,7 @@ export const ManageDashboards: FC<Props> = memo(({ folder }) => {
     folderIds: folderId ? [folderId] : [],
     layout: defaultLayout,
   };
+
   const {
     query,
     hasFilters,
@@ -89,8 +90,7 @@ export const ManageDashboards: FC<Props> = memo(({ folder }) => {
       />
     );
   }
-
-
+  
   return (
     <div className={styles.container}>
       <div>
@@ -151,15 +151,15 @@ export const ManageDashboards: FC<Props> = memo(({ folder }) => {
 const getStyles = stylesFactory((theme: DatavTheme) => {
   return {
     container: css`
-      label: container;
-      height: 100%;
+      label: search-container;
+      height: 95%;
     `,
     results: css`
       display: flex;
       flex-direction: column;
       flex: 1;
       height: 100%;
-      margin-top: ${theme.spacing.xl};
+      margin-top: ${theme.spacing.md};
     `,
     spinner: css`
       display: flex;

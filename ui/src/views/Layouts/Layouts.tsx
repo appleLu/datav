@@ -10,7 +10,7 @@ import { currentTheme, ThemeType} from 'src/packages/datav-core/src'
 import appEvents from 'src/core/library/utils/app_events'
 import OnRoute from './OnRoute'
 import ModalService from 'src/core/services/modal'
-
+import SearchWrapper from 'src/views/search/components/SearchWrapper'
 import './Layouts.less'
 
 const Layouts = () => {
@@ -40,7 +40,8 @@ const Layouts = () => {
 
       <ModalService />
       <OnRoute />
-    </Layout>
+      <SearchWrapper />
+    </Layout> 
   )
 }
 

@@ -1,6 +1,7 @@
 package search
 
 import (
+	// "fmt"
 	"strconv"
 	"strings"
 
@@ -95,7 +96,7 @@ func Search(c *gin.Context) {
 
 			res = append(res, r)
 		}
-
+		
 		c.JSON(200, common.ResponseSuccess(res))
 		return
 
@@ -116,11 +117,18 @@ func Search(c *gin.Context) {
 		// get all dashboards
 		res := make([]*DashboardSearchRes, 0)
 		for _, dash := range cache.Dashboards {
+			if c.Query("folderIds") != "" {
+				if dash.FolderId != folderIds {
+					continue
+				}
+			}
 			if query != "" {
 				if !strings.Contains(strings.ToLower(dash.Title), query) {
 					continue
 				}
 			}
+
+
 			f := folders.QueryById(dash.FolderId)
 			if f == nil {
 				c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "get folder error"))

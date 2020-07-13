@@ -7,6 +7,7 @@ import { DashboardSection, OnToggleChecked } from '../types';
 import { SearchCheckbox } from './SearchCheckbox';
 import { getSectionIcon, getSectionStorageKey } from '../utils';
 import { Spin } from 'antd';
+import { Link } from 'react-router-dom';
 
 interface SectionHeaderProps {
   editable?: boolean;
@@ -51,9 +52,9 @@ export const SectionHeader: FC<SectionHeaderProps> = ({
 
       <span className={styles.text}>{section.title}</span>
       {section.url && (
-        <a href={section.url} className={styles.link}>
+        <Link to={section.url} className={styles.link}>
           <Icon name="cog" />
-        </a>
+        </Link>
       )}
       {section.itemsFetching ? <Spin style={{height: '16px',width:'16px'}} /> : <Icon name={section.expanded ? 'angle-down' : 'angle-right'} />}
     </div>
@@ -65,6 +66,7 @@ const getSectionHeaderStyles = stylesFactory((theme: DatavTheme, selected = fals
   return {
     wrapper: cx(
       css`
+        label: section-header;
         display: flex;
         align-items: center;
         font-size: ${theme.typography.size.base};
