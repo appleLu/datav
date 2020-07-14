@@ -158,10 +158,10 @@ export class SearchSrv {
   }
 
   getDashboardTags() {
-    return backendSrv.get('/api/dashboards/tags');
+    return backendSrv.get('/api/dashboard/tags').then((res) => res.data);
   }
 
   getSortOptions() {
-    return backendSrv.get('/api/search/sorting');
+    return backendSrv.get('/api/search/sorting').then((res) => res.data);
   }
 }

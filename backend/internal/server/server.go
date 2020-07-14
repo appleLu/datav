@@ -90,6 +90,7 @@ func (s *Server) Start() error {
 				dashboardR.POST("/save", dashboard.SaveDashboard)
 				dashboardR.GET("/uid/:uid", dashboard.GetDashboard)
 				dashboardR.POST("/import", dashboard.ImportDashboard)
+				dashboardR.GET("/tags", dashboard.GetAllTags)
 			}
 
 			searchR := authR.Group("/api/search") 

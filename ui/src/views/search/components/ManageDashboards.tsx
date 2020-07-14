@@ -100,7 +100,7 @@ export const ManageDashboards: FC<Props> = memo(({ folder }) => {
             inputClassName="gf-form-input width-20"
             value={query.query}
             onChange={onQueryChange}
-            placeholder={'Search dashboards by name'}
+            placeholder={'Search dashboard/folder or folder by name'}
           />
           <DashboardActions isEditor={isEditor} canEdit={hasEditPermissionInFolders || canSave} folderId={folderId} />
         </HorizontalGroup>

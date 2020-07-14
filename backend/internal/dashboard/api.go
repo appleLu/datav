@@ -1,6 +1,8 @@
 package dashboard
 
 import (
+	"sort"
+	"github.com/apm-ai/datav/backend/internal/cache"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -128,7 +130,7 @@ func GetDashboard(c *gin.Context) {
 
 	//@todo : acl control
 	dashMeta.CanEdit = true
-	
+
 	c.JSON(200, common.ResponseSuccess(utils.Map{
 		"dashboard": data,
 		"meta":      dashMeta,
@@ -209,4 +211,35 @@ func ImportDashboard(c *gin.Context) {
 		"uid":     dash.Uid,
 		"url":     dash.GetUrl(),
 	}))
+}
+
+type TagRes struct {
+	Term string `json:"term"`
+	Count int `json:"count"`
+}
+type TagResList []*TagRes
+func (s TagResList) Len() int      { return len(s) }
+func (s TagResList) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+func (s TagResList) Less(i, j int) bool {
+	return s[i].Term < s[j].Term
+}
+
+
+func GetAllTags(c *gin.Context) {
+	tagMap := make(map[string]int)
+	for _,dash := range cache.Dashboards {
+		tags := dash.Data.Get("tags").MustStringArray()
+		for _,tag := range tags {
+			tagMap[tag] = tagMap[tag] + 1
+		}
+	}
+
+	tags := make(TagResList,0)
+	for tag,count := range tagMap {
+		tags = append(tags, &TagRes{tag,count})
+	}
+
+	sort.Sort(tags)
+	
+	c.JSON(200,common.ResponseSuccess(tags))
 }

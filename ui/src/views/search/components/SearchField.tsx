@@ -64,7 +64,7 @@ export const SearchField: FC<SearchFieldProps> = ({ query, onChange, size, clear
     <div className={cx(styles.wrapper, className)}>
       <input
         type="text"
-        placeholder="Search dashboards by name"
+        placeholder="Search dashboard/folder by name"
         value={query.query}
         onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
           onChange(event.currentTarget.value);

@@ -1,6 +1,7 @@
 package search
 
 import (
+	"sort"
 	// "fmt"
 	"strconv"
 	"strings"
@@ -11,7 +12,6 @@ import (
 	"github.com/apm-ai/datav/backend/pkg/common"
 	"github.com/apm-ai/datav/backend/pkg/i18n"
 	"github.com/apm-ai/datav/backend/pkg/models"
-	"github.com/apm-ai/datav/backend/pkg/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -33,9 +33,10 @@ func Search(c *gin.Context) {
 	tp := c.Query("type")
 	query := strings.ToLower(strings.TrimSpace(c.Query("query")))
 
+	tags := c.QueryArray("tag")
 	// search folders and dashboard with query
 	if  (query != "") || (folderIds == models.RootFolderId && layout == FoldersLayout) {
-		res := make([]utils.Map, 0)
+		res := make(SearchHitList, 0)
 		if layout == FoldersLayout {
 			// folders and dashboard
 			fs := folders.QueryAll()
@@ -49,13 +50,13 @@ func Search(c *gin.Context) {
 				f.Type = TypeFolder
 				f.Tags = make([]string, 0)
 
-				res = append(res, utils.Map{
-					"id":    f.Id,
-					"uid":   f.Uid,
-					"title": f.Title,
-					"url":   f.Url,
-					"tags":  f.Tags,
-					"type":  f.Type,
+				res = append(res, &SearchHit{
+					Id:    int64(f.Id),
+					Uid:   f.Uid,
+					Title: f.Title,
+					Url:   f.Url,
+					Tags:  f.Tags,
+					Type:  f.Type,
 				})
 			}
 		}
@@ -72,6 +73,11 @@ func Search(c *gin.Context) {
 				}
 			}
 
+			dtags := dash.Data.Get("tags").MustStringArray()
+			if !filterTags(dtags,tags) {
+				continue
+			}
+
 			f := folders.QueryById(dash.FolderId)
 			if f == nil {
 				c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "get folder error"))
@@ -79,23 +85,25 @@ func Search(c *gin.Context) {
 			}
 
 			dash.UpdateSlug()
-			r := utils.Map{
-				"id":          dash.Id,
-				"uid":         dash.Uid,
-				"title":       dash.Title,
-				"url":         dash.GenerateUrl(),
-				"slug":        dash.Slug,
-				"type":        TypeDashboard,
-				"tags":        make([]string, 0),
-				"isStarred":   false,
-				"folderId":    f.Id,
-				"folderTitle": f.Title,
-				"folderUid":   f.Uid,
-				"folderUrl":   f.Url,
+			r := &SearchHit{
+				Id:          dash.Id,
+				Uid:         dash.Uid,
+				Title:       dash.Title,
+				Url:         dash.GenerateUrl(),
+				Slug:        dash.Slug,
+				Type:        TypeDashboard,
+				Tags:        dtags,
+				IsStarred:   false,
+				FolderId:    f.Id,
+				FolderTitle: f.Title,
+				FolderUid:   f.Uid,
+				FolderUrl:   f.Url,
 			}
 
 			res = append(res, r)
 		}
+		
+		sort.Sort(res)
 		
 		c.JSON(200, common.ResponseSuccess(res))
 		return
@@ -115,7 +123,7 @@ func Search(c *gin.Context) {
 
 	if layout == ListLayout && tp == TypeDashboard {
 		// get all dashboards
-		res := make([]*DashboardSearchRes, 0)
+		res := make(SearchHitList, 0)
 		for _, dash := range cache.Dashboards {
 			if c.Query("folderIds") != "" {
 				if dash.FolderId != folderIds {
@@ -128,7 +136,10 @@ func Search(c *gin.Context) {
 				}
 			}
 
-
+			dtags := dash.Data.Get("tags").MustStringArray()
+			if !filterTags(dtags,tags) {
+				continue
+			}
 			f := folders.QueryById(dash.FolderId)
 			if f == nil {
 				c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "get folder error"))
@@ -136,14 +147,14 @@ func Search(c *gin.Context) {
 			}
 
 			dash.UpdateSlug()
-			r := &DashboardSearchRes{
+			r := &SearchHit{
 				Id:          dash.Id,
 				Uid:         dash.Uid,
 				Title:       dash.Title,
 				Url:         dash.GenerateUrl(),
 				Slug:        dash.Slug,
 				Type:        TypeDashboard,
-				Tags:        make([]string, 0),
+				Tags:        dtags,
 				IsStarred:   false,
 				FolderId:    f.Id,
 				FolderTitle: f.Title,
@@ -153,6 +164,9 @@ func Search(c *gin.Context) {
 
 			res = append(res, r)
 		}
+
+		sort.Sort(res)
+		
 		c.JSON(200, common.ResponseSuccess(res))
 		return
 	}
@@ -166,22 +180,26 @@ func Search(c *gin.Context) {
 			return
 		}
 
-		res := make([]*DashboardSearchRes, 0)
+		res := make(SearchHitList, 0)
 		for _, dash := range dashes {
 			if query != "" {
 				if !strings.Contains(strings.ToLower(dash.Title), query) {
 					continue
 				}
 			}
+			dtags := dash.Data.Get("tags").MustStringArray()
+			if !filterTags(dtags,tags) {
+				continue
+			}
 			dash.UpdateSlug()
-			r := &DashboardSearchRes{
+			r := &SearchHit{
 				Id:          dash.Id,
 				Uid:         dash.Uid,
 				Title:       dash.Title,
 				Url:         dash.GenerateUrl(),
 				Slug:        dash.Slug,
 				Type:        TypeDashboard,
-				Tags:        make([]string, 0),
+				Tags:        dtags,
 				IsStarred:   false,
 				FolderId:    f.Id,
 				FolderUid:   f.Uid,
@@ -190,6 +208,9 @@ func Search(c *gin.Context) {
 			}
 			res = append(res, r)
 		}
+
+		sort.Sort(res)
+
 		c.JSON(200, common.ResponseSuccess(res))
 		return
 	}
@@ -219,4 +240,25 @@ func Dashboard(c *gin.Context) {
 	default:
 		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "invalid request, search type not found"))
 	}
+}
+
+
+func filterTags(dtags []string,tags []string) bool {
+	// filter by tags
+	if len(tags) > 0 {
+		for _,tag := range tags {
+			exist := false
+			for _,dtag := range dtags {
+				if tag == dtag {
+					exist = true
+				}
+			}
+			if (!exist) {
+				return false
+			}
+		}
+		return true
+	}
+
+	return true
 }

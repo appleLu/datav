@@ -115,26 +115,33 @@ export const menuItems: MenuItem[] = [
     // these two are core menu items, be careful to modify
     {
         id: 'new',
-        url: '/new',
+        url: null,
         text: 'New',
         title: 'Add something new',
         icon: 'plus',
         showPosition: MenuPosition.Bottom,
-        redirectTo: '/new/dashboard',
+        redirectTo:  null,
         children: [
             {
                 icon: 'database',
                 id: 'create-dashboard',
-                url: '/dashboard',
-                text: 'New Dashboard',
+                url: '/new/dashboard',
+                text: 'Dashboard',
                 component: React.lazy(() => import('src/views/dashboard/DashboardPage'))
             },
             {
                 icon: 'database',
-                id: 'import',
-                url: '/import',
-                text: 'Import Dashboard',
+                id: 'import-dashboard',
+                url: '/import/dashboard',
+                text: 'Import',
                 component: React.lazy(() => import('src/views/dashboard/ImportPage'))
+            },
+            {
+                icon: 'database',
+                id: 'new-folder',
+                text: 'Folder',
+                url: '/cfg/folders',
+                component: React.lazy(() => import('src/views/search/components/DashboardListPage'))
             },
         ],
         sortWeight:-100
@@ -186,7 +193,7 @@ export const menuItems: MenuItem[] = [
         ]
     },
     {
-        id: 'folder',
+        id: 'manage-folder',
         url: null,
         text: 'Folder',
         icon: 'folder-open',

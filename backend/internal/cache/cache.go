@@ -5,6 +5,7 @@ import (
 	"github.com/apm-ai/datav/backend/pkg/db"
 	"github.com/apm-ai/datav/backend/pkg/models"
 	"github.com/apm-ai/datav/backend/pkg/log"
+	"github.com/apm-ai/datav/backend/pkg/utils/simplejson"
 )
 
 var logger = log.RootLogger.New("logger", "cache")
@@ -16,7 +17,7 @@ var Folders =  make(map[int]*models.Folder)
 func InitCache() {
 	go func() {
 		for {
-			rows,err := db.SQL.Query(`SELECT id,title,uid,folder_id FROM dashboard`)
+			rows,err := db.SQL.Query(`SELECT id,title,uid,folder_id,data FROM dashboard`)
 			if err != nil {
 				logger.Warn("load dashboard into search cache,query error","error",err)
 				time.Sleep(5 * time.Second)
@@ -25,19 +26,24 @@ func InitCache() {
 
 			var id int64 
 			var folderId int
-			var title,uid string 
+			var title,uid string
+			var rawJSON []byte
 			for rows.Next() {
-				err := rows.Scan(&id,&title,&uid,&folderId)
+				err := rows.Scan(&id,&title,&uid,&folderId,&rawJSON)
 				if err != nil {
 					logger.Warn("load dashboard into search cache,scan error","error",err)
 					continue
 				}
+
+				data := simplejson.New()
+				err = data.UnmarshalJSON(rawJSON)
 
 				Dashboards[title] = &models.Dashboard{
 					Id: id,
 					Uid: uid,
 					Title: title,
 					FolderId: folderId,
+					Data: data,
 				}
 			}
 

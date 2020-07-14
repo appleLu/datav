@@ -11,7 +11,7 @@ function ContentWrapper(porps:any){
     return(
         <>
             <Content className="datav-content">
-                <Suspense fallback={<div>404</div>}>
+                <Suspense fallback={<div />}>
                     {
                         routers.map((route, i) => {
                             return(
