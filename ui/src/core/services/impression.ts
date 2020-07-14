@@ -23,6 +23,7 @@ export class ImpressionSrv {
     if (impressions.length > 50) {
       impressions.pop();
     }
+
     localStore.set(impressionsKey, JSON.stringify(impressions));
   }
 
@@ -39,7 +40,7 @@ export class ImpressionSrv {
   }
 
   impressionKey() {
-    return 'dashboard_impressions-' + store.getState().user.id
+    return 'dashboard_impressions'
   }
 }
 

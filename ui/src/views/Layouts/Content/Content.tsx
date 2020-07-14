@@ -1,6 +1,6 @@
 import React, { Suspense} from 'react'
 import { Layout, BackTop } from 'antd'
-import { Route,Redirect} from 'react-router-dom'
+import { Route,Redirect, withRouter} from 'react-router-dom'
 
 import './Content.less'
 const { Content } = Layout
@@ -15,7 +15,7 @@ function ContentWrapper(porps:any){
                     {
                         routers.map((route, i) => {
                             return(
-                                <Route key={i.toString()} path={route.url} render={(props) => <route.component routeID={route.id} parentRouteID={route.parentID}  {...props}/>} />
+                                <Route key={i.toString()} path={route.url} render={(props) => <route.component key={props.match.params.uid} routeID={route.id} parentRouteID={route.parentID}  {...props}/>} />
                             )
                         })
                     }
@@ -27,4 +27,4 @@ function ContentWrapper(porps:any){
     )
 }
 
-export default ContentWrapper
+export default withRouter(ContentWrapper)

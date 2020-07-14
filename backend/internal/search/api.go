@@ -34,6 +34,46 @@ func Search(c *gin.Context) {
 	query := strings.ToLower(strings.TrimSpace(c.Query("query")))
 
 	tags := c.QueryArray("tag")
+
+	dashIds := c.QueryArray("dashboardIds")
+	if (len(dashIds) > 0) {
+		// get dashboards by ids
+		res := make(SearchHitList, 0)
+		dashes := dashboard.QueryDashboardsByIds(dashIds)
+		for _,dash := range dashes {
+			dtags := dash.Data.Get("tags").MustStringArray()
+			if !filterTags(dtags,tags) {
+				continue
+			}
+
+			f := folders.QueryById(dash.FolderId)
+			if f == nil {
+				c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "get folder error"))
+				return
+			}
+
+			dash.UpdateSlug()
+			r := &SearchHit{
+				Id:          dash.Id,
+				Uid:         dash.Uid,
+				Title:       dash.Title,
+				Url:         dash.GenerateUrl(),
+				Slug:        dash.Slug,
+				Type:        TypeDashboard,
+				Tags:        dtags,
+				IsStarred:   false,
+				FolderId:    f.Id,
+				FolderTitle: f.Title,
+				FolderUid:   f.Uid,
+				FolderUrl:   f.Url,
+			}
+
+			res = append(res, r)
+		}
+		c.JSON(200,common.ResponseSuccess(res))
+		return
+	}
+
 	// search folders and dashboard with query
 	if  (query != "") || (folderIds == models.RootFolderId && layout == FoldersLayout) {
 		res := make(SearchHitList, 0)

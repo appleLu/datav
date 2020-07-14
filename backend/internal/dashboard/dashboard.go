@@ -1,6 +1,8 @@
 package dashboard
 
 import (
+	"fmt"
+	"strings"
 	"database/sql"
 	"github.com/apm-ai/datav/backend/pkg/db"
 	"github.com/apm-ai/datav/backend/pkg/log"
@@ -33,7 +35,41 @@ func QueryByFolderId(folderId int) []*models.Dashboard {
 		data := simplejson.New()
 		err = data.UnmarshalJSON(rawJSON)
 		dash.Data =data
-		
+
+		dashes = append(dashes,dash)
+	}
+
+	return dashes
+}
+
+func QueryDashboardsByIds(ids []string) []*models.Dashboard {
+	idStr := strings.Join(ids, "','")
+	idStr = "'" + idStr + "'"
+
+	dashes := make([]*models.Dashboard,0)
+	
+	q := fmt.Sprintf("SELECT id,uid,title,data FROM dashboard WHERE id in (%s)",idStr)
+	rows,err := db.SQL.Query(q)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			logger.Warn("query dashboard by folderId error","error",err)
+		}
+		return dashes
+	}
+
+	for rows.Next() {
+		var rawJSON []byte
+		dash := &models.Dashboard{}
+		err := rows.Scan(&dash.Id,&dash.Uid,&dash.Title,&rawJSON)
+		if err != nil {
+			logger.Warn("query dashboard by folderId ,scan error","error",err)
+			continue
+		}
+
+		data := simplejson.New()
+		err = data.UnmarshalJSON(rawJSON)
+		dash.Data =data
+
 		dashes = append(dashes,dash)
 	}
 

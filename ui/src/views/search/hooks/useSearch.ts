@@ -23,7 +23,6 @@ export const useSearch: UseSearch = (query, reducer, params = {}) => {
   const search = () => {
     dispatch({ type: SEARCH_START });
     const parsedQuery = getParsedQuery(query, queryParsing);
-    console.log(parsedQuery)
     searchSrv.search(parsedQuery).then(results => {
       dispatch({ type: FETCH_RESULTS, payload: results });
     });

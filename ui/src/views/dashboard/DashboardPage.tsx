@@ -26,6 +26,7 @@ import { updateLocation } from 'src/store/reducers/location';
 import { SubMenu } from './components/SubMenu/SubMenu';
 import { BackButton } from '../components/BackButton/BackButton';
 import { PanelInspector, InspectTab } from '../components/Inspector/PanelInspector';
+import impressionSrv from 'src/core/services/impression'
 
 interface DashboardPageProps {
     dashboard: DashboardModel | null;
@@ -74,7 +75,7 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
         return this.props.match.params['uid'] || pathToUID[this.props.location.pathname] || null
     }
 
-    async componentDidMount() {
+    componentDidMount() {
         // register to changeTracker
         //@todo : 为了方便测试，暂时屏蔽
         // tracker.register(this.hasChanges.bind(this))
@@ -113,7 +114,7 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
                     () => store.dispatch(updateLocation({ query: { settingView: 'general' }, partial: true }))
                 } />
             </>)
-
+        impressionSrv.addDashboardImpression(ds.id);
     }
     componentWillUnmount() {
         // unregister from changeTracker

@@ -34,11 +34,12 @@ export class SearchSrv {
       return Promise.resolve([]);
     }
 
-    return backendSrv.search({ dashboardIds: dashIds }).then(result => {
+    return backendSrv.search({ dashboardIds: dashIds }).then(res => {
+      const dashes = res.data
       return dashIds
-        .map(orderId => result.find(result => result.id === orderId))
+        .map(orderId => dashes.find(dash => dash.id === orderId))
         .filter(hit => hit && !hit.isStarred) as DashboardSearchHit[];
-    });
+    }).catch(() => []);
   }
 
   private getStarred(sections: DashboardSection): Promise<any> {
