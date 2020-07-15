@@ -59,22 +59,6 @@ export const setCurrentTheme = (tt: ThemeType) => {
 
 
 
-//@legacy
-// merged into bootConfigs
-// default config settings
-export const defaultConfig: DatavConfig = {
-    panel: { newTitle: 'Panel Title' },
-    dashboard: { newTitle: 'New Dashboard Copy' },
-    application: {
-        startDate: () => 'now-3h',
-        endDate: () => 'now',
-        theme: ThemeType.Light,
-        locale: 'en_US'
-    },
-    user: {
-        avatarUrl: ''
-    }
-}
 
 //@legacy
 // config examples, remove in future
@@ -88,6 +72,16 @@ export const config = {
     disableSanitizeHtml: false,
     alertingEnabled: true,
     rootFolderName: 'General',
+    panel: { newTitle: 'Panel Title' },
+    dashboard: { newTitle: 'New Dashboard Copy' },
+    defaultAdminName: 'admin',
+    
+    application: {
+        startDate: () => 'now-3h',
+        endDate: () => 'now',
+        theme: ThemeType.Light,
+        locale: 'en_US'
+    },
     user: {
         lightTheme: true
     },

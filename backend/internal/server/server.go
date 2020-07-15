@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/apm-ai/datav/backend/internal/users"
 	"github.com/apm-ai/datav/backend/internal/datasources"
 	"errors"
 	"github.com/apm-ai/datav/backend/pkg/utils"
@@ -24,7 +25,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
-
+ 
 // Web ...
 type Server struct {
 }
@@ -97,7 +98,7 @@ func (s *Server) Start() error {
 			{
 				searchR.GET("", search.Search)
 				searchR.GET("/dashboard", search.Dashboard)
-			}
+			} 
 
 			folderR := authR.Group("/api/folder") 
 			{
@@ -105,6 +106,20 @@ func (s *Server) Start() error {
 				folderR.GET("/uid/:uid", folders.GetByUid)
 				folderR.POST("/new",folders.NewFolder)
 				folderR.GET("/all",folders.GetAll)
+			}
+
+			userR := authR.Group("/api/users") 
+			{
+				userR.GET("", users.GetUsers)
+				userR.GET("/user", users.GetUser)		
+			}
+
+			adminR := authR.Group("/api/admin")
+			{
+				adminR.PUT("/password", users.UpdatePassword)
+				adminR.PUT("/user/:id", users.UpdateUser)
+				adminR.DELETE("/user/:id", users.DeleteUser)
+				adminR.POST("/user/new", users.NewUser)
 			}
 		}
 
@@ -159,8 +174,8 @@ func Cors() gin.HandlerFunc {
  // Auth is a gin middleware for user auth
  func Auth() gin.HandlerFunc {
 	return func(c *gin.Context)  {
-		li := session.GetUser(c)
-		if li == nil {
+		user := session.CurrentUser(c)
+		if user == nil {
 			c.JSON(http.StatusUnauthorized, common.ResponseErrorMessage(nil, i18n.ON, i18n.NeedLoginMsg))
 			return 
 		}

@@ -2,6 +2,7 @@ package datasources
 
 import (
 	"github.com/apm-ai/datav/backend/internal/plugins"
+	"github.com/apm-ai/datav/backend/internal/session"
 	"github.com/apm-ai/datav/backend/pkg/common"
 	"github.com/apm-ai/datav/backend/pkg/i18n"
 
@@ -16,6 +17,7 @@ import (
 )
 
 func NewDataSource(c *gin.Context) {
+	userId :=  session.CurrentUserId(c)
 	ds := &DataSource{}
 	c.BindJSON(&ds)
 
@@ -29,8 +31,8 @@ func NewDataSource(c *gin.Context) {
 
 	jsonData, err := ds.JsonData.Encode()
 
-	res, err := db.SQL.Exec(`INSERT INTO data_source (name, uid, version, type, url, is_default, json_data,basic_auth,created,updated) VALUES (?,?,?,?,?,?,?,?,?,?)`,
-		ds.Name, ds.Uid, ds.Version, ds.Type, ds.Url, ds.IsDefault, jsonData, ds.BasicAuth, ds.Created, ds.Updated)
+	res, err := db.SQL.Exec(`INSERT INTO data_source (name, uid, version, type, url, is_default, json_data,basic_auth,created_by,created,updated) VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
+		ds.Name, ds.Uid, ds.Version, ds.Type, ds.Url, ds.IsDefault, jsonData, ds.BasicAuth,userId, ds.Created, ds.Updated)
 	if err != nil {
 		logger.Warn("add datasource error", "error", err)
 		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))

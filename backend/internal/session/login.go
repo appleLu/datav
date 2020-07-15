@@ -1,7 +1,9 @@
 package session
 
 import (
-	// "fmt"
+	"github.com/apm-ai/datav/backend/pkg/utils"
+	"github.com/apm-ai/datav/backend/pkg/models"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -14,8 +16,8 @@ import (
 
 // LoginModel ...
 type LoginModel struct {
-	UserID   string `json:"userid"`
-	Password string `json:"password"`
+	Username string `json:"username"`
+	Password string `json:"password"` 
 }
 
 // Login ...
@@ -23,46 +25,49 @@ func Login(c *gin.Context) {
 	var lm = &LoginModel{}
 	c.Bind(&lm)
 
-	userid := lm.UserID
+	username := lm.Username
 	password := lm.Password
 
-	logger.Info("login with password:", "userid", userid)
+	logger.Info("User loged in", "username", username)
 
 	// 检查信息是否正确
-	var pw, priv, name, mobile, email, avatarURL string
-	row := db.SQL.QueryRow(`select password,priv,name,mobile,email,avatar_url FROM users WHERE id=?`, userid)
-	err := row.Scan(&pw, &priv, &name, &mobile, &email, &avatarURL)
+	var id int64
+	var pw, role, name, mobile, email,salt string
+	row := db.SQL.QueryRow(`select id,password,salt,role,name,mobile,email FROM user WHERE username=?`, username)
+	err := row.Scan(&id, &pw,&salt, &role, &name, &mobile, &email)
 	if err != nil {
-		logger.Warn("query user when login", "error",err)
+		logger.Warn("query user when login", "error", err)
 		c.JSON(http.StatusInternalServerError, common.ResponseErrorMessage(nil, i18n.ON, i18n.DbErrMsg))
-		return 
+		return
+	}
+	
+	fmt.Println("pw: ",pw,"salt:",salt)
+	encodedPassword,_ := utils.EncodePassword(password,salt)
+	if encodedPassword != pw{
+		fmt.Println(password,salt,pw)
+		c.JSON(http.StatusForbidden, common.ResponseErrorMessage(nil, i18n.ON, i18n.UsePwInvalidMsg))
+		return
 	}
 
-	if pw == "" || pw != password {
-		c.JSON(http.StatusUnauthorized, common.ResponseErrorMessage(nil, i18n.ON, i18n.UsePwInvalidMsg))
-		return 
-	}
-
-	// 若之前已登陆，则删除之前的登陆信息
 	token := getToken(c)
 	deleteSession(token)
 
 	token = strconv.FormatInt(time.Now().UnixNano(), 10)
 
 	// 设置权限
-	if priv == "" {
-		priv = common.PRIV_NORMAL
+	if role == "" {
+		role = models.ROLE_VIEWER
 	}
 
 	session := &Session{
 		Token: token,
-		User: &User{
-			ID:        userid,
-			Priv:      priv,
-			Name:      name,
-			Email:     email,
-			Mobile:    mobile,
-			AvatarURL:  avatarURL,
+		User: &models.User{
+			Id:       id,
+			Username: username,
+			Role:     models.RoleType(role),
+			Name:     name,
+			Email:    email,
+			Mobile:   mobile,
 		},
 		CreateTime: time.Now(),
 	}
@@ -70,13 +75,13 @@ func Login(c *gin.Context) {
 	err = storeSession(session)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.ResponseErrorMessage(nil, i18n.ON, i18n.DbErrMsg))
-		return 
-	}
-
+		return
+	} 
+ 
 	// 更新数据库中的user表
-	_, err = db.SQL.Exec(`UPDATE users SET last_login_date=? WHERE id=?`, time.Now().Unix(), session.User.ID)
+	_, err = db.SQL.Exec(`UPDATE user SET last_seen_at=? WHERE id=?`, time.Now(), id)
 	if err != nil {
-		logger.Warn("set last login date error", "error",err)
+		logger.Warn("set last login date error", "error", err)
 	}
 
 	c.JSON(http.StatusOK, common.ResponseSuccess(session))

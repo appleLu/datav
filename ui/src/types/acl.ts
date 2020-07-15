@@ -1,4 +1,4 @@
-export enum OrgRole {
+export enum Role {
     Viewer = 'Viewer',
     Editor = 'Editor',
     Admin = 'Admin',
@@ -13,7 +13,7 @@ export enum OrgRole {
     teamId?: number;
     team?: string;
     permission?: PermissionLevel;
-    role?: OrgRole;
+    role?: Role;
     icon?: string;
     inherited?: boolean;
   }
@@ -21,7 +21,7 @@ export enum OrgRole {
   export interface DashboardAclUpdateDTO {
     userId: number;
     teamId: number;
-    role: OrgRole;
+    role: Role;
     permission: PermissionLevel;
   }
   
@@ -34,7 +34,7 @@ export enum OrgRole {
     teamId?: number;
     team?: string;
     permission?: PermissionLevel;
-    role?: OrgRole;
+    role?: Role;
     icon?: string;
     name?: string;
     inherited?: boolean;
@@ -52,7 +52,7 @@ export enum OrgRole {
   export interface NewDashboardAclItem {
     teamId: number;
     userId: number;
-    role?: OrgRole;
+    role?: Role;
     permission: PermissionLevel;
     type: AclTarget;
   }

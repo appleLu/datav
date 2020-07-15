@@ -45,6 +45,7 @@ import { setContextSrv } from 'src/core/services/context';
 import { standardEditorsRegistry, getStandardOptionEditors } from 'src/packages/datav-core/src';
 import globalEvents from './globalEvents'
 import { getDefaultVariableAdapters, variableAdapters } from 'src/views/variables/adapters';
+import { initMenuItems } from 'src/routes';
 interface Props {
   theme: string
 }
@@ -67,6 +68,9 @@ const UIApp = (props: Props) => {
     globalEvents.init()
 
     standardEditorsRegistry.setInit(getStandardOptionEditors);
+
+    // init menu items
+    initMenuItems(store.getState())
 
     // init datasource service
     initDatasourceService()
@@ -95,7 +99,7 @@ const UIApp = (props: Props) => {
 
 
     // init context service
-    setContextSrv(store.getState().user.id, store.getState().user.priv)
+    setContextSrv(store.getState().user.id, store.getState().user.role)
 
     // init location service
     setLocationSrv({

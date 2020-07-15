@@ -80,7 +80,7 @@ export const DashboardActions: FC<Props> = ({ folderId, isEditor, canEdit }) => 
                     })}
                   />
                 </Field>
-                <Button htmlType="submit">Create</Button>
+                <Button htmlType="submit">Submit</Button>
               </>
             )}
           </Form>

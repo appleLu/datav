@@ -27,7 +27,7 @@ function Login() {
         getBackendSrv().post(
             '/api/login',
             {
-                userid: values.userid,
+                username: values.username,
                 password: values.password
             }).then(res => {
                 setToken(res.data.token)
@@ -42,7 +42,6 @@ function Login() {
                     }
                 }, 200)
             })
-
     };
 
     return (
@@ -55,9 +54,9 @@ function Login() {
                     onFinish={onFinish}
                 >
                     <Form.Item
-                        name="userid"
+                        name="username"
                     >
-                        <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="user id" />
+                        <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="username..." />
                     </Form.Item>
 
                     <Form.Item

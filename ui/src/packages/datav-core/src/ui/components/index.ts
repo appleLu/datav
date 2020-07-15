@@ -72,6 +72,7 @@ export * from './DynamicTagList/DynamicTagList'
 export * from './Spinner/Spinner'
 export { Tag } from './Tags/Tag';
 export { TagList } from './Tags/TagList';
+export {ConfirmButton} from './ConfirmButton/ConfirmButton'
 
 const LegacyForms = {
     LegacyInput,

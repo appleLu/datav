@@ -55,7 +55,7 @@ func GetByUid(c *gin.Context) {
 		}
 	}
 
-	folder.Uid = uid
+	folder.Uid = uid 
 	folder.UpdatSlug()
 	folder.UpdateUrl()
 
@@ -85,17 +85,17 @@ func NewFolder(c *gin.Context) {
 			c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
 			return
 		}
-
+ 
 		if id != folder.ParentId {
 			c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "bad parent folder id"))
 			return
 		}
 	}
 
-	user := session.GetUser(c)
+	userId := session.CurrentUserId(c)
 
 	res,err := db.SQL.Exec("INSERT INTO folder (parent_id,title,uid,created_by,created,updated) VALUES (?,?,?,?,?,?)",
-		folder.ParentId, folder.Title, folder.Uid, user.ID, folder.Created, folder.Updated)
+		folder.ParentId, folder.Title, folder.Uid, userId, folder.Created, folder.Updated)
 	if err != nil {
 		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
 		return 

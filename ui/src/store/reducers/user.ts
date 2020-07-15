@@ -4,15 +4,17 @@ import { createAction } from '@reduxjs/toolkit';
 
 import storage from 'src/core/library/utils/localStorage'
 
-import {defaultConfig} from 'src/packages/datav-core'
+import {Role} from 'src/types'
 
 export interface UserState {
-  id: string;
+  id: number;
+  username: string;
   name: string;
   email: string;
-  priv: string;
+  role: Role;
   mobile?: string;
-  avatarUrl?: string;
+  lastSeenAt?: string;
+  isDisabled? : boolean
 }
 
 const cachedUser = storage.get("user")
@@ -21,9 +23,9 @@ export const initialState: UserState = cachedUser ? cachedUser :
     id: null,
     name: null,
     email: null,
-    priv: null,
+    role: null,
     mobile: null,
-    avatarUrl: defaultConfig.user.avatarUrl
+    isDisabled: false
   };
 
 export const updateUser = createAction<UserState>('user/update');

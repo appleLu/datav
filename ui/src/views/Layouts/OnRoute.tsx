@@ -9,6 +9,8 @@ import { setHistory} from 'src/packages/datav-core'
 import { getTimeSrv } from 'src/core/services/time'
 import appEvents from 'src/core/library/utils/app_events'
 import { CoreEvents } from 'src/types'
+import { getBackendSrv } from 'src/core/services/backend'
+import { updateUser } from 'src/store/reducers/user'
 
 
 const OnRoute = () =>{
@@ -21,7 +23,18 @@ const OnRoute = () =>{
     if (history.location.pathname === '/') {
       history.push('/dashboard')
     }
-  
+    
+    // on page refresh
+    useEffect(() => {
+      if (store.getState().user.id) {
+        getBackendSrv().get('/api/users/user',{id: store.getState().user.id}).then((res) => {
+          console.log(res.data)
+          store.dispatch(updateUser(res.data))
+        })
+      }
+    },[])
+
+
     useEffect(() => {
       // is login in
       if (isEmpty(getToken()) || !store.getState().user.id) {

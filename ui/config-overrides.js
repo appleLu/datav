@@ -69,7 +69,7 @@ module.exports = override(
     modifyVars: {
       '@zindex-modal': 1050,
       '@zindex-modal-mask': 1050,
-      '@zindex-message':1040,
+      '@zindex-message':1050,
       '@zindex-notification': 1050
     }
   }),

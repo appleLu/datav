@@ -12,11 +12,11 @@ import (
 )
 
 func GetPlugins(c *gin.Context) {
-	li := session.GetUser(c)
-	if !models.IsAdmin(li.Priv) {
+	user := session.CurrentUser(c)
+	if !models.IsAdmin(user.Role) {
 		c.JSON(http.StatusInternalServerError, common.ResponseErrorMessage(nil, i18n.ON, i18n.NoPrivMsg))
 		return
-	}
+	} 
 
 	tp := c.Query("type")
 	result := make(PluginList, 0)

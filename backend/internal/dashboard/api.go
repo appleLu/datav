@@ -4,7 +4,7 @@ import (
 	"sort"
 	"github.com/apm-ai/datav/backend/internal/cache"
 	"database/sql"
-	"fmt"
+	// "fmt"
 	"net/http"
 	"time"
 
@@ -28,8 +28,8 @@ type ReqDashboardData struct {
 }
 
 func SaveDashboard(c *gin.Context) {
-	user := session.GetUser(c)
-
+	userId := session.CurrentUserId(c)
+  
 	dsData := &ReqDashboardData{}
 	err := c.Bind(&dsData)
 	if err != nil {
@@ -49,7 +49,7 @@ func SaveDashboard(c *gin.Context) {
 	if !update { // create dashboard
 		dash.Uid = utils.GenerateShortUID()
 		dash.Data.Set("version", 0)
-		dash.CreatedBy = user.ID
+		dash.CreatedBy = userId
 		dash.Created = time.Now()
 	} else { //update dashboard
 		dash.Uid = dsData.Dashboard.Get("uid").MustString()
@@ -63,7 +63,6 @@ func SaveDashboard(c *gin.Context) {
 	dash.Updated = time.Now()
 
 	dash.FolderId = dsData.FolderId
-	fmt.Println(dash.FolderId)
 
 
 	jsonData, err := dash.Data.Encode()
@@ -138,8 +137,8 @@ func GetDashboard(c *gin.Context) {
 }
 
 func ImportDashboard(c *gin.Context) {
-	user := session.GetUser(c)
-
+	userId := session.CurrentUserId(c)
+ 
 	dsData := &ReqDashboardData{}
 	err := c.Bind(&dsData)
 	if err != nil {
@@ -158,7 +157,7 @@ func ImportDashboard(c *gin.Context) {
 
 	dash.Data.Set("version", 0)
 
-	dash.CreatedBy = user.ID
+	dash.CreatedBy = userId
 	dash.Created = time.Now()
 	dash.Updated = time.Now()
 
@@ -240,6 +239,6 @@ func GetAllTags(c *gin.Context) {
 	}
 
 	sort.Sort(tags)
-	
+
 	c.JSON(200,common.ResponseSuccess(tags))
 }

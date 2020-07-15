@@ -15,11 +15,11 @@ type Dashboard struct {
 	Version  int `json:"version,omitempty"`
 	
 	Editable bool `json:"editable,omitempty"`
-	
+
 	Created  time.Time `json:"created,omitempty"`
 	Updated  time.Time `json:"updated,omitempty"`
 
-	CreatedBy string `json:"createdBy,omitempty"`
+	CreatedBy int64 `json:"createdBy,omitempty"`
 	FolderId  int `json:"folderId,omitempty"`
 	IsFolder  bool `json:"isFolder,omitempty"`
 	

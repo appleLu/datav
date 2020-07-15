@@ -1,8 +1,12 @@
 package sqls
 
 import (
+	"github.com/apm-ai/datav/backend/pkg/utils"
+	"time"
+	"fmt"
 	"github.com/apm-ai/datav/backend/pkg/models"
-	
+	"github.com/apm-ai/datav/backend/pkg/db"
+	"database/sql"
 )
 // go and sqlite types compare
 // |int       | integer           |
@@ -13,24 +17,77 @@ import (
 // |string    | text              |
 // |time.Time | timestamp/datetime
 // Tutorial: https://www.runoob.com/sqlite/sqlite-index.html
+var adminSalt,adminPW string 
+
+func init() {
+	salt,err  := utils.GetRandomString(10)
+	if err != nil {
+		panic(err)
+	}
+
+	adminSalt = salt
+
+	pw,err := utils.EncodePassword("admin",salt)
+	if (err != nil) {
+		panic(err)
+	}
+
+	adminPW = pw
+}
+
+func CreateTables() {
+	d, err := sql.Open("sqlite3", "./datav.db")
+	if err != nil {
+		fmt.Println("open sqlite error", "error:",err)
+		panic(err)
+	}
+	db.SQL = d
+
+	// create tables
+	for _, q := range CreateTableSqls {
+		_, err = d.Exec(q)
+		if err != nil {
+			fmt.Println("sqlite create table error", "error:",err, "sql:", q)
+			panic(err)
+		}
+	}
+	
+	// insert init data
+	_,err = db.SQL.Exec(`INSERT INTO user (username,password,salt,role,email,created,updated) VALUES (?,?,?,?,?,?,?)`,
+		"admin",adminPW,adminSalt,models.ROLE_ADMIN,"admin@datav.dev",time.Now(),time.Now())
+	if err != nil {
+		fmt.Println("init data error","error:",err)
+		panic(err)
+	}
+}
+
+
 var CreateTableSqls = []string{
-	`CREATE TABLE IF NOT EXISTS users (
-		id VARCHAR(255) not null primary key, 
-		name VARCHAR(255) default 'New User',
-		password VARCHAR(255) not null,
-		mobile VARCHAR(11) default '',
-		email VARCHAR(255) not null,
-		priv VARCHAR(10) not null,
-		avatar_url VARCHAR(255) default '',
-		last_login_date DATETIME DEFAULT CURRENT_DATETIME
+	`CREATE TABLE IF NOT EXISTS user (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		username VARCHAR(255) NOT NULL UNIQUE,
+		name VARCHAR(255) DEFAULT '',
+		password VARCHAR(50) DEFAULT '',
+		salt VARCHAR(50),
+		role VARCHAR(10) DEFAULT 'Viewer',
+
+		mobile VARCHAR(11) DEFAULT '',
+		email VARCHAR(255) NOT NULL UNIQUE,
+
+		last_seen_at DATETIME DEFAULT CURRENT_DATETIME,
+		is_diabled BOOL NOT NULL DEFAULT 'false',
+
+		created DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
+		updated DATETIME NOT NULL DEFAULT CURRENT_DATETIME
 	);
-	CREATE INDEX IF NOT EXISTS index_name
-		ON users (name);
-	INSERT INTO users (id,name,password,email,priv) VALUES ('admin','admin','admin','cto@188.com','` + string(models.ROLE_ADMIN) + "');",
+	CREATE INDEX IF NOT EXISTS user_username
+		ON user (username);
+	CREATE INDEX IF NOT EXISTS user_email
+		ON user (email);`,
 
 	`CREATE TABLE IF NOT EXISTS sessions (
 		sid              VARCHAR(255) primary key,   
-		user_id          VARCHAR(255)
+		user_id          INTEGER
 	);
 	`,
 
@@ -57,6 +114,7 @@ var CreateTableSqls = []string{
 		json_data TEXT DEFAULT '{}',
 		secure_json_data TEXT DEFAULT '{}',
 
+		created_by  INTEGER NOT NULL,
 		created DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
 		updated DATETIME NOT NULL DEFAULT CURRENT_DATETIME
 	);
@@ -71,7 +129,7 @@ var CreateTableSqls = []string{
 		uid                 VARCHAR(40) NOT NULL UNIQUE,
 		title               VARCHAR(255) NOT NULL UNIQUE,
 		version 			INT NOT NULL,
-		created_by 			VARCHAR(255) NOT NULL,
+		created_by 			INTEGER NOT NULL,
 		folder_id           INT NOT NULL DEFAULT '0',
 		data				MEDIUMTEXT NOT NULL,
 		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
@@ -90,7 +148,7 @@ var CreateTableSqls = []string{
 		parent_id           INT NOT NULL,
 		uid                 VARCHAR(40) NOT NULL UNIQUE,
 		title                VARCHAR(255) NOT NULL UNIQUE,
-		created_by 			VARCHAR(255) NOT NULL,
+		created_by 			INTEGER NOT NULL,
 		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
 		updated 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
 	);

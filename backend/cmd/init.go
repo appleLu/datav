@@ -16,11 +16,8 @@ limitations under the License.
 package cmd
  
 import (
-	"database/sql"
-
 	"github.com/apm-ai/datav/backend/cmd/sqls"
 	"github.com/apm-ai/datav/backend/pkg/config"
-	"github.com/apm-ai/datav/backend/pkg/db"
 	"github.com/apm-ai/datav/backend/pkg/log"
 	"github.com/spf13/cobra"
 )
@@ -34,8 +31,8 @@ var initCmd = &cobra.Command{
 		config.Init("web.conf")
 		log.InitLogger(config.Data.Common.LogLevel)
 
-		createTables()
-
+		sqls.CreateTables()
+		log.RootLogger.Info("create tables ok")
 		log.RootLogger.Info("init enviroments ok, you can start datav now")
 	},
 }
@@ -54,22 +51,4 @@ func init() {
 	// initCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func createTables() {
-	d, err := sql.Open("sqlite3", "./datav.db")
-	if err != nil {
-		log.RootLogger.Error("open sqlite error", "error",err)
-		panic(err)
-	}
-	db.SQL = d
 
-	// create tables
-	for _, q := range sqls.CreateTableSqls {
-		_, err = d.Exec(q)
-		if err != nil {
-			log.RootLogger.Error("sqlite create table error", "error",err, "sql", q)
-			panic(err)
-		}
-	}
-
-	log.RootLogger.Info("create tables ok")
-}

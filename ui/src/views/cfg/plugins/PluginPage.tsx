@@ -14,7 +14,7 @@ import {
   PluginType,
   UrlQueryMap,
 } from 'src/packages/datav-core';
-import { CoreEvents } from 'src/types';
+import { CoreEvents, Role } from 'src/types';
 import { Alert, Tooltip } from 'src/packages/datav-core';
 
 import Page from '../../Layouts/Page/Page';
@@ -68,7 +68,7 @@ interface Props {
 
 interface State {
   query?: UrlQueryMap;
-  userPriv: string;
+  userRole: Role;
   loading: boolean;
   plugin?: GrafanaPlugin;
   nav: NavModel;
@@ -84,7 +84,7 @@ class PluginPage extends PureComponent<Props & any, State> {
       loading: true,
       nav: getLoadingNav(),
       defaultPage: PAGE_ID_README,
-      userPriv: store.getState().user.priv,
+      userRole: store.getState().user.role,
       query: {}
     };
   }
@@ -256,8 +256,8 @@ class PluginPage extends PureComponent<Props & any, State> {
   }
 
   render() {
-    const { loading, nav, plugin,userPriv} = this.state;
-    const isAdmin = userPriv === 'Admin';
+    const { loading, nav, plugin,userRole} = this.state;
+    const isAdmin = userRole === 'Admin';
     return (
       <Page navModel={nav}>
         <Page.Contents isLoading={loading}>

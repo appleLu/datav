@@ -21,5 +21,5 @@ export interface ApplicationConfig {
 }
 
 export interface UserConfig {
-  avatarUrl: string
+  avatarUrl?: string
 }
