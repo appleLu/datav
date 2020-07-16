@@ -8,7 +8,6 @@ import { useLocation } from 'react-router-dom'
 import classNames from 'classnames'
 
 import { User } from 'src/core/services/context';
-import { MenuItem } from 'src/routes';
 import { Icon, IconName, ThemeType, setCurrentTheme } from 'src/packages/datav-core';
 
 import { getFooterLinks } from '../Footer/Footer';
@@ -19,7 +18,7 @@ import { logout } from 'src/core/library/utils/user';
 import { store } from 'src/store/store';
 import { Langs } from 'src/core/library/locale';
 import { updateLocale, updateTheme } from 'src/store/reducers/application';
-import { StoreState } from 'src/types'
+import { StoreState ,MenuItem} from 'src/types'
 
 export interface Props {
   link: MenuItem;

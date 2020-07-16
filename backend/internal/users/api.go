@@ -21,6 +21,7 @@ func GetUsers(c *gin.Context) {
 	if err != nil {
 		logger.Warn("get all users error", "error", err)
 		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return 
 	}
 
 	users := make(models.Users, 0)

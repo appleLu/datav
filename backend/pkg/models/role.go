@@ -15,3 +15,16 @@ func (r RoleType) IsValid() bool {
 func IsAdmin(r RoleType) bool {
 	return r == ROLE_ADMIN
 }
+
+func RoleSortWeight(role RoleType) int {
+	switch role {
+	case ROLE_VIEWER :
+		return 0
+	case ROLE_EDITOR: 
+		return 1
+	case ROLE_ADMIN:
+		return 2
+	default:
+		return 0
+	}
+}

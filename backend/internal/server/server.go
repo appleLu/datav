@@ -22,6 +22,7 @@ import (
 	"github.com/apm-ai/datav/backend/internal/cache"
 	"github.com/apm-ai/datav/backend/internal/search"
 	"github.com/apm-ai/datav/backend/internal/folders"
+	"github.com/apm-ai/datav/backend/internal/teams"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -109,10 +110,20 @@ func (s *Server) Start() error {
 			}
 
 			userR := authR.Group("/api/users") 
-			{
+			{ 
 				userR.GET("", users.GetUsers)
 				userR.GET("/user", users.GetUser)		
 			}
+
+			teamR := authR.Group("/api/teams") 
+			{
+				teamR.GET("", teams.GetTeams)
+				teamR.GET("/team", teams.GetTeam)
+				teamR.GET("/members/:id", teams.GetTeamMembers)	
+				teamR.POST("/:id/members", teams.AddTeamMembers)	
+				teamR.DELETE("/:teamId/:memberId", teams.DeleteTeamMember)	
+				teamR.PUT("/team/:id", teams.UpdateTeam)
+			} 
 
 			adminR := authR.Group("/api/admin")
 			{
@@ -120,6 +131,8 @@ func (s *Server) Start() error {
 				adminR.PUT("/user/:id", users.UpdateUser)
 				adminR.DELETE("/user/:id", users.DeleteUser)
 				adminR.POST("/user/new", users.NewUser)
+
+				adminR.POST("/team/new", teams.NewTeam)
 			}
 		}
 

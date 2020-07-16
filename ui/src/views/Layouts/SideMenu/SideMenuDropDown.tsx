@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 // import _ from 'lodash';
 import DropDownChild from './DropDownChild';
 import { Link } from 'react-router-dom'
-import { MenuItem } from 'src/routes';
+import { MenuItem } from 'src/types';
 
 interface Props {
   link: MenuItem;

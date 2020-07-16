@@ -1,12 +1,13 @@
 import React  from 'react';
 import _ from 'lodash';
 import TopSectionItem from './TopSectionItem';
-import { menuItems,MenuItem, MenuPosition } from 'src/routes';
-import { addParamToUrl } from 'src/core/library/utils/url';
+import { MenuItem, MenuPosition } from 'src/types';
 import { getLocationSrv } from 'src/packages/datav-core/src';
+import {store} from 'src/store/store'
 
 
 const TopSection = () => {
+  const menuItems = store.getState().menu.items
   const mainLinks = _.filter(menuItems, (item:MenuItem) => item.showPosition === MenuPosition.Top);
   const searchLink:MenuItem= {
     text: 'Search',

@@ -5,6 +5,7 @@ import pluginsReducer from './plugins'
 import panelEditorReducer from './panelEditor'
 import dashboardReducer from './dashboard'
 import locationReducer from './location'
+import menuReducer from './menu'
 import templatingReducers from 'src/views/variables/state/reducers';
 
 import { CleanUp, cleanUpAction } from '../actions/cleanUp';
@@ -16,7 +17,8 @@ const rootReducers = {
     ...pluginsReducer,
     ...panelEditorReducer,
     ...dashboardReducer,
-    ...locationReducer
+    ...locationReducer,
+    ...menuReducer
 };
 
 

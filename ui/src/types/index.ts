@@ -10,6 +10,8 @@ export * from './search'
 export * from './plugins'
 export * from './acl'
 export * from './folder'
+export * from './menu'
+export * from './teams'
 
 export type KeyValuePair = {
     key: string;

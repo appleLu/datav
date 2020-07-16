@@ -32,11 +32,10 @@ import darkVars from 'src/styles/dark.json';
 import lightVars from 'src/styles/light.json';
 import { StoreState } from 'src/types'
 
-import { LocationUpdate, setDataSourceService, setBackendSrv, ThemeType, setCurrentTheme, setMarkdownOptions, getBackendSrv, setBootConfig, getBootConfig, ThemeContext, getTheme, setLocationSrv } from 'src/packages/datav-core'
+import { LocationUpdate, setDataSourceService, setBackendSrv, ThemeType, setCurrentTheme, setMarkdownOptions, getBackendSrv, setBootConfig, ThemeContext, getTheme, setLocationSrv } from 'src/packages/datav-core'
 import { DatasourceSrv } from 'src/core/services/datasource'
 import { backendSrv } from 'src/core/services/backend'
 
-import { message } from 'antd';
 import { TimeSrv, setTimeSrv } from 'src/core/services/time';
 import { KeybindingSrv, setKeybindingSrv } from 'src/core/services/keybinding'
 import { store } from 'src/store/store'
@@ -45,7 +44,7 @@ import { setContextSrv } from 'src/core/services/context';
 import { standardEditorsRegistry, getStandardOptionEditors } from 'src/packages/datav-core/src';
 import globalEvents from './globalEvents'
 import { getDefaultVariableAdapters, variableAdapters } from 'src/views/variables/adapters';
-import { initMenuItems } from 'src/routes';
+import { initRoutes} from 'src/routes';
 interface Props {
   theme: string
 }
@@ -70,7 +69,7 @@ const UIApp = (props: Props) => {
     standardEditorsRegistry.setInit(getStandardOptionEditors);
 
     // init menu items
-    initMenuItems(store.getState())
+    initRoutes(store.getState())
 
     // init datasource service
     initDatasourceService()

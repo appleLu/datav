@@ -5,7 +5,7 @@ import classNames from 'classnames'
 
 import SideMenuDropDown from './SideMenuDropDown';
 import { Icon } from 'src/packages/datav-core';
-import { MenuItem } from 'src/routes'
+import { MenuItem } from 'src/types'
 import { Link } from 'react-router-dom'
 export interface Props {
   link: MenuItem;
@@ -25,7 +25,7 @@ const TopSectionItem: FC<Props> = props => {
       </span>
     </a>
   } else if (link.redirectTo) {
-    renderLink =      <Link to={link.redirectTo} className="sidemenu-link" onClick={onClick}>
+    renderLink =  <Link to={link.redirectTo} className="sidemenu-link" onClick={onClick}>
       <span className="icon-circle sidemenu-icon pointer">
         <Icon name={link.icon as any} size="xl" />
       </span>

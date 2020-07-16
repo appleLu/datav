@@ -41,7 +41,7 @@ func Login(c *gin.Context) {
 		return
 	}
 	
-	fmt.Println("pw: ",pw,"salt:",salt)
+
 	encodedPassword,_ := utils.EncodePassword(password,salt)
 	if encodedPassword != pw{
 		fmt.Println(password,salt,pw)

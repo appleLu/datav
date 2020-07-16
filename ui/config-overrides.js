@@ -32,11 +32,14 @@ const lightVars = {
   ...getLessVars('./node_modules/antd/lib/style/themes/compact.less'), 
   '@primary-color': defaultVars['@primary-color'] };
 
-
+const darkComponentBG = '#141619'
+const darkItemHoverBg = '#202226'
+const darkBodyBg = '#101010'
 const newDarkVars = {...darkVars, ...customVariables,
-  '@body-background':'#101010','@component-background':'#141619','@border-color-base':'#202226',
-  '@item-hover-bg':'#202226','@text-color':'#c7d0d9','@input-bg':'#141619','@text-color-secondary':'#7b8087',
-   '@warning-color': '#eb7b18','@success-color':'#74e680'}
+  '@body-background':darkBodyBg,'@component-background':darkComponentBG,'@border-color-base':darkItemHoverBg,
+  '@item-hover-bg':darkItemHoverBg,'@text-color':'#c7d0d9','@input-bg':darkComponentBG,'@text-color-secondary':'#7b8087',
+   '@warning-color': '#eb7b18','@success-color':'#74e680','@table-header-bg':darkBodyBg,
+  '@table-row-hover-bg': darkItemHoverBg}
 const newLightVars = {...lightVars, ...customVariables,
   '@warning-color': '#ff7941','@success-color':'#3eb15b','@body-background':'#f0f2f5'}
 fs.writeFileSync('./src/styles/dark.json', JSON.stringify(newDarkVars));

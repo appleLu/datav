@@ -3,6 +3,8 @@ package utils
 import (
 	"errors"
 	"time"
+	"math"
+	"fmt"
 )
 
 func Time2String(t time.Time) string {
@@ -75,4 +77,36 @@ func UnixMsToTimestring(n int64) string {
 func UnixMsToTimestringMinute(n int64) string {
 	now := time.Unix(n/1000, 0)
 	return Time2StringMinute(now)
+}
+
+
+func GetAgeString(t time.Time) string {
+	if t.IsZero() {
+		return "?"
+	}
+
+	sinceNow := time.Since(t)
+	minutes := sinceNow.Minutes()
+	years := int(math.Floor(minutes / 525600))
+	months := int(math.Floor(minutes / 43800))
+	days := int(math.Floor(minutes / 1440))
+	hours := int(math.Floor(minutes / 60))
+
+	if years > 0 {
+		return fmt.Sprintf("%dy ago", years)
+	}
+	if months > 0 {
+		return fmt.Sprintf("%dM ago", months)
+	}
+	if days > 0 {
+		return fmt.Sprintf("%dd ago", days)
+	}
+	if hours > 0 {
+		return fmt.Sprintf("%dh ago", hours)
+	}
+	if int(minutes) > 0 {
+		return fmt.Sprintf("%dm ago", int(minutes))
+	}
+
+	return "< 1m"
 }

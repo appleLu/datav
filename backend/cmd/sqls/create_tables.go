@@ -7,16 +7,9 @@ import (
 	"github.com/apm-ai/datav/backend/pkg/models"
 	"github.com/apm-ai/datav/backend/pkg/db"
 	"database/sql"
+	"github.com/apm-ai/datav/backend/pkg/log"
 )
-// go and sqlite types compare
-// |int       | integer           |
-// |int64     | integer           |
-// |float64   | float             |
-// |bool      | integer           |
-// |[]byte    | blob              |
-// |string    | text              |
-// |time.Time | timestamp/datetime
-// Tutorial: https://www.runoob.com/sqlite/sqlite-index.html
+
 var adminSalt,adminPW string 
 
 func init() {
@@ -35,35 +28,81 @@ func init() {
 	adminPW = pw
 }
 
-func CreateTables() {
+func openSql() {
 	d, err := sql.Open("sqlite3", "./datav.db")
 	if err != nil {
-		fmt.Println("open sqlite error", "error:",err)
+		log.RootLogger.Crit("open sqlite error", "error:",err)
 		panic(err)
 	}
 	db.SQL = d
+}
 
+func CreateTables() {
+	openSql()
 	// create tables
 	for _, q := range CreateTableSqls {
-		_, err = d.Exec(q)
+		_, err := db.SQL.Exec(q)
 		if err != nil {
-			fmt.Println("sqlite create table error", "error:",err, "sql:", q)
+			log.RootLogger.Crit("sqlite create table error", "error:",err, "sql:", q)
 			panic(err)
 		}
 	}
 	
 	// insert init data
-	_,err = db.SQL.Exec(`INSERT INTO user (username,password,salt,role,email,created,updated) VALUES (?,?,?,?,?,?,?)`,
+	_,err := db.SQL.Exec(`INSERT INTO user (username,password,salt,role,email,created,updated) VALUES (?,?,?,?,?,?,?)`,
 		"admin",adminPW,adminSalt,models.ROLE_ADMIN,"admin@datav.dev",time.Now(),time.Now())
 	if err != nil {
-		fmt.Println("init data error","error:",err)
+		log.RootLogger.Crit("init data error","error:",err)
 		panic(err)
 	}
 }
 
 
-var CreateTableSqls = []string{
-	`CREATE TABLE IF NOT EXISTS user (
+func CreateTable(names []string) {
+	defer func() {
+		if err := recover();err != nil {
+			DropTable(names)
+		}
+	}()
+	openSql()
+	for _,tbl := range names {
+		q,ok := CreateTableSqls[tbl]
+		if !ok {
+			log.RootLogger.Crit("target sql table not exist","table_name",tbl)
+			panic("create sql of '" + tbl + "' table not exist")
+		}
+
+		// check table already exists
+		_,err :=db.SQL.Query(fmt.Sprintf("SELECT * from %s LIMIT 1",tbl))
+		if err == nil || err == sql.ErrNoRows {
+			log.RootLogger.Info("Table already exist,skip creating","table_name",tbl)
+			continue
+		}
+
+		_,err = db.SQL.Exec(q)
+		if err != nil {
+			log.RootLogger.Crit("database error","error",err.Error())
+			panic(err.Error())
+		}
+
+		log.RootLogger.Info("sql table created ok","table_name",tbl)
+	}
+}
+
+func DropTable(names []string) {
+	openSql()
+	for _,tbl := range names {
+		q := fmt.Sprintf("DROP TABLE IF EXISTS %s",tbl)
+		_,err := db.SQL.Exec(q)
+		if err != nil {
+			log.RootLogger.Warn("drop table error", "error",err,"query",q)
+		}
+		log.RootLogger.Info("sql table dropped ok","table_name",tbl)
+	}
+}
+
+var CreateTableSqls = map[string]string {
+	"user" : `CREATE TABLE IF NOT EXISTS user (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		username VARCHAR(255) NOT NULL UNIQUE,
 		name VARCHAR(255) DEFAULT '',
@@ -85,13 +124,13 @@ var CreateTableSqls = []string{
 	CREATE INDEX IF NOT EXISTS user_email
 		ON user (email);`,
 
-	`CREATE TABLE IF NOT EXISTS sessions (
+	"sessions" : `CREATE TABLE IF NOT EXISTS sessions (
 		sid              VARCHAR(255) primary key,   
 		user_id          INTEGER
 	);
 	`,
 
-	`CREATE TABLE IF NOT EXISTS data_source (
+	"data_source" : `CREATE TABLE IF NOT EXISTS data_source (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		uid VARCHAR(40) NOT NULL UNIQUE,
 		name VARCHAR(255) NOT NULL UNIQUE,
@@ -124,7 +163,7 @@ var CreateTableSqls = []string{
 		ON data_source (uid);
 	`,
 
-	`CREATE TABLE IF NOT EXISTS dashboard (
+	"dashboard" : `CREATE TABLE IF NOT EXISTS dashboard (
 		id 					INTEGER PRIMARY KEY AUTOINCREMENT,
 		uid                 VARCHAR(40) NOT NULL UNIQUE,
 		title               VARCHAR(255) NOT NULL UNIQUE,
@@ -143,7 +182,7 @@ var CreateTableSqls = []string{
 		ON dashboard (folder_id);
 	`,
 
-	`CREATE TABLE IF NOT EXISTS folder (
+	"folder" : `CREATE TABLE IF NOT EXISTS folder (
 		id 					INTEGER PRIMARY KEY AUTOINCREMENT,
 		parent_id           INT NOT NULL,
 		uid                 VARCHAR(40) NOT NULL UNIQUE,
@@ -155,9 +194,28 @@ var CreateTableSqls = []string{
 	CREATE INDEX IF NOT EXISTS folder_parent_id
 		ON folder (parent_id);
 	`,
+
+	"team" : `CREATE TABLE IF NOT EXISTS team (
+		id 					INTEGER PRIMARY KEY AUTOINCREMENT,
+		name                VARCHAR(255) NOT NULL UNIQUE,
+		created_by          INTEGER NOT NULL,        
+		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
+		updated 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+	);
+	CREATE INDEX IF NOT EXISTS team_name
+		ON team (name);
+	`,
+
+	"team_member" : `CREATE TABLE IF NOT EXISTS team_member (
+		id 					INTEGER PRIMARY KEY AUTOINCREMENT,
+		team_id             INTEGER NOT NULL,
+		user_id 			INTEGER NOT NULL,    
+		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+	);
+	CREATE INDEX IF NOT EXISTS team_member_team_id
+		ON team_member (team_id);
+	CREATE UNIQUE INDEX IF NOT EXISTS team_member_team_user_id 
+		ON team_member (team_id, user_id);
+	`,
 }
 
-var DropTableSqls = []string{
-	`drop table users`,
-	`drop table sessions`,
-}

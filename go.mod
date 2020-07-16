@@ -9,6 +9,7 @@ require (
 	github.com/mattn/go-colorable v0.1.7 // indirect
 	github.com/mattn/go-sqlite3 v1.14.0
 	github.com/spf13/cobra v1.0.0
+	github.com/spf13/pflag v1.0.3
 	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf
 	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543

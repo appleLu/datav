@@ -1,6 +1,6 @@
 import { NavModel } from 'src/packages/datav-core';
-import { MenuItem, menuItems } from 'src/routes';
-import { Menu } from 'antd';
+import { MenuItem } from 'src/types';
+import {store} from 'src/store/store'
 
 
 function getNotFoundModel(): NavModel {
@@ -19,6 +19,7 @@ function getNotFoundModel(): NavModel {
 }
 
 export function getNavModel(id: string, parentID: string): NavModel {
+    const menuItems = store.getState().menu.items
     // find main node
     let main: MenuItem;
     menuItems.forEach((item) => {

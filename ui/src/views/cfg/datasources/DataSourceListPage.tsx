@@ -5,15 +5,25 @@ import React, { PureComponent } from 'react';
 import Page from '../../Layouts/Page/Page';
 import DataSourceList from './DataSourceList'
 // Types
-import { DataSourceSettings, NavModel, getBackendSrv } from 'src/packages/datav-core';
+import { DataSourceSettings, NavModel, getBackendSrv,IconName, LinkButton} from 'src/packages/datav-core';
+import EmptyListCTA from 'src/views/components/EmptyListCTA/EmptyListCTA'
 import { getNavModel } from '../../Layouts/Page/navModel';
 import { withRouter } from 'react-router-dom';
-import { Button } from 'antd';
-import appEvents from 'src/core/library/utils/app_events';
 
 
 
- 
+
+const emptyListModel = {
+  title: 'There are no data sources defined yet',
+  buttonIcon: 'database' as IconName,
+  buttonLink: '/datasources/new',
+  buttonTitle: 'Add data source',
+  proTip: 'You can also define data sources through configuration files.',
+  proTipLink: 'http://docs.grafana.org/administration/provisioning/#datasources?utm_source=grafana_ds_list',
+  proTipLinkTitle: 'Learn more',
+  proTipTarget: '_blank',
+};
+
 
 export interface Props {
   routeID: string;
@@ -49,7 +59,6 @@ export class DatasourceListPage extends PureComponent<Props&any,State> {
 
   render() {
     const {
-      searchQuery,
       history
     } = this.props;
     const hasFetched= true
@@ -65,9 +74,9 @@ export class DatasourceListPage extends PureComponent<Props&any,State> {
       <Page navModel={navModel}>
         <Page.Contents isLoading={!hasFetched}>
           <>
-            <div className="ub-right"><Button type="primary" onClick={() => gotoUrl()}>ADD DATASOURCE</Button></div>
+            {!hasFetched && <div className="ub-right"><LinkButton onClick={() => gotoUrl()}>ADD DATASOURCE</LinkButton></div>}
             <div style={{marginTop: '40px'}}>
-            {hasFetched && dataSourses.length === 0 && <div>Empty Datasources</div>}
+            {hasFetched && dataSourses.length === 0 && <EmptyListCTA {...emptyListModel} />}
             {hasFetched &&
               dataSourses.length > 0 &&
                 <DataSourceList dataSources={dataSourses} key="list" />}

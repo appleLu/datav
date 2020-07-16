@@ -28,7 +28,6 @@ const OnRoute = () =>{
     useEffect(() => {
       if (store.getState().user.id) {
         getBackendSrv().get('/api/users/user',{id: store.getState().user.id}).then((res) => {
-          console.log(res.data)
           store.dispatch(updateUser(res.data))
         })
       }

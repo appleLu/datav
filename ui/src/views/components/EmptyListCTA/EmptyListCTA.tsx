@@ -1,6 +1,7 @@
 import React, { MouseEvent, useContext } from 'react';
 import { CallToActionCard, LinkButton, ThemeContext, Icon, IconName } from 'src/packages/datav-core';
 import { css } from 'emotion';
+import { Link } from 'react-router-dom';
 
 export interface Props {
   title: string;
@@ -39,7 +40,7 @@ const EmptyListCTA: React.FunctionComponent<Props> = ({
   infoBoxTitle,
 }) => {
   const theme = useContext(ThemeContext);
-
+ 
   const footer = () => {
     return (
       <>
@@ -47,9 +48,9 @@ const EmptyListCTA: React.FunctionComponent<Props> = ({
           <span key="proTipFooter">
             <Icon name="rocket" />
             <> ProTip: {proTip} </>
-            <a href={proTipLink} target={proTipTarget} className="text-link">
+            <Link to={proTipLink} className="text-link">
               {proTipLinkTitle}
-            </a>
+            </Link>
           </span>
         ) : (
           ''

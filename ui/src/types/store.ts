@@ -9,6 +9,7 @@ import {PluginsState} from 'src/store/reducers/plugins'
 import {PanelEditorState} from 'src/store/reducers/panelEditor'
 import { DashboardState } from 'src/store/reducers/dashboard'
 import { LocationState } from 'src/store/reducers/location'
+import { MenuState } from 'src/store/reducers/menu';
 
 export interface StoreState {
     user: UserState
@@ -19,6 +20,7 @@ export interface StoreState {
     panelEditor: PanelEditorState
     dashboard: DashboardState
     location: LocationState
+    menu: MenuState
 }
 
 /*

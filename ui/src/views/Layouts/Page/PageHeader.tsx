@@ -4,10 +4,9 @@ import { css } from 'emotion';
 import { Tab, TabsBar, Icon, IconName } from 'src/packages/datav-core';
  
 import { NavModel, NavModelBreadcrumb } from 'src/packages/datav-core';
-import { CoreEvents } from 'src/types';
+import { CoreEvents ,MenuItem} from 'src/types';
 import appEvents from 'src/core/library/utils/app_events';
 import './PageHeader.less'
-import {MenuItem} from 'src/routes/index'
 import { useHistory } from 'react-router-dom';
 
 export interface Props {

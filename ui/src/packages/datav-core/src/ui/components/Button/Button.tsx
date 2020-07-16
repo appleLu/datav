@@ -7,6 +7,7 @@ import { getFocusStyle, getPropertiesForButtonSize } from '../Form/commonStyles'
 import { DatavTheme } from '../../../data';
 import { ButtonContent } from './ButtonContent';
 import { ComponentSize } from '../../types/size';
+import { Link } from 'react-router-dom';
 
 const buttonVariantStyles = (from: string, to: string, textColor: string) => css`
   background: linear-gradient(180deg, ${from} 0%, ${to} 100%);
@@ -28,11 +29,11 @@ const getPropertiesForVariant = (theme: DatavTheme, variant: ButtonVariant) => {
       const from = theme.isLight ? theme.palette.gray7 : theme.palette.gray15;
       const to = theme.isLight
         ? tinycolor(from)
-            .darken(5)
-            .toString()
+          .darken(5)
+          .toString()
         : tinycolor(from)
-            .lighten(4)
-            .toString();
+          .lighten(4)
+          .toString();
       return {
         borderColor: theme.isLight ? theme.palette.gray85 : theme.palette.gray25,
         background: buttonVariantStyles(from, to, theme.isLight ? theme.palette.gray25 : theme.palette.gray4),
@@ -157,7 +158,7 @@ Button.displayName = 'Button';
 
 type ButtonLinkProps = CommonProps & ButtonHTMLAttributes<HTMLButtonElement> & AnchorHTMLAttributes<HTMLAnchorElement>;
 export const LinkButton = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
-  ({ variant, icon, children, className, ...otherProps }, ref) => {
+  ({ variant, icon, children, className, href, ...otherProps }, ref) => {
     const theme = useTheme()
     const styles = getButtonStyles({
       theme,
@@ -167,12 +168,19 @@ export const LinkButton = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
       hasIcon: icon !== undefined,
     });
 
-    return (
-      <a className={cx(styles.button, className)} {...otherProps} ref={ref}>
+    const render = href ?
+      <Link to={href} className={cx(styles.button, className)} {...otherProps} ref={ref}>
         <ButtonContent icon={icon} size={otherProps.size}>
           {children}
         </ButtonContent>
-      </a>
+      </Link> :
+      <span className={cx(styles.button, className)} {...otherProps} ref={ref}>
+        <ButtonContent icon={icon} size={otherProps.size}>
+          {children}
+        </ButtonContent>
+      </span>
+    return (
+      render
     );
   }
 );
