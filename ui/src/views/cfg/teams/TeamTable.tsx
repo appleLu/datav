@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { Table, Space, Modal,notification} from 'antd'
-import { getBackendSrv } from 'src/core/services/backend';
+import { Table, Space, Modal,Tag} from 'antd'
 import { Team } from 'src/types';
 import { Link } from 'react-router-dom';
+import { getState } from 'src/store/store';
 
 interface Props {
     teams: Team[]
@@ -18,36 +18,29 @@ const TeamTable = (props: Props) => {
         team.key = team.id
     })
 
-    const editTeam = (team) => {
-        setTeamEdit(team)
-        setEditTeamVisible(true)
-    }
     const columns = [
         ...rawColumns,
+        {
+            title: 'Created By',
+            key: 'createdBy',
+            render: (_, team:Team) => (
+                <>
+                <span>{team.createdBy}</span>
+                {getState().user.id === team.createdById && <Tag className="ub-ml1">You</Tag>}
+                </>
+            ),
+        },
         {
             title: 'Action',
             key: 'action',
             render: (_, team) => (
                 <Space size="middle">
-                    <Link to={`/team/members/${team.id}`}  className="pointer">Manage</Link>
+                    <Link to={`/team/members/${team.id}`}  className="pointer">View</Link>
                 </Space>
             ),
         }
     ]
 
-    const onTeamDelete = (team) => {
-        getBackendSrv().delete(`/api/admin/team/${team.id}`).then(() => {
-            notification['success']({
-                message: "Success",
-                description: `Team ${team.name} has been deleted`,
-                duration: 5
-            });
-
-            props.reloadTeams()
-
-            setEditTeamVisible(false)
-        })
-    }
     return (
         <>
             <Table
@@ -76,11 +69,6 @@ const rawColumns = [
         title: 'Name',
         dataIndex: 'name',
         key: 'name',
-    },
-    {
-        title: 'Created By',
-        dataIndex: 'createdBy',
-        key: 'createdBy',
     },
     {
         title: 'Members',

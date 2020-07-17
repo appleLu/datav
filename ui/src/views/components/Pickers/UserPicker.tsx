@@ -33,7 +33,7 @@ const UserPicker = (props:Props) =>{
 
     return (
         <>
-            <Select value={props.selectedUsers} className="width-14" mode="multiple" onChange={props.onSelectUser} defaultOpen={true}>
+            <Select value={props.selectedUsers} className="width-14" mode="multiple" onChange={props.onSelectUser}>
                 {options}
             </Select>
         </>

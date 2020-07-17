@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { UserState } from 'src/store/reducers/user'
-import { Table, Space, Modal,notification} from 'antd'
+import { Table, Space, Modal,notification,Tag} from 'antd'
 import { UserProfile } from './components/UserProfile'
 import { getBackendSrv } from 'src/core/services/backend';
+import { getState } from 'src/store/store';
 
 interface Props {
     users: UserState[]
@@ -23,6 +24,16 @@ const UserTable = (props: Props) => {
         setEditUserVisible(true)
     }
     const columns = [
+        {
+            title: 'Username',
+            key: 'username',
+            render: (_, user:UserState) => (
+                <>
+                <span>{user.username}</span>
+                {getState().user.id === user.id && <Tag className="ub-ml1">You</Tag>}
+                </>
+            ),
+        },
         ...rawColumns,
         {
             title: 'Action',
@@ -74,11 +85,6 @@ export default UserTable
 
 const rawColumns = [
     {
-        title: 'Username',
-        dataIndex: 'username',
-        key: 'username',
-    },
-    {
         title: 'Name',
         dataIndex: 'name',
         key: 'name',
@@ -94,7 +100,7 @@ const rawColumns = [
         key: 'mobile',
     },
     {
-        title: 'Role',
+        title: 'Global Role',
         dataIndex: 'role',
         key: 'role'
     },

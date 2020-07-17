@@ -7,7 +7,7 @@ import { Role } from 'src/types';
 import { getBackendSrv } from 'src/core/services/backend';
 import { notification } from 'antd';
 import isEmail from 'validator/lib/isEmail';
-
+import RolePicker from 'src/views/components/Pickers/RolePicker'
 
 interface Props {
     user: UserState;
@@ -188,7 +188,9 @@ export class UserProfile extends PureComponent<Props, State> {
                             <tbody>
                                 <tr>
                                 <td className="width-16" style={{fontWeight: 500}}>Role</td>
-                                <td className="width-25" colSpan={2}><RadioButtonGroup onChange={this.onRoleChange} value={user.role} options={roles}/></td>
+                                <td className="width-25" colSpan={2}>
+                                    <RolePicker onChange={this.onRoleChange} value={user.role}/>
+                                </td>
                                 </tr>
                             </tbody>
                         </table>

@@ -24,6 +24,7 @@ func (s Teams) Less(i, j int) bool {
 
 type TeamMember struct {
 	Id       int64     `json:"id"`
+	TeamId   int64     `json:"teamId,omitempty"`
 	Username string    `json:"username"`
 	Created  time.Time `json:"created"`
 	Role     RoleType    `json:"role"`

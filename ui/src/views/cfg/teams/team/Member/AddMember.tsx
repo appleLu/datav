@@ -4,20 +4,25 @@ import {Modal,Button, notification, message} from 'antd'
 import {getBackendSrv} from 'src/core/services/backend'
 import appEvents from 'src/core/library/utils/app_events'
 import UserPicker from 'src/views/components/Pickers/UserPicker'
+import RolePicker from 'src/views/components/Pickers/RolePicker'
+import { Role } from 'src/types'
 
 interface Props {
     teamId: number
     inTeamMembers: {}
 }
-
+ 
 
 const AddMember = (props: Props) => {
     const [modalVisible,setModalVisible] = useState(false)
     const [selectedMembers,setSelectedMembers] = useState([])
+    const [memberRole,setMemberRole] = useState(Role.Viewer)
     const addMember = async ()  => {
         setSelectedMembers([])
         setModalVisible(false)
-        getBackendSrv().post(`/api/teams/${props.teamId}/members`,{members : selectedMembers}).then((res) => {
+        setMemberRole(Role.Viewer)
+
+        getBackendSrv().post(`/api/teams/${props.teamId}/members`,{members : selectedMembers, role: memberRole}).then(() => {
             appEvents.emit('update-team-member')
             notification['success']({
                 message: "Success",
@@ -51,6 +56,10 @@ const AddMember = (props: Props) => {
                                 label="Team Member"
                             >
                                 <UserPicker onSelectUser={selectMember} selectedUsers={selectedMembers} excludedUsers={props.inTeamMembers}/>
+                            </Field>
+
+                            <Field label="Member Role">
+                                <RolePicker onChange={setMemberRole} value={memberRole}/>
                             </Field>
                             <Button type="primary" htmlType="submit" style={{marginTop: '16px'}}>Submit</Button>
                         </>

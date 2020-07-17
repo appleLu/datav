@@ -39,7 +39,7 @@ const newDarkVars = {...darkVars, ...customVariables,
   '@body-background':darkBodyBg,'@component-background':darkComponentBG,'@border-color-base':darkItemHoverBg,
   '@item-hover-bg':darkItemHoverBg,'@text-color':'#c7d0d9','@input-bg':darkComponentBG,'@text-color-secondary':'#7b8087',
    '@warning-color': '#eb7b18','@success-color':'#74e680','@table-header-bg':darkBodyBg,
-  '@table-row-hover-bg': darkItemHoverBg}
+  '@table-row-hover-bg': darkItemHoverBg,'@popover-background':darkComponentBG}
 const newLightVars = {...lightVars, ...customVariables,
   '@warning-color': '#ff7941','@success-color':'#3eb15b','@body-background':'#f0f2f5'}
 fs.writeFileSync('./src/styles/dark.json', JSON.stringify(newDarkVars));
@@ -72,8 +72,8 @@ module.exports = override(
     modifyVars: {
       '@zindex-modal': 1050,
       '@zindex-modal-mask': 1050,
-      '@zindex-message':1050,
-      '@zindex-notification': 1050
+      '@zindex-message':1100,
+      '@zindex-notification': 1100
     }
   }),
   addWebpackAlias({

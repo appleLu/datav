@@ -9,7 +9,11 @@ const (
 )
 
 func (r RoleType) IsValid() bool {
-	return r == ROLE_VIEWER || r == ROLE_ADMIN || r == ROLE_EDITOR
+	return r == ROLE_VIEWER || r == ROLE_EDITOR || r == ROLE_ADMIN 
+}
+
+func (r RoleType) IsAdmin() bool {
+	return r == ROLE_ADMIN 
 }
 
 func IsAdmin(r RoleType) bool {

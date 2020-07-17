@@ -69,7 +69,7 @@ const UIApp = (props: Props) => {
     standardEditorsRegistry.setInit(getStandardOptionEditors);
 
     // init menu items
-    initRoutes(store.getState())
+    initRoutes(store)
 
     // init datasource service
     initDatasourceService()

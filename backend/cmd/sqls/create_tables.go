@@ -209,8 +209,10 @@ var CreateTableSqls = map[string]string {
 	"team_member" : `CREATE TABLE IF NOT EXISTS team_member (
 		id 					INTEGER PRIMARY KEY AUTOINCREMENT,
 		team_id             INTEGER NOT NULL,
-		user_id 			INTEGER NOT NULL,    
-		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+		user_id 			INTEGER NOT NULL,   
+		role 				VARCHAR(10) DEFAULT 'Viewer',
+		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
+		updated 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
 	);
 	CREATE INDEX IF NOT EXISTS team_member_team_id
 		ON team_member (team_id);

@@ -1,6 +1,7 @@
 package teams
 
 import (
+	"github.com/apm-ai/datav/backend/internal/invasion"
 	"github.com/apm-ai/datav/backend/pkg/utils"
 	"database/sql"
 	// "fmt"
@@ -42,7 +43,7 @@ func GetTeams(c *gin.Context) {
 		if err != nil {
 			logger.Warn("select team member count error","error",err)
 		}
-
+		
 		team.MemberCount = count
 		teams = append(teams, team)
 	}
@@ -94,7 +95,7 @@ func NewTeam(c *gin.Context) {
 	id, _ := res.LastInsertId()
 
 	// insert self as first team member
-	_,err = db.SQL.Exec("INSERT INTO team_member (team_id,user_id,created,updated) VALUES (?,?,?,?)",id,user.Id,now,now)
+	_,err = db.SQL.Exec("INSERT INTO team_member (team_id,user_id,role,created,updated) VALUES (?,?,?,?,?)",id,user.Id,models.ROLE_ADMIN,now,now)
 	if err != nil {
 		logger.Warn("insert team member error", "error", err)
 		db.SQL.Exec("DELETE FROM team WHERE id=?",id)
@@ -121,7 +122,7 @@ func GetTeamMembers(c *gin.Context) {
 	}
 
 	members := make(models.TeamMembers,0)
-	rows,err := db.SQL.Query("SELECT user_id,created FROM team_member WHERE team_id=?",id)
+	rows,err := db.SQL.Query("SELECT user_id,role,created FROM team_member WHERE team_id=?",id)
 	if err != nil && err != sql.ErrNoRows {
 		logger.Warn("get team members error","error",err)
 		c.JSON(500, common.ResponseErrorMessage(nil,i18n.OFF,err.Error()))
@@ -130,14 +131,13 @@ func GetTeamMembers(c *gin.Context) {
 
 	for rows.Next() {
 		member := &models.TeamMember{}
-		err := rows.Scan(&member.Id,&member.Created)
+		err := rows.Scan(&member.Id,&member.Role,&member.Created)
 		if err != nil {
 			logger.Warn("get team members scan error","error",err)
 			continue
 		}
 
 		u,_ := users.QueryUser(member.Id,"","")
-		member.Role = u.Role
 		member.Username = u.Username
 		member.RoleSortWeight = models.RoleSortWeight(member.Role)
 		member.CreatedAge = utils.GetAgeString(member.Created)
@@ -149,14 +149,19 @@ func GetTeamMembers(c *gin.Context) {
 	c.JSON(200,common.ResponseSuccess(members))
 }
 
+type AddMemberReq struct {
+	MemberIds []int64 `json:"members"`
+	Role models.RoleType `json:"role"`
+}
 func AddTeamMembers(c *gin.Context) {
 	teamId,_ := strconv.ParseInt(c.Param("id"),10,64)
-	req := make(map[string][]int64)
+	req := &AddMemberReq{}
 	c.Bind(&req)
 
-	members := req["members"]
-	
-	if teamId == 0 || len(members) == 0 {
+	members := req.MemberIds
+	role := req.Role
+
+	if teamId == 0 || len(members) == 0 || !role.IsValid() { 
 		c.JSON(400,common.ResponseErrorMessage(nil,i18n.OFF,"teamId or members cannot be empty"))
 		return 
 	}
@@ -193,7 +198,7 @@ func AddTeamMembers(c *gin.Context) {
 
 	now := time.Now()
 	for _,memberId := range members {
-		_,err := db.SQL.Exec("INSERT INTO team_member (team_id,user_id,created) VALUES (?,?,?)",teamId,memberId,now)
+		_,err := db.SQL.Exec("INSERT INTO team_member (team_id,user_id,role,created,updated) VALUES (?,?,?,?,?)",teamId,memberId,role,now,now)
 		if err != nil {
 			logger.Warn("add team member error","error",err)
 			c.JSON(500, common.ResponseErrorMessage(nil,i18n.OFF,err.Error()))
@@ -225,14 +230,8 @@ func DeleteTeamMember(c *gin.Context) {
 		return 
 	}
 
-	currentUserId := session.CurrentUserId(c)
-	if currentUserId == memberId {
-		c.JSON(400,common.ResponseErrorMessage(nil,i18n.OFF,"You cannot delete your self"))
-		return 
-	}
-
 	if memberId == team.CreatedById {
-		c.JSON(400,common.ResponseErrorMessage(nil,i18n.OFF,"You cannot delete the team owner"))
+		c.JSON(400,common.ResponseErrorMessage(nil,i18n.OFF,"Team creator cannot be deleted, transfer the team first"))
 		return 
 	}
 
@@ -267,4 +266,91 @@ func UpdateTeam(c *gin.Context) {
 	}
 
 	c.JSON(200,common.ResponseSuccess(nil))
+}
+
+func UpdateTeamMember(c *gin.Context) {
+	member := &models.TeamMember{}
+	c.Bind(&member)
+	
+	if member.TeamId == 0 || member.Id == 0 || !member.Role.IsValid()  {
+		c.JSON(400,common.ResponseErrorMessage(nil,i18n.OFF,"bad team member data"))
+		return 
+	}
+
+	// cannot update team creator's role
+	
+	_,err := db.SQL.Exec("UPDATE team_member SET role=?,updated=? WHERE team_id=? and user_id=?",member.Role,time.Now(),member.TeamId,member.Id)
+	if err != nil {
+		logger.Warn("update team member error","error",err)
+		c.JSON(500, common.ResponseErrorMessage(nil,i18n.OFF,err.Error()))
+		return 
+	}
+
+	team,err := QueryTeam(member.TeamId,"")
+	if member.Id == team.CreatedById && !member.Role.IsAdmin(){
+		c.JSON(400,common.ResponseErrorMessage(nil,i18n.OFF,"Team creator's role must be 'Admin' !"))
+		return 
+	}
+
+	c.JSON(200,common.ResponseSuccess(nil))
+}
+
+func TransferTeam(c *gin.Context) {
+	teamId,_ := strconv.ParseInt(c.Param("id"),10,64)
+	req := make(map[string]int64)
+	c.Bind(&req)
+	memberId := req["memberId"]
+	
+	if teamId == 0 || memberId == 0 {
+		c.JSON(400,common.ResponseErrorMessage(nil,i18n.OFF,"bad data"))
+		return 
+	}
+
+	_,err := db.SQL.Exec("UPDATE team SET created_by=?,updated=? WHERE id=?",memberId,time.Now(),teamId)
+	if err != nil {
+		logger.Warn("update team member error","error",err)
+		c.JSON(500, common.ResponseErrorMessage(nil,i18n.OFF,err.Error()))
+		return 
+	}
+
+	c.JSON(200, common.ResponseSuccess(nil))
+}
+
+func DeleteTeam(c *gin.Context) {
+	teamId,_ := strconv.ParseInt(c.Param("teamId"),10,64)
+
+	if teamId == 0 {
+		invasion.Add(c)
+		c.JSON(400,common.ResponseErrorMessage(nil,i18n.OFF,"bad data"))
+		return 
+	}
+
+	userId := session.CurrentUserId(c)
+
+	var id int64
+	err := db.SQL.QueryRow("SELECT created_by FROM team WHERE id=?",teamId).Scan(&id)
+	if err != nil {
+		logger.Warn("delete team  error","error",err)
+		c.JSON(500, common.ResponseErrorMessage(nil,i18n.OFF,err.Error()))
+		return 
+	}
+
+	if id != userId {
+		c.JSON(403, common.ResponseErrorMessage(nil,i18n.OFF,"You have no perssion"))
+		return 
+	}
+
+	_,err = db.SQL.Exec("DELETE FROM team WHERE id=?",teamId)
+	if err != nil {
+		logger.Warn("delete team  error","error",err)
+		c.JSON(500, common.ResponseErrorMessage(nil,i18n.OFF,err.Error()))
+		return 
+	}
+
+	_,err = db.SQL.Exec("DELETE FROM team_member WHERE team_id=?",teamId)
+	if err != nil {
+		logger.Warn("delete team member error","error",err)
+	}
+
+	c.JSON(200, common.ResponseSuccess(nil))
 }

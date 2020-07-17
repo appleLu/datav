@@ -5,7 +5,7 @@ import {Modal,Button, notification} from 'antd'
 import {getBackendSrv} from 'src/core/services/backend'
 import isEmail from 'validator/lib/isEmail';
 import { Role } from 'src/types';
-
+import RolePicker from 'src/views/components/Pickers/RolePicker'
 interface Props {
     onAddUser : any
 }
@@ -128,10 +128,10 @@ const AddUser = (props: Props) => {
                                     ref={register({
                                         validate: async v => await validateEmail(v),
                                     })}
-                                />
+                                /> 
                             </Field>
-                            <Field invalid={!!errors.role} label="Role">
-                            <InputControl as={RadioButtonGroup} control={control} options={roles} name="role" />
+                            <Field label="Role" >
+                                <InputControl as={RolePicker} control={control}  name="role" />
                             </Field>
 
                             <Button type="primary" htmlType="submit" style={{marginTop: '16px'}}>Submit</Button>

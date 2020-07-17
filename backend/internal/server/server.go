@@ -123,6 +123,9 @@ func (s *Server) Start() error {
 				teamR.POST("/:id/members", teams.AddTeamMembers)	
 				teamR.DELETE("/:teamId/:memberId", teams.DeleteTeamMember)	
 				teamR.PUT("/team/:id", teams.UpdateTeam)
+				teamR.POST("/:id/member", teams.UpdateTeamMember)	
+				teamR.POST("/:id/transfer", teams.TransferTeam)	
+				teamR.DELETE("/:teamId", teams.DeleteTeam)	
 			} 
 
 			adminR := authR.Group("/api/admin")

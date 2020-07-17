@@ -4,6 +4,8 @@ import { getBackendSrv } from 'src/core/services/backend';
 import { TeamMember } from 'src/types';
 import { ConfirmModal } from 'src/packages/datav-core/src';
 import appEvents from 'src/core/library/utils/app_events';
+import EditMember from './EditMember'
+import { getState } from 'src/store/store';
 
 interface Props {
     teamId: number
@@ -13,21 +15,22 @@ interface Props {
 
 
 const MemberTable = (props: Props) => {
-    const [modalVisible,setModalVisible] = useState(false)
-    const [memberToDelete,setMemberToDelete]:[TeamMember,any]= useState(null)
+    const [delModalVisible,setDelModalVisible] = useState(false)
+    const [tempMember,setTempMember]:[TeamMember,any]= useState(null)
+    const [editVisible,setEditVisible] = useState(false)
 
     const deleteMember = () => {
-        if (memberToDelete) {
-            getBackendSrv().delete(`/api/teams/${props.teamId}/${memberToDelete.id}`).then(() => {
+        if (tempMember) {
+            getBackendSrv().delete(`/api/teams/${props.teamId}/${tempMember.id}`).then(() => {
                 appEvents.emit('update-team-member')
                 notification['success']({
                     message: "Success",
-                    description: `Team member ${memberToDelete.username} has been deleted`,
+                    description: `Team member ${tempMember.username} has been deleted`,
                     duration: 5
                   });
             })
         }
-        setModalVisible(false)
+        setDelModalVisible(false)
     }
 
     const columns = [
@@ -38,6 +41,7 @@ const MemberTable = (props: Props) => {
                 <>
                 <span>{member.username}</span>
                 {props.teamCreatedBy === member.id && <Tag className="ub-ml1">Creator</Tag>}
+                {getState().user.id === member.id && <Tag className="ub-ml1">You</Tag>}
                 </>
             ),
         },
@@ -48,8 +52,12 @@ const MemberTable = (props: Props) => {
             render: (_, member) => (
                 <Space size="middle">
                     <span onClick={() => {
-                        setMemberToDelete(member)
-                        setModalVisible(true)
+                        setTempMember(member)
+                        setEditVisible(true)
+                    }} className="pointer">Edit</span>
+                    <span onClick={() => {
+                        setTempMember(member)
+                        setDelModalVisible(true)
                     }} className="pointer">Delete</span>
                 </Space>
             ),
@@ -64,13 +72,14 @@ const MemberTable = (props: Props) => {
                 dataSource={props.members}
                 pagination={false}
             />
+            {editVisible && <EditMember teamId={props.teamId} member={tempMember} onCancelEdit={() => setEditVisible(false)}/>}
             <ConfirmModal
-                isOpen={modalVisible}
+                isOpen={delModalVisible}
                 title="Delete Team Member"
                 body="Are you sure you want to delete this member?"
                 confirmText="Delete member"
                 onConfirm={() => deleteMember()}
-                onDismiss={() =>setModalVisible(false)}
+                onDismiss={() =>setDelModalVisible(false)}
             />
         </>
     )
@@ -81,7 +90,7 @@ export default MemberTable
 
 const rawColumns = [
     {
-        title: 'Role',
+        title: 'Team Role',
         dataIndex: 'role',
         key: 'role',
     },
