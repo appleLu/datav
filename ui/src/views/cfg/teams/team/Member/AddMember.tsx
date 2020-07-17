@@ -22,7 +22,7 @@ const AddMember = (props: Props) => {
         setModalVisible(false)
         setMemberRole(Role.Viewer)
 
-        getBackendSrv().post(`/api/teams/${props.teamId}/members`,{members : selectedMembers, role: memberRole}).then(() => {
+        getBackendSrv().post(`/api/teams/members/${props.teamId}`,{members : selectedMembers, role: memberRole}).then(() => {
             appEvents.emit('update-team-member')
             notification['success']({
                 message: "Success",

@@ -1,6 +1,8 @@
 package models
 
 import (
+	"database/sql"
+	"github.com/apm-ai/datav/backend/pkg/db"
 	"time"
 )
 
@@ -39,4 +41,29 @@ func (s TeamMembers) Len() int      { return len(s) }
 func (s TeamMembers) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 func (s TeamMembers) Less(i, j int) bool {
 	return s[i].RoleSortWeight > s[j].RoleSortWeight
+}
+
+
+func QueryTeam(id int64, name string) (*Team,error) {
+	team := &Team{}
+	err := db.SQL.QueryRow(`SELECT id,name,created_by FROM team WHERE id=? or name=?`,
+		id, name).Scan(&team.Id,  &team.Name, &team.CreatedById)
+	if err != nil && err != sql.ErrNoRows{
+		return team,err
+	}
+
+	return team,nil
+}
+
+func QueryTeamMember(teamId int64,userId int64) (*TeamMember,error) {
+	member := &TeamMember{}
+	err := db.SQL.QueryRow(`SELECT role FROM team_member WHERE team_id=? and user_id=?`,
+		teamId, userId).Scan(&member.Role)
+	if err != nil && err != sql.ErrNoRows{
+		return member,err
+	}
+	member.Id = userId
+	member.TeamId = teamId
+
+	return member,nil
 }

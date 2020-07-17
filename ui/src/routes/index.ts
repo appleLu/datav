@@ -118,6 +118,13 @@ export const initRoutes = (store: Store<StoreState>) => {
                     url: '/cfg/folders',
                     component: React.lazy(() => import('src/views/search/components/DashboardListPage'))
                 },
+                {
+                    icon: 'database',
+                    id: 'new-team',
+                    text: 'Team',
+                    url: '/cfg/teams',
+                    component: React.lazy(() => import('src/views/cfg/teams/TeamsPage'))
+                },
             ],
             sortWeight: -100
         },
@@ -220,7 +227,7 @@ export const initRoutes = (store: Store<StoreState>) => {
         {
             id: 'user',
             url: '/user',
-            text: store.getState().user.name == '' ? store.getState().user.username : store.getState().user.name,
+            text: store.getState().user.name == '' ? store.getState().user.username : store.getState().user.username + ' / ' + store.getState().user.name,
             icon: 'user',
             showPosition: MenuPosition.Bottom,
             redirectTo: '/user/preferences',

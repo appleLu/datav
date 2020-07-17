@@ -16,6 +16,7 @@ interface Props {
 }
 
 interface State {
+    tempUser: UserState;
     isLoading: boolean;
     showDeleteModal: boolean;
     showDisableModal: boolean;
@@ -33,6 +34,7 @@ export class UserProfile extends PureComponent<Props, State> {
         isLoading: false,
         showDeleteModal: false,
         showDisableModal: false,
+        tempUser: _.cloneDeep(this.props.user)
     };
 
     showDeleteUserModal = (show: boolean) => () => {
@@ -60,9 +62,8 @@ export class UserProfile extends PureComponent<Props, State> {
     };
 
 
-    onChangeSetUser = (key) => {
-        const user = _.cloneDeep(this.props.user)
-        getBackendSrv().put(`/api/admin/user/${user.id}`,user).then(() => {
+    onChangeSetUser = (key,tempUser) => {
+        getBackendSrv().put(`/api/admin/user/${tempUser.id}`,tempUser).then(() => {
             this.props.reloadUsers()
 
             notification['success']({
@@ -70,16 +71,35 @@ export class UserProfile extends PureComponent<Props, State> {
                 description: `User ${key} has been changed!`,
                 duration: 5
             });
+        }).catch(() => {
+            this.setState({
+                ...this.state,
+                tempUser: _.cloneDeep(this.props.user)
+            })
         })
     }
     onUserNameChange = (name: string) => {
-        this.props.user.name = name
-        this.onChangeSetUser('name')
+        const tempUser = {
+            ...this.state.tempUser,
+            name: name
+        } 
+        this.setState({
+            ...this.state,
+            tempUser:tempUser
+        })
+        this.onChangeSetUser('name',tempUser)
     };
 
     onUserUsernameChange = (username:string) => {
-        this.props.user.username = username
-        this.onChangeSetUser('username')
+        const tempUser = {
+            ...this.state.tempUser,
+            username: username
+        } 
+        this.setState({
+            ...this.state,
+            tempUser:tempUser
+        })
+        this.onChangeSetUser('username',tempUser)
     }
     onUserEmailChange = (email: string) => {
         if (!isEmail(email)) {
@@ -90,13 +110,27 @@ export class UserProfile extends PureComponent<Props, State> {
             });
             return 
         }
-        this.props.user.email = email
-        this.onChangeSetUser('email')
+        const tempUser = {
+            ...this.state.tempUser,
+            email: email
+        } 
+        this.setState({
+            ...this.state,
+            tempUser:tempUser
+        })
+        this.onChangeSetUser('email',tempUser)
     };
 
     onRoleChange = (role: string) => {
-        this.props.user.role = role as Role
-        this.onChangeSetUser('role')
+        const tempUser = {
+            ...this.state.tempUser,
+            role: role as Role
+        } 
+        this.setState({
+            ...this.state,
+            tempUser:tempUser
+        })
+        this.onChangeSetUser('role',tempUser)
     }
 
     onPasswordChange = (password: string) => {
@@ -113,8 +147,7 @@ export class UserProfile extends PureComponent<Props, State> {
     };
 
     render() {
-        const { user } = this.props;
-        const { showDeleteModal, showDisableModal } = this.state;
+        const { showDeleteModal, showDisableModal,tempUser } = this.state;
         const styles = getStyles(getTheme(currentTheme));
 
         return (
@@ -126,17 +159,17 @@ export class UserProfile extends PureComponent<Props, State> {
                             <tbody>
                                 <UserProfileRow
                                     label="Username"
-                                    value={user.username}
+                                    value={tempUser.username}
                                     onChange={this.onUserUsernameChange}
                                 />
                                 <UserProfileRow
                                     label="Name"
-                                    value={user.name}
+                                    value={tempUser.name}
                                     onChange={this.onUserNameChange}
                                 />
                                 <UserProfileRow
                                     label="Email"
-                                    value={user.email}
+                                    value={tempUser.email}
                                     onChange={this.onUserEmailChange}
                                 />
                                 <UserProfileRow
@@ -161,7 +194,7 @@ export class UserProfile extends PureComponent<Props, State> {
                             onConfirm={this.onUserDelete}
                             onDismiss={this.showDeleteUserModal(false)}
                         />
-                        {user.isDisabled ? (
+                        {tempUser.isDisabled ? (
                             <Button variant="secondary" onClick={this.onUserEnable}>
                                 Enable User
                             </Button>
@@ -189,7 +222,7 @@ export class UserProfile extends PureComponent<Props, State> {
                                 <tr>
                                 <td className="width-16" style={{fontWeight: 500}}>Role</td>
                                 <td className="width-25" colSpan={2}>
-                                    <RolePicker onChange={this.onRoleChange} value={user.role}/>
+                                    <RolePicker onChange={this.onRoleChange} value={tempUser.role}/>
                                 </td>
                                 </tr>
                             </tbody>

@@ -22,7 +22,7 @@ const EditMember = (props: Props) => {
     const updateMember = async () => {
         props.onCancelEdit()
         tempMember.teamId = props.teamId
-        getBackendSrv().post(`/api/teams/${props.teamId}/member`, tempMember).then(() => {
+        getBackendSrv().post(`/api/teams/team/${props.teamId}/member`, tempMember).then(() => {
             appEvents.emit('update-team-member')
             notification['success']({
                 message: "Success",

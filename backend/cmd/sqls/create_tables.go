@@ -49,8 +49,8 @@ func CreateTables() {
 	}
 	
 	// insert init data
-	_,err := db.SQL.Exec(`INSERT INTO user (username,password,salt,role,email,created,updated) VALUES (?,?,?,?,?,?,?)`,
-		"admin",adminPW,adminSalt,models.ROLE_ADMIN,"admin@datav.dev",time.Now(),time.Now())
+	_,err := db.SQL.Exec(`INSERT INTO user (id,username,password,salt,role,email,created,updated) VALUES (?,?,?,?,?,?,?,?)`,
+		1,models.SuperAdminUsername,adminPW,adminSalt,models.ROLE_ADMIN,models.SuperAdminUsername+"@localhost",time.Now(),time.Now())
 	if err != nil {
 		log.RootLogger.Crit("init data error","error:",err)
 		panic(err)
@@ -204,6 +204,8 @@ var CreateTableSqls = map[string]string {
 	);
 	CREATE INDEX IF NOT EXISTS team_name
 		ON team (name);
+	CREATE INDEX IF NOT EXISTS team_created_by
+		ON team (created_by);
 	`,
 
 	"team_member" : `CREATE TABLE IF NOT EXISTS team_member (
@@ -216,6 +218,8 @@ var CreateTableSqls = map[string]string {
 	);
 	CREATE INDEX IF NOT EXISTS team_member_team_id
 		ON team_member (team_id);
+	CREATE INDEX IF NOT EXISTS team_member_user_id
+		ON team_member (user_id);
 	CREATE UNIQUE INDEX IF NOT EXISTS team_member_team_user_id 
 		ON team_member (team_id, user_id);
 	`,

@@ -14,7 +14,7 @@ import (
 func GetPlugins(c *gin.Context) {
 	user := session.CurrentUser(c)
 	if !models.IsAdmin(user.Role) {
-		c.JSON(http.StatusInternalServerError, common.ResponseErrorMessage(nil, i18n.ON, i18n.NoPrivMsg))
+		c.JSON(http.StatusInternalServerError, common.ResponseErrorMessage(nil, i18n.ON, i18n.NoPermissionMsg))
 		return
 	} 
 

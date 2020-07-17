@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/apm-ai/datav/backend/internal/acl"
 	"github.com/apm-ai/datav/backend/internal/users"
 	"github.com/apm-ai/datav/backend/internal/datasources"
 	"errors"
@@ -23,6 +24,7 @@ import (
 	"github.com/apm-ai/datav/backend/internal/search"
 	"github.com/apm-ai/datav/backend/internal/folders"
 	"github.com/apm-ai/datav/backend/internal/teams"
+	"github.com/apm-ai/datav/backend/internal/admin"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -119,23 +121,23 @@ func (s *Server) Start() error {
 			{
 				teamR.GET("", teams.GetTeams)
 				teamR.GET("/team", teams.GetTeam)
-				teamR.GET("/members/:id", teams.GetTeamMembers)	
-				teamR.POST("/:id/members", teams.AddTeamMembers)	
+				teamR.GET("/members/:teamId", teams.GetTeamMembers)	
+				teamR.POST("/leave/:teamId",teams.LeaveTeam)
+				teamR.POST("/members/:teamId", teams.AddTeamMembers)	
 				teamR.DELETE("/:teamId/:memberId", teams.DeleteTeamMember)	
-				teamR.PUT("/team/:id", teams.UpdateTeam)
-				teamR.POST("/:id/member", teams.UpdateTeamMember)	
-				teamR.POST("/:id/transfer", teams.TransferTeam)	
+				teamR.PUT("/team/:teamId", teams.UpdateTeam)
+				teamR.POST("/team/:teamId/member", teams.UpdateTeamMember)	
+				teamR.POST("/transfer/:teamId", teams.TransferTeam)	
 				teamR.DELETE("/:teamId", teams.DeleteTeam)	
 			} 
-
-			adminR := authR.Group("/api/admin")
+  
+			adminR := authR.Group("/api/admin",AdminAuth())
 			{
-				adminR.PUT("/password", users.UpdatePassword)
-				adminR.PUT("/user/:id", users.UpdateUser)
-				adminR.DELETE("/user/:id", users.DeleteUser)
-				adminR.POST("/user/new", users.NewUser)
-
-				adminR.POST("/team/new", teams.NewTeam)
+				adminR.PUT("/password", admin.UpdatePassword)
+				adminR.PUT("/user/:id", admin.UpdateUser)
+				adminR.DELETE("/user/:id", admin.DeleteUser)
+				adminR.POST("/user/new", admin.NewUser)
+				adminR.POST("/team/new", admin.NewTeam)
 			}
 		}
 
@@ -193,7 +195,20 @@ func Cors() gin.HandlerFunc {
 		user := session.CurrentUser(c)
 		if user == nil {
 			c.JSON(http.StatusUnauthorized, common.ResponseErrorMessage(nil, i18n.ON, i18n.NeedLoginMsg))
+			c.Abort()
 			return 
+		}
+		c.Next()
+	}
+}
+
+
+func AdminAuth() gin.HandlerFunc {
+	return func(c *gin.Context)  {
+		if !acl.IsGlobalAdmin(c) {
+			c.JSON(403, common.ResponseErrorMessage(nil, i18n.ON, i18n.NoPermissionMsg))
+			c.Abort()
+			return
 		}
 		c.Next()
 	}

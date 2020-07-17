@@ -90,7 +90,7 @@ export class TeamSettingPage extends PureComponent<Props, State> {
             })
             return
         }
-        getBackendSrv().post(`/api/teams/${team.id}/transfer`,{memberId : this.transferTo}).then(() => {
+        getBackendSrv().post(`/api/teams/transfer/${team.id}`,{memberId : this.transferTo}).then(() => {
             globalEvents.showMessage(() => notification['success']({
                 message: "Success",
                 description: `Team Transferd!`,
@@ -116,8 +116,7 @@ export class TeamSettingPage extends PureComponent<Props, State> {
     
     onLeave() {
         const {team} = this.state
-        const userId = getState().user.id
-        getBackendSrv().delete(`/api/teams/${team.id}/${userId}`).then(() => {
+        getBackendSrv().post(`/api/teams/leave/${team.id}`).then(() => {
             globalEvents.showMessage(() => notification['success']({
                 message: "Success",
                 description: `Leaved from ${team.name}!`,

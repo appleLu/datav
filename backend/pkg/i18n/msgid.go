@@ -4,4 +4,4 @@ package i18n
 const DbErrMsg = "databaseError"
 const UsePwInvalidMsg = "userPwInvalid"
 const NeedLoginMsg = "needLogin"
-const NoPrivMsg = "noPriv"
+const NoPermissionMsg = "noPermission"

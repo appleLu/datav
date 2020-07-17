@@ -28,6 +28,6 @@ const zhCN: localeData = {
     databaseError: "访问数据库时发生致命错误",
     userPwInvalid: "用户不存在或者密码不正确",
     needLogin: "未授权请求，请重新登录",
-    noPriv: "没有权限访问该页面"
+    noPermission: "权限不足"
 }
 export default zhCN

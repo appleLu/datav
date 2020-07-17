@@ -18,7 +18,6 @@ const getTabsBarStyles = stylesFactory((theme: DatavTheme, hideBorder = false) =
     tabsWrapper:
       !hideBorder &&
       css`
-        border-bottom: 1px solid ${colors.pageHeaderBorder};
       `,
     tabs: css`
       position: relative;

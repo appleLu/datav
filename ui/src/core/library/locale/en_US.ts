@@ -29,7 +29,7 @@ const enUS:localeData = {
     databaseError: "fatal errors happend when accessing database",
     userPwInvalid: "user not exist or password error",
     needLogin: "You need to be authorized,please login",
-    noPriv: "You  have no privilege to access this"
+    noPermission: "You  have no permisson"
 
 }
 export default enUS
