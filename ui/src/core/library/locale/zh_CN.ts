@@ -26,7 +26,8 @@ const zhCN: localeData = {
     logout: '注销登录',
     // the msg content for BACKEND msgids ,msgids are defined in web/pkg/constant/msgid.go
     databaseError: "访问数据库时发生致命错误",
-    userPwInvalid: "用户不存在或者密码不正确",
+    userNotExist: "用户名不存在",
+    incorrectPW: "密码错误",
     needLogin: "未授权请求，请重新登录",
     noPermission: "权限不足"
 }

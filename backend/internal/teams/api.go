@@ -121,6 +121,11 @@ func AddTeamMembers(c *gin.Context) {
 	members := req.MemberIds
 	role := req.Role
 
+	if teamId == models.GlobalTeamId {
+		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "You cannot add members to global team, please use 'Add User' instead"))
+		return	
+	}
+
 	if teamId == 0 || len(members) == 0 || !role.IsValid() {
 		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "teamId or members cannot be empty"))
 		return
@@ -191,6 +196,10 @@ func DeleteTeamMember(c *gin.Context) {
 		return
 	}
 
+	if teamId == models.GlobalTeamId {
+		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "You cannot delete member in global team, please use 'Delete User' instead"))
+		return	
+	}
 
 	team, err := models.QueryTeam(teamId, "")
 	if err != nil {
@@ -239,6 +248,12 @@ func UpdateTeam(c *gin.Context) {
 	if team.Id == 0 || team.Name == "" {
 		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "bad team data"))
 		return
+	}
+
+
+	if team.Id == models.GlobalTeamId {
+		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "Global team cannot be updated"))
+		return	
 	}
 
 	_, err := db.SQL.Exec("UPDATE team SET name=? WHERE id=?", team.Name, team.Id)
@@ -301,6 +316,12 @@ func TransferTeam(c *gin.Context) {
 		return
 	}
 
+	
+	if teamId == models.GlobalTeamId {
+		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "Global team cannot be transferred,it must belongs to 'admin' user"))
+		return	
+	}
+
 	// only global admin and team creator can transfer team
 	if !acl.IsGlobalAdmin(c) && !acl.IsTeamCreator(teamId,c) {
 		c.JSON(403, common.ResponseErrorMessage(nil, i18n.ON, i18n.NoPermissionMsg))
@@ -340,6 +361,10 @@ func DeleteTeam(c *gin.Context) {
 		return
 	}
 	
+	if teamId == models.GlobalTeamId {
+		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "Global team cannot be deleted"))
+		return	
+	}
 
 	_, err := db.SQL.Exec("DELETE FROM team WHERE id=?", teamId)
 	if err != nil {
@@ -368,6 +393,11 @@ func LeaveTeam(c *gin.Context) {
 	if acl.IsTeamCreator(teamId, c) {
 		c.JSON(400, common.ResponseErrorMessage(nil,i18n.OFF,"team creator cannot leave team, need transfer team to another member first"))
 		return
+	}
+
+	if teamId == models.GlobalTeamId {
+		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "You cannot leave global team,this team is default team in datav"))
+		return	
 	}
 
 	userId := session.CurrentUserId(c)

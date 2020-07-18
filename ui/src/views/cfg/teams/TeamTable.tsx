@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Table, Space, Modal,Tag} from 'antd'
+import { Table, Space, Modal,Tag, Tooltip} from 'antd'
 import { Team } from 'src/types';
 import { Link } from 'react-router-dom';
 import { getState } from 'src/store/store';
@@ -18,7 +18,17 @@ const TeamTable = (props: Props) => {
         team.key = team.id
     })
 
-    const columns = [
+    const columns = [    
+        {
+        title: 'Name',
+        key: 'name',
+        render: (_, team:Team) => (
+            <>
+            <span>{team.name}</span>
+            {team.id == 1 && <Tooltip title="Every user in datav will be in global team,this team cannot be changed"><Tag className="ub-ml1">Main Team</Tag></Tooltip>}
+            </>
+        ),
+        },
         ...rawColumns,
         {
             title: 'Created By',
@@ -65,11 +75,6 @@ const TeamTable = (props: Props) => {
 export default TeamTable
 
 const rawColumns = [
-    {
-        title: 'Name',
-        dataIndex: 'name',
-        key: 'name',
-    },
     {
         title: 'Members',
         dataIndex: 'memberCount',

@@ -27,7 +27,8 @@ const enUS:localeData = {
 
     // the msg content for BACKEND msgids ,msgids are defined in web/pkg/constant/msgid.go
     databaseError: "fatal errors happend when accessing database",
-    userPwInvalid: "user not exist or password error",
+    userNotExist: "user not exist",
+    incorrectPW: "incorrect password",
     needLogin: "You need to be authorized,please login",
     noPermission: "You  have no permisson"
 

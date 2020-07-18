@@ -220,7 +220,7 @@ export class UserProfile extends PureComponent<Props, State> {
                         <table className="filter-table form-inline">
                             <tbody>
                                 <tr>
-                                <td className="width-16" style={{fontWeight: 500}}>Role</td>
+                                <td className="width-16" style={{fontWeight: 500}}>Global Role</td>
                                 <td className="width-25" colSpan={2}>
                                     <RolePicker onChange={this.onRoleChange} value={tempUser.role}/>
                                 </td>

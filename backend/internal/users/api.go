@@ -13,7 +13,7 @@ import (
 )
 
 func GetUsers(c *gin.Context) {
-	rows, err := db.SQL.Query(`SELECT id,username,name,email,mobile,role,last_seen_at FROM user`)
+	rows, err := db.SQL.Query(`SELECT id,username,name,email,mobile,last_seen_at FROM user`)
 	if err != nil {
 		logger.Warn("get all users error", "error", err)
 		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
@@ -23,12 +23,20 @@ func GetUsers(c *gin.Context) {
 	users := make(models.Users, 0)
 	for rows.Next() {
 		user := &models.User{}
-		err := rows.Scan(&user.Id, &user.Username, &user.Name, &user.Email, &user.Mobile, &user.Role, &user.LastSeenAt)
+		err := rows.Scan(&user.Id, &user.Username, &user.Name, &user.Email, &user.Mobile, &user.LastSeenAt)
 		if err != nil {
 			logger.Warn("get all users scan error", "error", err)
 			continue
 		}
 
+		globalMember,err := models.QueryTeamMember(models.GlobalTeamId,user.Id)
+		if err != nil {
+			logger.Warn("get all users team member error", "error", err)
+			continue
+		}
+		
+		user.Role = globalMember.Role
+		
 		users = append(users, user)
 	}
 

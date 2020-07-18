@@ -49,10 +49,24 @@ func CreateTables() {
 	}
 	
 	// insert init data
-	_,err := db.SQL.Exec(`INSERT INTO user (id,username,password,salt,role,email,created,updated) VALUES (?,?,?,?,?,?,?,?)`,
-		1,models.SuperAdminUsername,adminPW,adminSalt,models.ROLE_ADMIN,models.SuperAdminUsername+"@localhost",time.Now(),time.Now())
+	_,err := db.SQL.Exec(`INSERT INTO user (id,username,password,salt,email,created,updated) VALUES (?,?,?,?,?,?,?)`,
+		models.SuperAdminId,models.SuperAdminUsername,adminPW,adminSalt,models.SuperAdminUsername+"@localhost",time.Now(),time.Now())
 	if err != nil {
-		log.RootLogger.Crit("init data error","error:",err)
+		log.RootLogger.Crit("init super admin error","error:",err)
+		panic(err)
+	}
+
+	_,err = db.SQL.Exec(`INSERT INTO team (id,name,created_by,created,updated) VALUES (?,?,?,?,?)`,
+		models.GlobalTeamId,models.GlobalTeamName,models.SuperAdminId,time.Now(),time.Now())
+	if err != nil {
+		log.RootLogger.Crit("init global team error","error:",err)
+		panic(err)
+	}
+
+	_,err = db.SQL.Exec(`INSERT INTO team_member (team_id,user_id,role,created,updated) VALUES (?,?,?,?,?)`,
+		models.GlobalTeamId,models.SuperAdminId,models.ROLE_ADMIN,time.Now(),time.Now())
+	if err != nil {
+		log.RootLogger.Crit("init global team member error","error:",err)
 		panic(err)
 	}
 }
@@ -108,7 +122,6 @@ var CreateTableSqls = map[string]string {
 		name VARCHAR(255) DEFAULT '',
 		password VARCHAR(50) DEFAULT '',
 		salt VARCHAR(50),
-		role VARCHAR(10) DEFAULT 'Viewer',
 
 		mobile VARCHAR(11) DEFAULT '',
 		email VARCHAR(255) NOT NULL UNIQUE,
@@ -168,6 +181,7 @@ var CreateTableSqls = map[string]string {
 		uid                 VARCHAR(40) NOT NULL UNIQUE,
 		title               VARCHAR(255) NOT NULL UNIQUE,
 		version 			INT NOT NULL,
+		owned_by            INTEGER NOT NULL DEFAULT '1',
 		created_by 			INTEGER NOT NULL,
 		folder_id           INT NOT NULL DEFAULT '0',
 		data				MEDIUMTEXT NOT NULL,
@@ -176,10 +190,26 @@ var CreateTableSqls = map[string]string {
 	);
 	CREATE INDEX IF NOT EXISTS dashboard_uid
 		ON dashboard (uid);
-	CREATE INDEX IF NOT EXISTS dashboard_createdBy
+	CREATE INDEX IF NOT EXISTS dashboard_created_by
+		ON dashboard (owned_by);
+	CREATE INDEX IF NOT EXISTS dashboard_owned_by
 		ON dashboard (created_by);
 	CREATE INDEX IF NOT EXISTS dashboard_folder_id
 		ON dashboard (folder_id);
+	`,
+
+	"dashboard_acl" : `CREATE TABLE IF NOT EXISTS dashboard_acl (
+		id 					INTEGER PRIMARY KEY AUTOINCREMENT,
+		dashboard_id        INTEGER NOT NULL,
+		team_id             INTEGER NOT NULL,
+		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+	);
+	CREATE INDEX IF NOT EXISTS dashboard_acl_dashboard_id
+		ON dashboard_acl (dashboard_id);
+	CREATE INDEX IF NOT EXISTS dashboard_acl_team_id
+		ON dashboard_acl (team_id);
+	CREATE UNIQUE INDEX IF NOT EXISTS dashboard_acl_dashboard_team_id
+		ON dashboard_acl (dashboard_id,team_id);
 	`,
 
 	"folder" : `CREATE TABLE IF NOT EXISTS folder (
@@ -188,11 +218,14 @@ var CreateTableSqls = map[string]string {
 		uid                 VARCHAR(40) NOT NULL UNIQUE,
 		title                VARCHAR(255) NOT NULL UNIQUE,
 		created_by 			INTEGER NOT NULL,
+		owned_by            INTEGER NOT NULL DEFAULT '1',
 		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
 		updated 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
 	);
 	CREATE INDEX IF NOT EXISTS folder_parent_id
 		ON folder (parent_id);
+	CREATE INDEX IF NOT EXISTS folder_owned_by
+		ON folder (owned_by);
 	`,
 
 	"team" : `CREATE TABLE IF NOT EXISTS team (

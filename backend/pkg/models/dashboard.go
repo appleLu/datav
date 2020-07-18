@@ -1,6 +1,8 @@
 package models
 
 import (
+	"database/sql"
+	"github.com/apm-ai/datav/backend/pkg/db"
 	"github.com/apm-ai/datav/backend/pkg/utils"
 	"fmt"
 	"time"
@@ -96,6 +98,7 @@ type DashboardMeta struct {
 	Created               time.Time `json:"created"`
 	Updated               time.Time `json:"updated"`
 	UpdatedBy             string    `json:"updatedBy"`
+	OwnedBy               int64     `json:"ownedBy"` // team that ownes this dashboard
 	CreatedBy             string    `json:"createdBy"`
 	Version               int       `json:"version"`
 	HasAcl                bool      `json:"hasAcl"`
@@ -105,4 +108,26 @@ type DashboardMeta struct {
 	FolderUrl             string    `json:"folderUrl"`
 	Provisioned           bool      `json:"provisioned"`
 	ProvisionedExternalId string    `json:"provisionedExternalId"`
+}
+
+func QueryAclTeamIds(dashId int64) ([]int64,error) {
+	teamIds := make([]int64,0)
+	rows,err := db.SQL.Query("SELECT team_id FROM dashboard_acl WHERE dashboard_id=?",dashId)
+	if err !=nil  {
+		if err != sql.ErrNoRows {
+			return teamIds,err
+		}
+		return teamIds,nil
+	}
+
+	for rows.Next() {
+		var teamId int64 
+		err := rows.Scan(&teamId)
+		if err != nil {
+			continue
+		}
+		teamIds = append(teamIds,teamId)
+	}
+
+	return teamIds,nil
 }

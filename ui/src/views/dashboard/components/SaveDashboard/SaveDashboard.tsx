@@ -59,7 +59,6 @@ const SaveDashboard = (props: Props) => {
         title: `${dashboard.title} Copy`,
         folderId: 0
     };
-    console.log(dashboard)
     const initialValues = !isNew ? {
         title: dashboard.title,
         folderId: dashboard.meta.folderId

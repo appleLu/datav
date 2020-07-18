@@ -16,6 +16,8 @@ import { cx } from 'emotion'
 import { VariableEditorContainer } from 'src/views/variables/editor/VariableEditorContainer';
 import GeneralSetting from './General'
 import JsonSetting from './JsonSetting'
+import Permission from './Permission'
+
 export interface Props {
   dashboard: DashboardModel | null;
   viewId: string
@@ -68,13 +70,13 @@ export class DashboardSettings extends PureComponent<Props> {
     //   });
     // }
 
-    // if (this.props.dashboard.id && this.props.dashboard.meta.canAdmin) {
-    //   this.sections.push({
-    //     title: 'Permissions',
-    //     id: 'permissions',
-    //     icon: 'lock',
-    //   });
-    // }
+    if (this.props.dashboard.id && this.props.dashboard.meta.canAdmin) {
+      this.sections.push({
+        title: 'Permissions',
+        id: 'permissions',
+        icon: 'lock',
+      });
+    }
 
     // if (this.props.dashboard.meta.canMakeEditable) {
     //   this.sections.push({
@@ -147,6 +149,9 @@ export class DashboardSettings extends PureComponent<Props> {
                 }
                 {
                   this.props.viewId === 'general' && <GeneralSetting dashboard={this.props.dashboard} />
+                }
+                {
+                  this.props.viewId === 'permissions' && <Permission dashboard={this.props.dashboard} />
                 }
                 {
                   this.props.viewId === 'dashboard_json' && <JsonSetting dashboard={this.props.dashboard} />

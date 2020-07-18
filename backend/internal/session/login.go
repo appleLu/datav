@@ -30,22 +30,21 @@ func Login(c *gin.Context) {
 
 	logger.Info("User loged in", "username", username)
 
-	// 检查信息是否正确
-	var id int64
-	var pw, role, name, mobile, email,salt string
-	row := db.SQL.QueryRow(`select id,password,salt,role,name,mobile,email FROM user WHERE username=?`, username)
-	err := row.Scan(&id, &pw,&salt, &role, &name, &mobile, &email)
+	user,err := models.QueryUser(0,username,"")
 	if err != nil {
-		logger.Warn("query user when login", "error", err)
-		c.JSON(http.StatusInternalServerError, common.ResponseErrorMessage(nil, i18n.ON, i18n.DbErrMsg))
-		return
+		c.JSON(500,common.ResponseErrorMessage(nil,i18n.ON,i18n.DbErrMsg))
+		return 
 	}
-	
 
-	encodedPassword,_ := utils.EncodePassword(password,salt)
-	if encodedPassword != pw{
-		fmt.Println(password,salt,pw)
-		c.JSON(http.StatusForbidden, common.ResponseErrorMessage(nil, i18n.ON, i18n.UsePwInvalidMsg))
+	if user.Id == 0 {
+		c.JSON(403, common.ResponseErrorMessage(nil,i18n.ON,i18n.UserNotExistMsg))
+		return 
+	} 
+
+	encodedPassword,_ := utils.EncodePassword(password,user.Salt)
+	if encodedPassword != user.Password{
+		fmt.Println(password,user.Salt,user.Password)
+		c.JSON(http.StatusForbidden, common.ResponseErrorMessage(nil, i18n.ON, i18n.IncorrectPWMsg))
 		return
 	}
 
@@ -54,21 +53,9 @@ func Login(c *gin.Context) {
 
 	token = strconv.FormatInt(time.Now().UnixNano(), 10)
 
-	// 设置权限
-	if role == "" {
-		role = models.ROLE_VIEWER
-	}
-
 	session := &Session{
 		Token: token,
-		User: &models.User{
-			Id:       id,
-			Username: username,
-			Role:     models.RoleType(role),
-			Name:     name,
-			Email:    email,
-			Mobile:   mobile,
-		},
+		User: user,
 		CreateTime: time.Now(),
 	}
 	//sub token验证成功，保存session
@@ -79,7 +66,7 @@ func Login(c *gin.Context) {
 	} 
  
 	// 更新数据库中的user表
-	_, err = db.SQL.Exec(`UPDATE user SET last_seen_at=? WHERE id=?`, time.Now(), id)
+	_, err = db.SQL.Exec(`UPDATE user SET last_seen_at=? WHERE id=?`, time.Now(), user.Id)
 	if err != nil {
 		logger.Warn("set last login date error", "error", err)
 	}

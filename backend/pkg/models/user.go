@@ -6,8 +6,10 @@ import (
 	"time"
 )
 
+// dont change !
 const (
 	SuperAdminUsername = "admin"
+	SuperAdminId = 1
 )
 
 type User struct {
@@ -21,6 +23,7 @@ type User struct {
 	Created    time.Time `json:"created,omitempty"`
 	Updated    time.Time `json:"updated,omitempty"`
 	Salt       string    `json:"-"`
+	Password   string    `json:"-"`
 }
 
 type Users []*User
@@ -35,15 +38,22 @@ func (s Users) Less(i, j int) bool {
 
 func QueryUser(id int64, username string, email string) (*User,error) {
 	user := &User{}
-	err := db.SQL.QueryRow(`SELECT id,username,name,email,mobile,role,salt,last_seen_at FROM user WHERE id=? or username=? or email=?`,
-		id, username, email).Scan(&user.Id, &user.Username, &user.Name, &user.Email, &user.Mobile, &user.Role, &user.Salt, &user.LastSeenAt)
+	err := db.SQL.QueryRow(`SELECT id,username,name,email,mobile,password,salt,last_seen_at FROM user WHERE id=? or username=? or email=?`,
+		id, username, email).Scan(&user.Id, &user.Username, &user.Name, &user.Email, &user.Mobile, &user.Password, &user.Salt, &user.LastSeenAt)
 	if err != nil && err != sql.ErrNoRows{
 		return user,err
 	}
 
-	if user.Role == "" {
-		user.Role = ROLE_VIEWER
+	if user.Id == 0 {
+		return user, nil
 	}
+
+	globalMember,err := QueryTeamMember(GlobalTeamId,user.Id)
+	if err != nil {
+		return user,err
+	}
+
+	user.Role = globalMember.Role
 
 	return user,nil
 }

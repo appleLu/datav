@@ -6,6 +6,12 @@ import (
 	"time"
 )
 
+// dont change !
+const (
+	GlobalTeamId = 1
+	GlobalTeamName = "global"
+)
+
 type Team struct {
 	Id          int64     `json:"id"`
 	Name        string    `json:"name"`
@@ -62,8 +68,13 @@ func QueryTeamMember(teamId int64,userId int64) (*TeamMember,error) {
 	if err != nil && err != sql.ErrNoRows{
 		return member,err
 	}
+
+	if err == sql.ErrNoRows {
+		return member,nil
+	}
+
 	member.Id = userId
 	member.TeamId = teamId
-
+	
 	return member,nil
 }

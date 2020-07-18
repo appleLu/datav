@@ -24,7 +24,7 @@ func InitCache() {
 				continue 
 			}
 
-			var id int64 
+			var id,ownedBy int64 
 			var folderId int
 			var title,uid string
 			var rawJSON []byte
@@ -47,7 +47,7 @@ func InitCache() {
 				}
 			}
 
-			rows,err = db.SQL.Query(`SELECT id,title,uid,parent_id FROM folder`)
+			rows,err = db.SQL.Query(`SELECT id,title,uid,owned_by,parent_id FROM folder`)
 			if err != nil {
 				logger.Warn("load dashboard into search cache,query error","error",err)
 				time.Sleep(5 * time.Second)
@@ -56,7 +56,7 @@ func InitCache() {
 
 			var fid int
 			for rows.Next() {
-				err := rows.Scan(&fid,&title,&uid,&folderId)
+				err := rows.Scan(&fid,&title,&uid,&ownedBy,&folderId)
 				if err != nil {
 					logger.Warn("load dashboard into search cache,scan error","error",err)
 					continue
@@ -66,6 +66,7 @@ func InitCache() {
 					Id: fid,
 					Uid: uid,
 					Title: title,
+					OwnedBy: ownedBy,
 					ParentId: folderId,
 				}
 			}

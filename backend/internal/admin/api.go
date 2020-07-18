@@ -54,8 +54,8 @@ func NewUser(c *gin.Context) {
 	encodedPW, _ := utils.EncodePassword(password, salt)
 	now := time.Now()
 
-	res, err := db.SQL.Exec("INSERT INTO user (username,password,salt,email,role,created,updated) VALUES (?,?,?,?,?,?,?)",
-		username, encodedPW, salt, email, role, now, now)
+	res, err := db.SQL.Exec("INSERT INTO user (username,password,salt,email,created,updated) VALUES (?,?,?,?,?,?)",
+		username, encodedPW, salt, email, now, now)
 	if err != nil {
 		logger.Warn("new user error", "error", err)
 		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
@@ -63,6 +63,15 @@ func NewUser(c *gin.Context) {
 	}
 
 	id, _ := res.LastInsertId()
+
+	// add user to global team
+	_,err = db.SQL.Exec("INSERT INTO team_member (team_id,user_id,role,created,updated) VALUES (?,?,?,?,?)",
+	models.GlobalTeamId,id,role,now,now)
+	if err != nil {
+		logger.Warn("new user error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
 
 	c.JSON(200, common.ResponseSuccess(&models.User{
 		Id:       id,
@@ -189,8 +198,17 @@ func UpdateUser(c *gin.Context) {
 		}
 	}
 	
-	_, err = db.SQL.Exec("UPDATE user SET username=?,name=?,email=?,role=?,updated=? WHERE id=?",
-		user.Username, user.Name, user.Email, user.Role, time.Now(), user.Id)
+	now := time.Now()
+	_, err = db.SQL.Exec("UPDATE user SET username=?,name=?,email=?,updated=? WHERE id=?",
+		user.Username, user.Name, user.Email, now, user.Id)
+	if err != nil {
+		logger.Warn("update user error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
+	_, err = db.SQL.Exec("UPDATE team_member SET role=?,updated=? WHERE team_id=? and user_id=?",
+		user.Role,now,models.GlobalTeamId,user.Id)
 	if err != nil {
 		logger.Warn("update user error", "error", err)
 		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
@@ -263,6 +281,11 @@ func NewTeam(c *gin.Context) {
 	name := strings.TrimSpace(req["name"])
 	if name == "" {
 		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "team name cannot be empty"))
+		return
+	}
+
+	if name == models.GlobalTeamName {
+		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "You cannot use 'global' as team name"))
 		return
 	}
 

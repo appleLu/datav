@@ -11,6 +11,16 @@ Datav is forked from **@grafana**, but changed a lot, e.g :
 - using antd for ui components
 - **no enterprise version, 100% open-source**
 
+## Key Features
+
+- **Plugins** Performance,Extensible,Beautiful,Configurable
+- **Dynamic Dashboards** Create dynamic & reusable dashboards with template variables
+- **Beautifult Large Screen** Customize your own big data large screen,it's very very cool
+- **Alerting** Visually define alert rules for your most important metrics
+- **Powerful Iframe API** Embed datav to your website With powerful iframe api
+- **Variables**  Global and Dashboard, global vars can help you achieve personalized features such as multiple environments
+- **Teams and ACL** Besides global dashboards, you can create teams, manage and share dashboards in your team.
+
 
 ## Design Philosophy
 Contrary to Grafana's big and all, DataV's design goal is small and beautiful.We support 90% of common usage scenarios.In these scenarios, DataV can ensure that it is simple enough and easy to use. Plug-in development will also be very simple. 
@@ -29,13 +39,3 @@ Contrary to Grafana's big and all, DataV's design goal is small and beautiful.We
 
 5. The needs of the bosses must be taken into account
 > Our bosses usually have different sights, so datav will take their needs too, e.g big screen dashboard, data report, **data association** etc
-
-
-## Some Features
-
-- **Plugins** Performance,Extensible,Beautiful,Configurable
-- **Dynamic Dashboards** Create dynamic & reusable dashboards with template variables
-- **Beautifult Large Screen** Customize your own big data large screen,it's very very cool
-- **Alerting** Visually define alert rules for your most important metrics
-- **Powerful Iframe API** Embed datav to your website With powerful iframe api
-- **Variables**  Global and Dashboard, global vars can help you achieve personalized features such as multiple environments

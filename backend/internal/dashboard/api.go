@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	"github.com/apm-ai/datav/backend/internal/acl"
 	"sort"
 	"github.com/apm-ai/datav/backend/internal/cache"
 	"database/sql"
@@ -18,6 +19,7 @@ import (
 	"github.com/apm-ai/datav/backend/pkg/utils"
 	"github.com/apm-ai/datav/backend/pkg/utils/simplejson"
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 type ReqDashboardData struct {
@@ -45,12 +47,13 @@ func SaveDashboard(c *gin.Context) {
 
 	dash.Data = dsData.Dashboard
 
+	now := time.Now()
 	update := dash.Id != 0
 	if !update { // create dashboard
 		dash.Uid = utils.GenerateShortUID()
 		dash.Data.Set("version", 0)
 		dash.CreatedBy = userId
-		dash.Created = time.Now()
+		dash.Created = now
 	} else { //update dashboard
 		dash.Uid = dsData.Dashboard.Get("uid").MustString()
 		if version, err := dsData.Dashboard.Get("version").Float64(); err == nil && update {
@@ -60,7 +63,7 @@ func SaveDashboard(c *gin.Context) {
 	dash.Title = dsData.Dashboard.Get("title").MustString()
 	dash.UpdateSlug()
 
-	dash.Updated = time.Now()
+	dash.Updated = now
 
 	dash.FolderId = dsData.FolderId
 
@@ -68,8 +71,8 @@ func SaveDashboard(c *gin.Context) {
 	jsonData, err := dash.Data.Encode()
 
 	if !update {
-		res, err := db.SQL.Exec(`INSERT INTO dashboard (uid, title, version, created_by, folder_id, data,created,updated) VALUES (?,?,?,?,?,?,?,?)`,
-			dash.Uid, dash.Title, dash.Version, dash.CreatedBy, dash.FolderId, jsonData, dash.Created, dash.Updated)
+		res, err := db.SQL.Exec(`INSERT INTO dashboard (uid, title, version,owned_by, created_by, folder_id, data,created,updated) VALUES (?,?,?,?,?,?,?,?,?)`,
+			dash.Uid, dash.Title, dash.Version,models.GlobalTeamId, dash.CreatedBy, dash.FolderId, jsonData, dash.Created, dash.Updated)
 		if err != nil {
 			logger.Warn("create dashboard error", "error", err)
 			c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
@@ -88,6 +91,17 @@ func SaveDashboard(c *gin.Context) {
 		}
 	}
 
+	if !update {
+		// set dashboard acl
+		_,err := db.SQL.Exec("INSERT INTO dashboard_acl (dashboard_id,team_id,created) VALUES (?,?,?)",
+		dash.Id,models.GlobalTeamId,now)
+		if err != nil {
+			logger.Warn("update dashboard error", "error", err)
+			c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+			return
+		}
+	}
+
 	c.JSON(200, common.ResponseSuccess(utils.Map{
 		"slug":    dash.Slug,
 		"version": dash.Version,
@@ -97,14 +111,58 @@ func SaveDashboard(c *gin.Context) {
 	}))
 }
 
+func UpdateOwnedBy(c *gin.Context) {
+	req := make(map[string]int64)
+	c.Bind(&req)
+	
+	dashId := req["dashId"]
+	ownedBy := req["ownedBy"]
+
+	if dashId == 0 || ownedBy == 0 {
+		c.JSON(400, common.ResponseErrorMessage(nil,i18n.OFF,"bad data"))
+		return 
+	}
+	
+	// get current ownedby
+	meta := QueryDashboardMeta(dashId)
+	currentOwnedBy := meta.OwnedBy
+
+	// check we have permission to do this
+	if !acl.IsGlobalAdmin(c) && !acl.IsTeamAdmin(currentOwnedBy,c) {
+		c.JSON(403, common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
+		return
+	}
+
+	// check target team id exists
+	team,err := models.QueryTeam(ownedBy,"")
+	if err != nil {
+		logger.Warn("query team error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+	if team.Id != ownedBy {
+		c.JSON(400, common.ResponseErrorMessage(nil,i18n.OFF,"bad owned by"))
+		return 
+	}
+
+	_,err = db.SQL.Exec("UPDATE dashboard SET owned_by=? WHERE id=?",ownedBy,dashId)
+	if err != nil {
+		logger.Warn("update dashboard ownedBy error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
+	c.JSON(200, common.ResponseSuccess(nil))
+}
+
 func GetDashboard(c *gin.Context) {
 	uid := c.Param("uid")
 
 	var rawJSON []byte
 	var id int64
 	dashMeta := &models.DashboardMeta{}
-	err := db.SQL.QueryRow(`SELECT id,version, created_by, folder_id, data,created,updated FROM dashboard WHERE uid=?`, uid).Scan(
-		&id, &dashMeta.Version, &dashMeta.CreatedBy, &dashMeta.FolderId, &rawJSON, &dashMeta.Created, &dashMeta.Updated,
+	err := db.SQL.QueryRow(`SELECT id,version, owned_by,created_by, folder_id, data,created,updated FROM dashboard WHERE uid=?`, uid).Scan(
+		&id, &dashMeta.Version,&dashMeta.OwnedBy, &dashMeta.CreatedBy, &dashMeta.FolderId, &rawJSON, &dashMeta.Created, &dashMeta.Updated,
 	)
 	if err != nil {
 		if err ==sql.ErrNoRows {
@@ -114,6 +172,11 @@ func GetDashboard(c *gin.Context) {
 		logger.Warn("get dashboard error", "error", err)
 		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
 		return
+	}
+
+	if !acl.CanViewDashboard(id,dashMeta.OwnedBy,c) {
+		c.JSON(403,common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
+		return 
 	}
 
 	data := simplejson.New()
@@ -126,9 +189,16 @@ func GetDashboard(c *gin.Context) {
 
 	data.Set("id", id)
 	data.Set("uid", uid)
-
-	//@todo : acl control
-	dashMeta.CanEdit = true
+	
+	dashMeta.CanStar = true
+	if acl.IsGlobalEditor(c) {
+		dashMeta.CanEdit = true
+		dashMeta.CanSave = true
+	}
+	
+	if acl.IsGlobalAdmin(c) {
+		dashMeta.CanAdmin = true
+	}
 
 	c.JSON(200, common.ResponseSuccess(utils.Map{
 		"dashboard": data,
@@ -157,9 +227,10 @@ func ImportDashboard(c *gin.Context) {
 
 	dash.Data.Set("version", 0)
 
+	now := time.Now()
 	dash.CreatedBy = userId
-	dash.Created = time.Now()
-	dash.Updated = time.Now()
+	dash.Created = now
+	dash.Updated = now
 
 	dash.UpdateSlug()
 
@@ -192,8 +263,8 @@ func ImportDashboard(c *gin.Context) {
 
 	jsonData, err := dash.Data.Encode()
 
-	res, err := db.SQL.Exec(`INSERT INTO dashboard (uid, title, version, created_by, folder_id, data,created,updated) VALUES (?,?,?,?,?,?,?,?)`,
-		dash.Uid, dash.Title, dash.Version, dash.CreatedBy, dash.FolderId, jsonData, dash.Created, dash.Updated)
+	res, err := db.SQL.Exec(`INSERT INTO dashboard (uid, title, version, created_by,owned_by, folder_id, data,created,updated) VALUES (?,?,?,?,?,?,?,?,?)`,
+		dash.Uid, dash.Title, dash.Version, dash.CreatedBy,models.GlobalTeamId, dash.FolderId, jsonData, dash.Created, dash.Updated)
 	if err != nil {
 		logger.Warn("create dashboard error", "error", err)
 		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
@@ -202,6 +273,15 @@ func ImportDashboard(c *gin.Context) {
 
 	id, _ := res.LastInsertId()
 	dash.Id = id
+
+	// set dashboard acl
+	_,err = db.SQL.Exec("INSERT INTO dashboard_acl (dashboard_id,team_id,created) VALUES (?,?,?)",
+	dash.Id,models.GlobalTeamId,now)
+	if err != nil {
+		logger.Warn("update dashboard error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
 
 	c.JSON(200, common.ResponseSuccess(utils.Map{
 		"slug":    dash.Slug,
@@ -241,4 +321,66 @@ func GetAllTags(c *gin.Context) {
 	sort.Sort(tags)
 
 	c.JSON(200,common.ResponseSuccess(tags))
+}
+
+func GetAcl(c *gin.Context) {
+	dashId,_ := strconv.ParseInt(c.Param("id"),10,64)
+	if dashId == 0 {
+		c.JSON(400, common.ResponseErrorMessage(nil,i18n.OFF, "bad dashboard id"))
+		return 
+	}
+
+	teamIds := make([]int64,0)
+
+	rows,err := db.SQL.Query("SELECT team_id FROM dashboard_acl WHERE dashboard_id=?",dashId)
+	if err != nil  {
+		logger.Warn("query dashboard acl error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
+	for rows.Next() {
+		var id int64 
+		err := rows.Scan(&id)
+		if err != nil {
+			logger.Warn("query dashboard acl scan error","error",err)
+			continue 
+		}
+		teamIds = append(teamIds,id)
+	}
+
+	c.JSON(200, common.ResponseSuccess(teamIds))
+}
+
+type UpdateAclReq struct {
+	DashId int64 `json:"dashId"`
+	TeamIds []int64 `json:"teamIds"`
+}
+func UpdateAcl(c *gin.Context) {
+	req := &UpdateAclReq{}
+	c.Bind(&req)
+	
+	if req.DashId == 0 {
+		c.JSON(400, common.ResponseErrorMessage(nil,i18n.OFF, "bad dashboard id"))
+		return 
+	}
+
+	_,err :=db.SQL.Exec("DELETE from dashboard_acl WHERE dashboard_id=?",req.DashId)
+	if err != nil {
+		logger.Warn("update dashboard acl error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
+	for _,teamId := range req.TeamIds {
+		_,err = db.SQL.Exec("INSERT INTO dashboard_acl (dashboard_id,team_id,created) VALUES (?,?,?)",
+		req.DashId,teamId,time.Now())
+		if err != nil {
+			logger.Warn("update dashboard error", "error", err)
+			c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+			return
+		}
+	}
+
+	c.JSON(200, common.ResponseSuccess(nil))
 }

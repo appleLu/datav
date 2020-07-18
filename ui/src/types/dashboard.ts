@@ -36,6 +36,7 @@ export interface DashboardDTO {
     createdBy?: string;
     updated?: string;
     updatedBy?: string;
+    ownedBy?: number
   }
   
   export interface PanelState {

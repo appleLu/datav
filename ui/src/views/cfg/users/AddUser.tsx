@@ -130,7 +130,7 @@ const AddUser = (props: Props) => {
                                     })}
                                 /> 
                             </Field>
-                            <Field label="Role" >
+                            <Field label="Global Role" >
                                 <InputControl as={RolePicker} control={control}  name="role" />
                             </Field>
 

@@ -37,8 +37,13 @@ func loadSession(sid string) *Session {
 		return nil
 	}
 
-	user := queryUserById(userid)
-	if user == nil {
+	user,err := models.QueryUser(userid,"","")
+	if err != nil {
+		logger.Warn("query user error","error",err)
+		return nil
+	}
+
+	if user.Id == 0 {
 		return nil
 	}
 
@@ -74,27 +79,4 @@ func CurrentUser(c *gin.Context) *models.User {
 func CurrentUserId(c *gin.Context) int64 {
 	user := CurrentUser(c)
 	return user.Id
-}
-
-
-func queryUserById(id int64) *models.User {
-	var username,name, email, mobile, role string
-	err := db.SQL.QueryRow(`SELECT username,name,email,mobile,role FROM user WHERE id=?`, id).Scan(&username,&name, &email, &mobile, &role)
-	if err != nil {
-		logger.Warn("query user error", "error",err)
-		return nil
-	}
-
-	if role == "" {
-		role = models.ROLE_VIEWER
-	}
-
-	return &models.User{
-		Id:        id,
-		Username: username,
-		Name:      name,
-		Email:     email,
-		Mobile:    mobile,
-		Role:      models.RoleType(role),
-	}
 }

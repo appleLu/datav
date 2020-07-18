@@ -1,6 +1,7 @@
 package acl
 
 import (
+	// "fmt"
 	"github.com/apm-ai/datav/backend/pkg/models"
 	"github.com/apm-ai/datav/backend/pkg/log"
 	"github.com/apm-ai/datav/backend/internal/session"
@@ -22,6 +23,13 @@ func IsGlobalAdmin(c *gin.Context) bool {
 	user := session.CurrentUser(c)
 	return user.Role.IsAdmin()
 }
+
+func IsGlobalEditor(c *gin.Context) bool {
+	user := session.CurrentUser(c)
+
+	return user.Role.IsEditor()
+}
+
 
 func IsUserSelf(userId int64,c *gin.Context) bool {
 	user := session.CurrentUser(c)
@@ -58,6 +66,34 @@ func IsTeamCreator(teamId int64,c *gin.Context) bool {
 	userId := session.CurrentUserId(c)
 	if team.CreatedById == userId {
 		return true
+	}
+
+	return false
+}
+
+func CanViewDashboard(dashId int64,ownedBy int64, c *gin.Context) bool {
+	if IsGlobalAdmin(c) {
+		return true
+	}
+
+
+	teamIds,_ := models.QueryAclTeamIds(dashId)
+
+	teamIds = append(teamIds,ownedBy)
+
+	userId := session.CurrentUserId(c)
+
+	// check user is in these teams
+	for _,teamId := range teamIds {
+		member, err := models.QueryTeamMember(teamId,userId)
+		if err != nil {
+			logger.Warn("get team error","error",err)
+			continue
+		}
+
+		if member.Id == userId {
+			return true
+		}
 	}
 
 	return false

@@ -24,7 +24,8 @@ type Folder struct {
 	Type string `json:"type"`
 	Tags []string `json:"tags"`
 
-	CreatedBy string `json:"createdBy,omitempty"`
+	OwnedBy int64 `json:"ownedBy"` //  team that ownes this folder 
+	CreatedBy int64 `json:"createdBy,omitempty"` // user that creates this folder
 	
 	Created time.Time `json:"created,omitempty"`
 	Updated time.Time `json:"updated,omitempty"`

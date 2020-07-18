@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { UserState } from 'src/store/reducers/user'
-import { Table, Space, Modal,notification,Tag} from 'antd'
+import { Table, Space, Modal,notification,Tag,Tooltip} from 'antd'
 import { UserProfile } from './components/UserProfile'
 import { getBackendSrv } from 'src/core/services/backend';
 import { getState } from 'src/store/store';
@@ -30,11 +30,21 @@ const UserTable = (props: Props) => {
             render: (_, user:UserState) => (
                 <>
                 <span>{user.username}</span>
+                {user.id == 1 && <Tooltip title="'admin' is the only one super admin in datav, this user cannot be changed"><Tag className="ub-ml1">Super Admin</Tag></Tooltip>}
                 {getState().user.id === user.id && <Tag className="ub-ml1">You</Tag>}
                 </>
             ),
         },
         ...rawColumns,
+        {
+            title: 'Global Role',
+            key: 'role',
+            render: (_, user:UserState) => (
+                <>
+                    {user.id == 1 ? <span>Super Admin</span> :<span>{user.role}</span>}
+                </>
+            ),
+        },
         {
             title: 'Action',
             key: 'action',
@@ -98,10 +108,5 @@ const rawColumns = [
         title: 'Mobile',
         dataIndex: 'mobile',
         key: 'mobile',
-    },
-    {
-        title: 'Global Role',
-        dataIndex: 'role',
-        key: 'role'
-    },
+    }
 ]

@@ -1,24 +1,25 @@
 package dashboard
 
 import (
+	"database/sql"
 	"fmt"
 	"strings"
-	"database/sql"
+
 	"github.com/apm-ai/datav/backend/pkg/db"
 	"github.com/apm-ai/datav/backend/pkg/log"
 	"github.com/apm-ai/datav/backend/pkg/models"
 	"github.com/apm-ai/datav/backend/pkg/utils/simplejson"
 )
 
-var logger = log.RootLogger.New("logger","dashboard")
+var logger = log.RootLogger.New("logger", "dashboard")
 
 func QueryByFolderId(folderId int) []*models.Dashboard {
-	dashes := make([]*models.Dashboard,0)
-	
-	rows,err := db.SQL.Query("SELECT id,uid,title,data FROM dashboard WHERE folder_id=?",folderId)
+	dashes := make([]*models.Dashboard, 0)
+
+	rows, err := db.SQL.Query("SELECT id,uid,title,data FROM dashboard WHERE folder_id=?", folderId)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.Warn("query dashboard by folderId error","error",err)
+			logger.Warn("query dashboard by folderId error", "error", err)
 		}
 		return dashes
 	}
@@ -26,17 +27,17 @@ func QueryByFolderId(folderId int) []*models.Dashboard {
 	for rows.Next() {
 		var rawJSON []byte
 		dash := &models.Dashboard{}
-		err := rows.Scan(&dash.Id,&dash.Uid,&dash.Title,&rawJSON)
+		err := rows.Scan(&dash.Id, &dash.Uid, &dash.Title, &rawJSON)
 		if err != nil {
-			logger.Warn("query dashboard by folderId ,scan error","error",err)
+			logger.Warn("query dashboard by folderId ,scan error", "error", err)
 			continue
 		}
 
 		data := simplejson.New()
 		err = data.UnmarshalJSON(rawJSON)
-		dash.Data =data
+		dash.Data = data
 
-		dashes = append(dashes,dash)
+		dashes = append(dashes, dash)
 	}
 
 	return dashes
@@ -46,13 +47,13 @@ func QueryDashboardsByIds(ids []string) []*models.Dashboard {
 	idStr := strings.Join(ids, "','")
 	idStr = "'" + idStr + "'"
 
-	dashes := make([]*models.Dashboard,0)
-	
-	q := fmt.Sprintf("SELECT id,uid,title,data FROM dashboard WHERE id in (%s)",idStr)
-	rows,err := db.SQL.Query(q)
+	dashes := make([]*models.Dashboard, 0)
+
+	q := fmt.Sprintf("SELECT id,uid,title,data FROM dashboard WHERE id in (%s)", idStr)
+	rows, err := db.SQL.Query(q)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.Warn("query dashboard by folderId error","error",err)
+			logger.Warn("query dashboard by folderId error", "error", err)
 		}
 		return dashes
 	}
@@ -60,18 +61,33 @@ func QueryDashboardsByIds(ids []string) []*models.Dashboard {
 	for rows.Next() {
 		var rawJSON []byte
 		dash := &models.Dashboard{}
-		err := rows.Scan(&dash.Id,&dash.Uid,&dash.Title,&rawJSON)
+		err := rows.Scan(&dash.Id, &dash.Uid, &dash.Title, &rawJSON)
 		if err != nil {
-			logger.Warn("query dashboard by folderId ,scan error","error",err)
+			logger.Warn("query dashboard by folderId ,scan error", "error", err)
 			continue
 		}
 
 		data := simplejson.New()
 		err = data.UnmarshalJSON(rawJSON)
-		dash.Data =data
+		dash.Data = data
 
-		dashes = append(dashes,dash)
+		dashes = append(dashes, dash)
 	}
 
 	return dashes
+}
+
+func QueryDashboardMeta(id int64) *models.DashboardMeta {
+	dashMeta := &models.DashboardMeta{}
+	err := db.SQL.QueryRow(`SELECT version, owned_by,created_by, folder_id, created,updated FROM dashboard WHERE id=?`, id).Scan(
+		&dashMeta.Version, &dashMeta.OwnedBy, &dashMeta.CreatedBy, &dashMeta.FolderId, &dashMeta.Created, &dashMeta.Updated,
+	)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			logger.Warn("get dashboard meta error", "error", err)
+		}
+		return nil
+	}
+
+	return dashMeta
 }

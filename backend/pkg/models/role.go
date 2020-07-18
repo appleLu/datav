@@ -16,6 +16,10 @@ func (r RoleType) IsAdmin() bool {
 	return r == ROLE_ADMIN 
 }
 
+func (r RoleType) IsEditor() bool {
+	return r == ROLE_ADMIN || r == ROLE_EDITOR
+}
+
 func IsAdmin(r RoleType) bool {
 	return r == ROLE_ADMIN
 }

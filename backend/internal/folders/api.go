@@ -94,8 +94,8 @@ func NewFolder(c *gin.Context) {
 
 	userId := session.CurrentUserId(c)
 
-	res,err := db.SQL.Exec("INSERT INTO folder (parent_id,title,uid,created_by,created,updated) VALUES (?,?,?,?,?,?)",
-		folder.ParentId, folder.Title, folder.Uid, userId, folder.Created, folder.Updated)
+	res,err := db.SQL.Exec("INSERT INTO folder (parent_id,title,uid,owned_by,created_by,created,updated) VALUES (?,?,?,?,?,?,?)",
+		folder.ParentId, folder.Title, folder.Uid,models.GlobalTeamId, userId, folder.Created, folder.Updated)
 	if err != nil {
 		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
 		return 
