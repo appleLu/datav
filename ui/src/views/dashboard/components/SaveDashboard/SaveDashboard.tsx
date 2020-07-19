@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Modal, Form, Input, Button, message,Select} from 'antd'
+import { Modal, Form, Input, Button, message,Select,notification} from 'antd'
 import {  DashboardModel,PanelModel } from 'src/views/dashboard/model'
 import { getBackendSrv } from 'src/core/services/backend';
 
@@ -38,6 +38,15 @@ const SaveDashboard = (props: Props) => {
 
 
     const saveDashboard = async (val) => {
+        if (!dashboard.meta.canSave) {
+            notification['error']({
+                message: "Error",
+                description: `You dont have permission to save`,
+                duration: 5
+              });
+              return 
+           }
+
         dashboard.title = val.title 
         dashboard.meta.folderId = val.folderId
         const clone = getSaveAsDashboardClone(dashboard);

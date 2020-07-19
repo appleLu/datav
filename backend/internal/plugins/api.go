@@ -3,21 +3,12 @@ package plugins
 import (
 	// "fmt"
 	"sort"
-	"github.com/apm-ai/datav/backend/pkg/models"
-	"github.com/apm-ai/datav/backend/internal/session"
 	"github.com/gin-gonic/gin"
 	"github.com/apm-ai/datav/backend/pkg/common"
-	"github.com/apm-ai/datav/backend/pkg/i18n"
 	"net/http"
 )
 
 func GetPlugins(c *gin.Context) {
-	user := session.CurrentUser(c)
-	if !models.IsAdmin(user.Role) {
-		c.JSON(http.StatusInternalServerError, common.ResponseErrorMessage(nil, i18n.ON, i18n.NoPermissionMsg))
-		return
-	} 
-
 	tp := c.Query("type")
 	result := make(PluginList, 0)
 

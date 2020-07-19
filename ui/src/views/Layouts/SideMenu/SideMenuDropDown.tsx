@@ -2,7 +2,8 @@ import React, { FC } from 'react';
 // import _ from 'lodash';
 import DropDownChild from './DropDownChild';
 import { Link } from 'react-router-dom'
-import { MenuItem } from 'src/types';
+import { MenuItem, hasPermission } from 'src/types';
+import { getState } from 'src/store/store';
 
 interface Props {
   link: MenuItem;
@@ -11,12 +12,18 @@ interface Props {
 
 const SideMenuDropDown: FC<Props> = props => {
   const { link, onHeaderClick } = props;
+  const userRole = getState().user.role
   let childrenLinks: MenuItem[] = [];
   if (link.children) {
     // childrenLinks = _.filter(link.children, item => !item.hideFromMenu);
-    childrenLinks = link.children
+    childrenLinks = link.children.filter((child) => {
+      if (child.needRole && !hasPermission(userRole,child.needRole)) {
+        return false
+      }
+      return true
+    })
   }
-
+  
   let renderLink: any
   if (link.url === '') {
     renderLink =

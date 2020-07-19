@@ -18,7 +18,7 @@ import { logout } from 'src/core/library/utils/user';
 import { store } from 'src/store/store';
 import { Langs } from 'src/core/library/locale';
 import { updateLocale, updateTheme } from 'src/store/reducers/application';
-import { StoreState ,MenuItem} from 'src/types'
+import { StoreState ,MenuItem, hasPermission} from 'src/types'
 
 export interface Props {
   link: MenuItem;
@@ -36,11 +36,23 @@ export const BottomNavLinks = (props:Props) => {
     // };
     const location = useLocation()
     const { link } = props;
+    
     const subMenuIconClassName = css`
       margin-right: 8px;
     `;
 
-    let children = link.children || [];
+    const userRole = store.getState().user.role
+    let children = []
+    if (link.children) {
+      children = link.children.filter((child) => {
+         if (child.needRole && !hasPermission(userRole,child.needRole)) {
+           return false
+         }
+
+         return true
+      })  
+    }
+   
 
     if (link.id === 'help') {
       children = getFooterLinks();

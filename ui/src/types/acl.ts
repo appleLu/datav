@@ -2,8 +2,32 @@ export enum Role {
     Viewer = 'Viewer',
     Editor = 'Editor',
     Admin = 'Admin',
-  }
-  
+}
+
+export function isAdmin(role : Role) {
+    return role === Role.Admin
+}
+
+export function isEditor(role : Role) {
+  return role === Role.Admin || role === Role.Editor
+}
+
+export function hasPermission(userRole : Role, needRole: Role) {
+   if (needRole === Role.Viewer) {
+     return true
+   }
+
+   if (needRole === Role.Editor) {
+     return userRole === Role.Editor || userRole === Role.Admin
+   }
+
+   if (needRole === Role.Admin) {
+     return userRole === Role.Admin
+   }
+
+   return false
+}
+
   export interface DashboardAclDTO {
     id?: number;
     dashboardId?: number;

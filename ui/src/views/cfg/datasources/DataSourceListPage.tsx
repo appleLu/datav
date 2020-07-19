@@ -74,7 +74,7 @@ export class DatasourceListPage extends PureComponent<Props&any,State> {
       <Page navModel={navModel}>
         <Page.Contents isLoading={!hasFetched}>
           <>
-            {!hasFetched && <div className="ub-right"><LinkButton onClick={() => gotoUrl()}>ADD DATASOURCE</LinkButton></div>}
+            {hasFetched && dataSourses.length !== 0  &&  <div className="ub-right"><LinkButton onClick={() => gotoUrl()}>ADD DATASOURCE</LinkButton></div>}
             <div style={{marginTop: '40px'}}>
             {hasFetched && dataSourses.length === 0 && <EmptyListCTA {...emptyListModel} />}
             {hasFetched &&

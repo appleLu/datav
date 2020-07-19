@@ -98,3 +98,75 @@ func CanViewDashboard(dashId int64,ownedBy int64, c *gin.Context) bool {
 
 	return false
 }
+
+func CanEditDashboard(dashId int64, ownedBy int64, c*gin.Context) bool {
+	if IsGlobalAdmin(c) {
+		return true
+	}
+
+	userId := session.CurrentUserId(c)
+
+	member, err := models.QueryTeamMember(ownedBy,userId)
+	if err != nil {
+		logger.Warn("get team error","error",err)
+		return false
+	}
+
+	if member.Id != userId {
+		return false
+	}
+
+	if member.Role.IsEditor() {
+		return true
+	}
+
+	return false
+}
+
+func CanSaveDashboard(dashId int64, ownedBy int64, c*gin.Context) bool {
+	if IsGlobalAdmin(c) {
+		return true
+	}
+
+	userId := session.CurrentUserId(c)
+
+	member, err := models.QueryTeamMember(ownedBy,userId)
+	if err != nil {
+		logger.Warn("get team error","error",err)
+		return false
+	}
+
+	if member.Id != userId {
+		return false
+	}
+
+	if member.Role.IsEditor() {
+		return true
+	}
+
+	return false
+}
+
+func CanAdminDashboard(dashId int64, ownedBy int64, c*gin.Context) bool {
+	if IsGlobalAdmin(c) {
+		return true
+	}
+
+	userId := session.CurrentUserId(c)
+
+	member, err := models.QueryTeamMember(ownedBy,userId)
+	if err != nil {
+		logger.Warn("get team error","error",err)
+		return false
+	}
+
+	if member.Id != userId {
+		return false
+	}
+
+	if member.Role.IsAdmin() {
+		return true
+	}
+
+	return false
+}

@@ -2,12 +2,12 @@
 import React from 'react'
 
 import _ from 'lodash'
-import { StoreState, MenuPosition } from 'src/types'
+import { StoreState, MenuPosition, Role, MenuItem } from 'src/types'
 import { Store } from 'redux'; 
 import { updateMenuItems } from 'src/store/reducers/menu';
 export const routers = []
 export const initRoutes = (store: Store<StoreState>) => {
-    const menuItems = [
+    const menuItems: MenuItem[] = [
         {
             id: 'dashboard',
             url: '/dashboard',
@@ -90,24 +90,25 @@ export const initRoutes = (store: Store<StoreState>) => {
         // these two are core menu items, be careful to modify
         {
             id: 'new',
-            url: null,
+            url: '/new',
             text: 'New',
             title: 'Add something new',
             icon: 'plus',
             showPosition: MenuPosition.Bottom,
             redirectTo: null,
+            needRole: Role.Editor,
             children: [
                 {
                     icon: 'database',
                     id: 'create-dashboard',
-                    url: '/new/dashboard',
+                    url: '/dashboard',
                     text: 'Dashboard',
                     component: React.lazy(() => import('src/views/dashboard/DashboardPage'))
                 },
                 {
                     icon: 'database',
                     id: 'import-dashboard',
-                    url: '/import/dashboard',
+                    url: '/import',
                     text: 'Import',
                     component: React.lazy(() => import('src/views/dashboard/ImportPage'))
                 },
@@ -115,14 +116,16 @@ export const initRoutes = (store: Store<StoreState>) => {
                     icon: 'database',
                     id: 'new-folder',
                     text: 'Folder',
-                    url: '/cfg/folders',
+                    url: '/folder',
+                    needRole: Role.Editor,
                     component: React.lazy(() => import('src/views/search/components/DashboardListPage'))
                 },
                 {
                     icon: 'database',
                     id: 'new-team',
                     text: 'Team',
-                    url: '/cfg/teams',
+                    url: '/team',
+                    needRole: Role.Admin,
                     component: React.lazy(() => import('src/views/cfg/teams/TeamsPage'))
                 },
             ],
@@ -142,6 +145,7 @@ export const initRoutes = (store: Store<StoreState>) => {
                     id: "datasources",
                     text: "Data Sources",
                     url: "/datasources",
+                    needRole: Role.Admin,
                     component: React.lazy(() => import('src/views/cfg/datasources/DataSourceListPage'))
                 },
                 {
@@ -156,6 +160,7 @@ export const initRoutes = (store: Store<StoreState>) => {
                     id: "folders",
                     text: "Folders",
                     url: "/folders",
+                    needRole: Role.Editor,
                     component: React.lazy(() => import('src/views/search/components/DashboardListPage'))
                 },
                 {

@@ -7,7 +7,8 @@ import { getBackendSrv } from 'src/packages/datav-core';
 import { getNavModel } from '../../Layouts/Page/navModel'
 import TeamTable from './TeamTable'
 import AddTeam from './AddTeam'
-import { Team } from 'src/types';
+import { Team, isAdmin } from 'src/types';
+import { getState } from 'src/store/store';
 
 export interface Props {
     routeID: string;
@@ -63,11 +64,11 @@ export class TeamPage extends PureComponent<Props, State> {
         return (
             <Page navModel={navModel}>
                 <Page.Contents isLoading={!hasFetched}>
-                    <div style={{ float: 'right' }}>
+                    {isAdmin(getState().user.role) && <div style={{ float: 'right'}}>
                         <AddTeam onAddTeam={this.onAddTeam} />
-                    </div>
-                    <div style={{ marginTop: '42px' }}>
-                        {hasFetched && <TeamTable teams={teams} reloadTeams={this.fetchData}/>}
+                    </div>}
+                    <div style={{ marginTop: isAdmin(getState().user.role) ? '40px' :'0' }}>
+                        {hasFetched && <TeamTable teams={teams} reloadTeams={this.fetchData} />}
                     </div>
                 </Page.Contents>
             </Page>

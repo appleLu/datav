@@ -4,6 +4,7 @@ import { Table, Space, Modal,notification,Tag,Tooltip} from 'antd'
 import { UserProfile } from './components/UserProfile'
 import { getBackendSrv } from 'src/core/services/backend';
 import { getState } from 'src/store/store';
+import { isAdmin } from 'src/types';
 
 interface Props {
     users: UserState[]
@@ -45,7 +46,7 @@ const UserTable = (props: Props) => {
                 </>
             ),
         },
-        {
+        isAdmin(getState().user.role) ? {
             title: 'Action',
             key: 'action',
             render: (_, user) => (
@@ -53,7 +54,7 @@ const UserTable = (props: Props) => {
                     <span onClick={() => editUser(user)} className="pointer">Edit</span>
                 </Space>
             ),
-        }
+        } : {}
     ]
 
     const onUserDelete = (user) => {

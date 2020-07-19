@@ -4,12 +4,13 @@ import _ from 'lodash'
 
 import Page from 'src/views/Layouts/Page/Page';
 import { getNavModel } from 'src/views/Layouts/Page/navModel'
-import { Team } from 'src/types';
+import { Team, isAdmin } from 'src/types';
 import { getBackendSrv } from 'src/core/services/backend';
 import MemberTable from './Member/MemberTable'
 import AddMember from './Member/AddMember'
 import { TeamMember } from 'src/types';
 import appEvents from 'src/core/library/utils/app_events';
+import { getState } from 'src/store/store';
 
 export interface Props {
     routeID: string;
@@ -20,6 +21,7 @@ interface State {
     team: Team
     hasFetched: boolean
     members: TeamMember[]
+    teamMemberOfCurrentUser: TeamMember
 }
 
 export class TeamMemberPage extends PureComponent<Props, State> {
@@ -27,8 +29,9 @@ export class TeamMemberPage extends PureComponent<Props, State> {
         super(props)
         this.state = {
             team: null,
-            hasFetched: true,
-            members: []
+            hasFetched: false,
+            members: [],
+            teamMemberOfCurrentUser: null
         }
 
         appEvents.on('update-team-member', () => {
@@ -47,7 +50,7 @@ export class TeamMemberPage extends PureComponent<Props, State> {
 
         this.setState({
             ...this.state,
-            members
+            members,
         })
     }
 
@@ -60,19 +63,22 @@ export class TeamMemberPage extends PureComponent<Props, State> {
         // @ts-ignore
         const res = await getBackendSrv().get('/api/teams/team',{id : this.props.match.params['id']})
         const team:Team = res.data
-        if (team) {
-            this.setState({
-                team: team,
-                hasFetched: true
-            })
-        }
+
+        const res0 = await getBackendSrv().get(`/api/teams/member/${team.id}/${getState().user.id}`)
+
+        this.setState({
+            team: team,
+            hasFetched: true,
+            teamMemberOfCurrentUser: res0.data
+        })
+
         this.loadMembers()
     }
 
     render() {
         const { routeID, parentRouteID } = this.props
 
-        const {team,hasFetched,members} = this.state
+        const {team,hasFetched,members,teamMemberOfCurrentUser} = this.state
         let navModel;
         if (team) {
             navModel = _.cloneDeep(getNavModel(routeID,parentRouteID))
@@ -87,6 +93,15 @@ export class TeamMemberPage extends PureComponent<Props, State> {
             navModel = _.cloneDeep(getNavModel(routeID,parentRouteID))
         }
 
+        if (teamMemberOfCurrentUser) {
+            navModel.main.children = navModel.main.children.filter((child) => {
+                if (child.id === "team-setting" && !isAdmin(teamMemberOfCurrentUser.role)) {
+                    return false
+                }
+                return true
+            })
+        }
+
         const teamMemberIds = {}
         if (members.length > 0) {
             members.forEach((member) => {
@@ -97,8 +112,13 @@ export class TeamMemberPage extends PureComponent<Props, State> {
         return (
             <Page navModel={navModel}>
                 <Page.Contents isLoading={!hasFetched}>
-                    <div style={{float: 'right'}}>{team && <AddMember teamId={team.id} inTeamMembers={teamMemberIds}/>}</div>
-                    <div style={{ marginTop: '42px' }} >{ team && <MemberTable teamCreatedBy={team.createdById} teamId={team.id} members={members}/>}</div>
+                    { 
+                        hasFetched &&  
+                        <>
+                            {isAdmin(teamMemberOfCurrentUser.role) && <div style={{float: 'right'}}><AddMember teamId={team.id} inTeamMembers={teamMemberIds}/></div>}
+                            <div style={{ marginTop: isAdmin(teamMemberOfCurrentUser.role) ? '40px' : '0px'}} ><MemberTable teamCreatedBy={team.createdById} teamId={team.id} members={members} teamMemberOfCurrentUser={teamMemberOfCurrentUser}/></div>
+                        </>
+                    }
                 </Page.Contents>
             </Page>
         );

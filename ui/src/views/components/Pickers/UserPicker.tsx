@@ -33,7 +33,16 @@ const UserPicker = (props:Props) =>{
 
     return (
         <>
-            <Select value={props.selectedUsers} className="width-14" mode="multiple" onChange={props.onSelectUser}>
+            <Select 
+                value={props.selectedUsers} 
+                className="width-14" 
+                mode="multiple" 
+                onChange={props.onSelectUser} 
+                showSearch
+                filterOption={(input, option) =>
+                    option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                }
+                >
                 {options}
             </Select>
         </>

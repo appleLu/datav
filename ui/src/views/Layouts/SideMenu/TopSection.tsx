@@ -1,14 +1,26 @@
 import React  from 'react';
 import _ from 'lodash';
 import TopSectionItem from './TopSectionItem';
-import { MenuItem, MenuPosition } from 'src/types';
+import { MenuItem, MenuPosition ,hasPermission} from 'src/types';
 import { getLocationSrv } from 'src/packages/datav-core/src';
 import {store} from 'src/store/store'
 
 
 const TopSection = () => {
   const menuItems = store.getState().menu.items
-  const mainLinks = _.filter(menuItems, (item:MenuItem) => item.showPosition === MenuPosition.Top);
+  const userRole = store.getState().user.role
+  
+  const mainLinks =  _.filter(menuItems, item => { 
+    if (item.showPosition !== MenuPosition.Top) {
+      return false
+    }
+    
+    if ((item.needRole && !hasPermission(userRole,item.needRole))) {
+      return false
+    }
+    
+    return true
+  });
   const searchLink:MenuItem= {
     text: 'Search',
     icon: 'search',

@@ -63,6 +63,7 @@ func QueryTeam(id int64, name string) (*Team,error) {
 
 func QueryTeamMember(teamId int64,userId int64) (*TeamMember,error) {
 	member := &TeamMember{}
+	member.Role = ROLE_VIEWER
 	err := db.SQL.QueryRow(`SELECT role FROM team_member WHERE team_id=? and user_id=?`,
 		teamId, userId).Scan(&member.Role)
 	if err != nil && err != sql.ErrNoRows{

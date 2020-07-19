@@ -125,6 +125,7 @@ func (s *Server) Start() error {
 				teamR.GET("", teams.GetTeams)
 				teamR.GET("/team", teams.GetTeam)
 				teamR.GET("/members/:teamId", teams.GetTeamMembers)	
+				teamR.GET("/member/:teamId/:userId", teams.GetTeamMember)	
 				teamR.POST("/leave/:teamId",teams.LeaveTeam)
 				teamR.POST("/members/:teamId", teams.AddTeamMembers)	
 				teamR.DELETE("/:teamId/:memberId", teams.DeleteTeamMember)	

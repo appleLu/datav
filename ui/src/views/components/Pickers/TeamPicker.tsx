@@ -28,7 +28,16 @@ const TeamPicker = (props:Props) =>{
 
     return (
         <>
-            <Select value={props.value} className="width-14" mode={props.mutiple? "multiple" : null} onChange={props.onChange}>
+            <Select 
+                value={props.value} 
+                className="width-14" 
+                mode={props.mutiple? "multiple" : null} 
+                onChange={props.onChange} 
+                showSearch
+                filterOption={(input, option) =>
+                    option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                }
+                >
                 {options}
             </Select>
         </>

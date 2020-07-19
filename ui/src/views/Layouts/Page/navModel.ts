@@ -1,5 +1,5 @@
 import { NavModel } from 'src/packages/datav-core';
-import { MenuItem } from 'src/types';
+import { MenuItem, hasPermission } from 'src/types';
 import {store} from 'src/store/store'
 
 
@@ -19,7 +19,10 @@ function getNotFoundModel(): NavModel {
 }
 
 export function getNavModel(id: string, parentID: string): NavModel {
+    const userRole = store.getState().user.role
+
     const menuItems = store.getState().menu.items
+
     // find main node
     let main: MenuItem;
     menuItems.forEach((item) => {
@@ -31,6 +34,13 @@ export function getNavModel(id: string, parentID: string): NavModel {
         return getNotFoundModel();
     }
 
+    main.children = main.children.filter((child) => {
+        if (child.needRole && !hasPermission(userRole,child.needRole)) {
+            return false
+        }
+
+        return true
+    })
     // set current selected node to active
     let node: MenuItem
     main.children.forEach(item => {

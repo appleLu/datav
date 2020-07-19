@@ -11,8 +11,7 @@ interface Props {
 
 const TeamTable = (props: Props) => {
     const [editTeamVisible, setEditTeamVisible] = useState(false)
-    const [teamEdit, setTeamEdit] = useState(null)
-
+    
     props.teams?.map((team) => {
         //@ts-ignore
         team.key = team.id

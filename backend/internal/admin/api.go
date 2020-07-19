@@ -289,6 +289,11 @@ func NewTeam(c *gin.Context) {
 		return
 	}
 
+	if !acl.IsGlobalAdmin(c) {
+		c.JSON(403, common.ResponseErrorMessage(nil, i18n.ON, i18n.NoPermissionMsg))
+		return
+	}
+
 	now := time.Now()
 
 	user := session.CurrentUser(c)

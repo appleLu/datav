@@ -1,3 +1,5 @@
+import { Role } from "./acl";
+
 export interface MenuItem {
     id?: string;
     parentID?: string;
@@ -14,6 +16,7 @@ export interface MenuItem {
     component?: any;
     active?: boolean;
     hideFromTabs?: boolean;
+    needRole?: Role; // if user wants to see this menu item, his role must be greater than this
 }
 
 export enum MenuPosition {

@@ -1,6 +1,7 @@
 package datasources
 
 import (
+	"github.com/apm-ai/datav/backend/internal/acl"
 	"github.com/apm-ai/datav/backend/internal/plugins"
 	"github.com/apm-ai/datav/backend/internal/session"
 	"github.com/apm-ai/datav/backend/pkg/common"
@@ -21,6 +22,11 @@ func NewDataSource(c *gin.Context) {
 	ds := &DataSource{}
 	c.BindJSON(&ds)
 
+	if !acl.IsGlobalAdmin(c) {
+		c.JSON(403,common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
+		return 
+	}
+
 	ds.Uid = utils.GenerateShortUID()
 	ds.Version = InitDataSourceVersion
 	ds.Created = time.Now()
@@ -30,7 +36,7 @@ func NewDataSource(c *gin.Context) {
 	}
 
 	jsonData, err := ds.JsonData.Encode()
-
+	
 	res, err := db.SQL.Exec(`INSERT INTO data_source (name, uid, version, type, url, is_default, json_data,basic_auth,created_by,created,updated) VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
 		ds.Name, ds.Uid, ds.Version, ds.Type, ds.Url, ds.IsDefault, jsonData, ds.BasicAuth,userId, ds.Created, ds.Updated)
 	if err != nil {
@@ -63,6 +69,11 @@ func GetDataSources(c *gin.Context) {
 }
 
 func GetDataSource(c *gin.Context) {
+	if !acl.IsGlobalEditor(c) {
+		c.JSON(403,common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
+		return 
+	}
+
 	ds := LoadDataSource(c.Param("dataSourceID"))
 	c.JSON(200, common.ResponseSuccess(ds))
 }
@@ -70,6 +81,11 @@ func GetDataSource(c *gin.Context) {
 func EditDataSource(c *gin.Context) {
 	ds := &DataSource{}
 	c.BindJSON(&ds)
+
+	if !acl.IsGlobalAdmin(c) {
+		c.JSON(403,common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
+		return 
+	}
 
 	ds.Updated = time.Now()
 	jsonData, err := ds.JsonData.Encode()
@@ -91,6 +107,12 @@ func EditDataSource(c *gin.Context) {
 
 func DeleteDataSource(c *gin.Context) {
 	dsID := c.Param("dataSourceID")
+	
+	if !acl.IsGlobalAdmin(c) {
+		c.JSON(403,common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
+		return 
+	}
+
 	_, err := db.SQL.Exec(`DELETE FROM data_source  WHERE id=?`, dsID)
 	if err != nil {
 		logger.Warn("delete datasource error", "error", err)

@@ -4,15 +4,15 @@ import { fromFetch } from 'rxjs/fetch';
 import { BackendSrv as BackendService, BackendSrvRequest, config } from 'src/packages/datav-core';
 
 import { DataSourceResponse, CoreEvents } from 'src/types';
-import { DashboardSearchHit } from 'src/types/search';
 import { DashboardDTO, FolderInfo, DashboardDataDTO } from 'src/types';
 import { parseInitFromOptions, parseUrlFromOptions } from 'src/core/library/utils/fetch';
 import { getToken } from 'src/core/library/utils/auth'
 import { logout } from 'src/core/library/utils/user';
-import { message } from 'antd';
+import { notification } from 'antd';
 import { store } from 'src/store/store'
 import localeAllData from 'src/core/library/locale'
 import appEvents from '../library/utils/app_events';
+
 export interface DatasourceRequestOptions {
   retry?: number;
   method?: string;
@@ -125,10 +125,14 @@ export class BackendSrv implements BackendService {
         // description = message;
         message = 'Error';
       }
-      
+
     }
     if (!err.status) {
-      message.error(`GET ${config.baseUrl} net::ERR_CONNECTION_REFUSED`)
+      notification['error']({
+        message: "Error",
+        description: `GET ${config.baseUrl} net::ERR_CONNECTION_REFUSED`,
+        duration: 5
+      });
     }
 
     throw data;
@@ -151,7 +155,7 @@ export class BackendSrv implements BackendService {
       map(response => {
         // show response message
         if (response.data) {
-           this.showMessage(response.data,'info')
+          this.showMessage(response.data, 'info')
         }
 
         const fetchSuccessResponse: SuccessResponse = response.data;
@@ -193,16 +197,16 @@ export class BackendSrv implements BackendService {
       options,
       this.noBackendCache
     );
-    
+
     const fromFetchStream = this.getFromFetchStream(options);
     const failureStream = fromFetchStream.pipe(this.toDataSourceRequestFailureStream(options));
     const successStream = fromFetchStream.pipe(
       filter(response => response.ok === true),
       map(response => {
-         // show response message
-         if (response.data) {
-           this.showMessage(response.data,'info')
-         }
+        // show response message
+        if (response.data) {
+          this.showMessage(response.data, 'info')
+        }
 
         const fetchSuccessResponse: DataSourceSuccessResponse = { ...response };
         return fetchSuccessResponse;
@@ -320,7 +324,7 @@ export class BackendSrv implements BackendService {
 
   private async moveDashboard(uid: string, toFolder: FolderInfo) {
     const res = await this.getDashboardByUid(uid);
-    const fullDash: DashboardDTO  = res.data
+    const fullDash: DashboardDTO = res.data
 
     if ((!fullDash.meta.folderId && toFolder.id === 0) || fullDash.meta.folderId === toFolder.id) {
       return { alreadyInFolder: true };
@@ -421,7 +425,7 @@ export class BackendSrv implements BackendService {
 
     let url = parseUrlFromOptions(options);
     url = config.baseUrl + url
-    
+
     const init = parseInitFromOptions(options);
     return this.dependencies.fromFetch(url, init).pipe(
       mergeMap(async response => {
@@ -470,10 +474,10 @@ export class BackendSrv implements BackendService {
           return throwError(fetchErrorResponse);
         })
       );
- 
-  private handleErrorResponse(response:DataSourceResponse<any>): ErrorResponse {
+
+  private handleErrorResponse(response: DataSourceResponse<any>): ErrorResponse {
     const { status, statusText, data } = response;
-    this.showMessage(data,'error')
+    this.showMessage(data, 'error')
 
     const fetchErrorResponse: ErrorResponse = { status, statusText, data };
 
@@ -484,18 +488,26 @@ export class BackendSrv implements BackendService {
     return fetchErrorResponse
   }
 
-  private showMessage(data:any,level:string) {
+  private showMessage(data: any, level: string) {
     if (!data.message) {
-      return 
+      return
     }
-    
+
     let msg = data.message;
     if (data.i18n) {
       const msgid = data.message
       msg = this.getI18nMessage(msgid)
     }
-    
-    level === 'error'? message.error(msg) : message.info(msg)
+
+    level === 'error' ? notification['error']({
+      message: "Error",
+      description: msg,
+      duration: 5
+    }) : notification['info']({
+      message: "Info",
+      description: msg,
+      duration: 5
+    });
   }
 
   private getI18nMessage(msgid: string): string {

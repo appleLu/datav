@@ -8,6 +8,8 @@ import { getNavModel } from '../../Layouts/Page/navModel'
 import { UserState } from 'src/store/reducers/user';
 import UserTable from './UserTable'
 import AddUser from './AddUser'
+import { getState } from 'src/store/store';
+import { isAdmin } from 'src/types';
 
 export interface Props {
     routeID: string;
@@ -63,10 +65,10 @@ export class UserPage extends PureComponent<Props, State> {
         return (
             <Page navModel={navModel}>
                 <Page.Contents isLoading={!hasFetched}>
-                    <div style={{ float: 'right' }}>
+                    {isAdmin(getState().user.role) && <div style={{ float: 'right' }}>
                         <AddUser onAddUser={this.onAddUser} />
-                    </div>
-                    <div style={{ marginTop: '42px' }}>
+                    </div>}
+                    <div style={{ marginTop: isAdmin(getState().user.role) ? '40px' :'0' }}>
                         {hasFetched && <UserTable users={users} reloadUsers={this.fetchData}/>}
                     </div>
                 </Page.Contents>

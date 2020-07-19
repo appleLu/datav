@@ -3,7 +3,7 @@ import React, {useState} from 'react'
 import { connect } from 'react-redux';
 import { Prompt} from "react-router-dom";
 
-import { Layout } from 'antd'
+import { Layout} from 'antd'
 
 import BreadcrumbWrapper from '../Breadcrumb/Breadcrumb'
 
@@ -14,6 +14,7 @@ import appEvents from 'src/core/library/utils/app_events';
 import tracker from 'src/core/services/changeTracker';
 
 import './Header.less'
+import { DashboardModel } from 'src/views/dashboard/model';
 
 interface Props {
     breadcrumbText: string
@@ -24,7 +25,7 @@ const { Header } = Layout
 function HeaderWrapper(props: Props) { 
    const [dashboard,setDashboard] = useState(null)
    const [dashboardComponent, setDashboardComponent] = useState(null)
-   appEvents.on('open-dashboard-save-modal', (dash) => {
+   appEvents.on('open-dashboard-save-modal', (dash:DashboardModel) => {
        setDashboard(dash)
    })
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Table, Space, Modal,notification, Tag} from 'antd'
 import { getBackendSrv } from 'src/core/services/backend';
-import { TeamMember } from 'src/types';
+import { TeamMember, isAdmin } from 'src/types';
 import { ConfirmModal } from 'src/packages/datav-core/src';
 import appEvents from 'src/core/library/utils/app_events';
 import EditMember from './EditMember'
@@ -11,6 +11,7 @@ interface Props {
     teamId: number
     members: TeamMember[]
     teamCreatedBy : number
+    teamMemberOfCurrentUser: TeamMember
 }
 
 
@@ -46,7 +47,7 @@ const MemberTable = (props: Props) => {
             ),
         },
         ...rawColumns,
-        {
+       isAdmin(props.teamMemberOfCurrentUser.role) ? {
             title: 'Action',
             key: 'action',
             render: (_, member) => (
@@ -61,7 +62,7 @@ const MemberTable = (props: Props) => {
                     }} className="pointer">Delete</span>
                 </Space>
             ),
-        }
+        } : {}
     ]
 
 

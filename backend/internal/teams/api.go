@@ -108,6 +108,26 @@ func GetTeamMembers(c *gin.Context) {
 	c.JSON(200, common.ResponseSuccess(members))
 }
 
+func GetTeamMember(c *gin.Context) {
+	teamId,_ := strconv.ParseInt(c.Param("teamId"), 10, 64)
+	userId,_ := strconv.ParseInt(c.Param("userId"), 10, 64)
+
+	if teamId == 0 || userId == 0 {
+		invasion.Add(c)
+		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "bad data"))
+		return
+	}
+
+	member, err := models.QueryTeamMember(teamId,userId)
+	if err != nil {
+		logger.Warn("get team member error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
+	c.JSON(200, common.ResponseSuccess(member))
+}
+
 type AddMemberReq struct {
 	MemberIds []int64         `json:"members"`
 	Role      models.RoleType `json:"role"`
@@ -256,6 +276,11 @@ func UpdateTeam(c *gin.Context) {
 		return	
 	}
 
+	if !acl.IsTeamAdmin(team.Id,c) {
+		c.JSON(403, common.ResponseErrorMessage(nil, i18n.ON, i18n.NoPermissionMsg))
+		return
+	}
+	
 	_, err := db.SQL.Exec("UPDATE team SET name=? WHERE id=?", team.Name, team.Id)
 	if err != nil {
 		logger.Warn("update team error", "error", err)

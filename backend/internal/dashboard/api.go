@@ -82,6 +82,12 @@ func SaveDashboard(c *gin.Context) {
 		id, _ := res.LastInsertId()
 		dash.Id = id
 	} else {
+		meta := QueryDashboardMeta(dash.Id)
+		if meta != nil && !acl.CanSaveDashboard(dash.Id,meta.OwnedBy,c) {
+			c.JSON(403, common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
+			return 
+		}
+
 		_, err := db.SQL.Exec(`UPDATE dashboard SET uid=?, title=?, version=?, folder_id=?, data=?,updated=? WHERE id=?`,
 			dash.Uid, dash.Title, dash.Version, dash.FolderId, jsonData, dash.Updated, dash.Id)
 		if err != nil {
@@ -179,6 +185,13 @@ func GetDashboard(c *gin.Context) {
 		return 
 	}
 
+		
+	dashMeta.CanStar = true
+	dashMeta.CanEdit = acl.CanEditDashboard(id,dashMeta.OwnedBy,c)
+	dashMeta.CanSave = acl.CanSaveDashboard(id,dashMeta.OwnedBy,c)
+	dashMeta.CanAdmin = acl.CanAdminDashboard(id,dashMeta.OwnedBy,c)
+
+
 	data := simplejson.New()
 	err = data.UnmarshalJSON(rawJSON)
 	if err != nil {
@@ -189,16 +202,7 @@ func GetDashboard(c *gin.Context) {
 
 	data.Set("id", id)
 	data.Set("uid", uid)
-	
-	dashMeta.CanStar = true
-	if acl.IsGlobalEditor(c) {
-		dashMeta.CanEdit = true
-		dashMeta.CanSave = true
-	}
-	
-	if acl.IsGlobalAdmin(c) {
-		dashMeta.CanAdmin = true
-	}
+
 
 	c.JSON(200, common.ResponseSuccess(utils.Map{
 		"dashboard": data,

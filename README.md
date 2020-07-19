@@ -8,7 +8,8 @@ Datav is forked from **@grafana**, but changed a lot, e.g :
 - a smaller but more extensible plugin system
 - multi spoken languages supported
 - large screen supported
-- using antd for ui components
+- different team and acl design,no orgs any more 
+
 - **no enterprise version, 100% open-source**
 
 ## Key Features
