@@ -1,6 +1,7 @@
 package sqls
 
 import (
+	"github.com/apm-ai/datav/backend/internal/teams"
 	"github.com/apm-ai/datav/backend/pkg/utils"
 	"time"
 	"fmt"
@@ -69,6 +70,9 @@ func CreateTables() {
 		log.RootLogger.Crit("init global team member error","error:",err)
 		panic(err)
 	}
+
+	// init global team permission
+	teams.InitTeamPermission(models.GlobalTeamId)
 }
 
 
@@ -210,6 +214,19 @@ var CreateTableSqls = map[string]string {
 		ON dashboard_acl (team_id);
 	CREATE UNIQUE INDEX IF NOT EXISTS dashboard_acl_dashboard_team_id
 		ON dashboard_acl (dashboard_id,team_id);
+	`,
+	
+	"team_acl": `CREATE TABLE IF NOT EXISTS team_acl (
+		id 					INTEGER PRIMARY KEY AUTOINCREMENT,
+		team_id        		INTEGER NOT NULL,
+		role                VARCHAR(10) NOT NULL,
+		permission          INT NOT NULL,
+		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+	);
+	CREATE INDEX IF NOT EXISTS team_acl_team_id
+		ON team_acl (team_id);
+	CREATE UNIQUE INDEX IF NOT EXISTS team_acl_team_id_role_permission
+		ON team_acl (team_id,role,permission);
 	`,
 
 	"folder" : `CREATE TABLE IF NOT EXISTS folder (

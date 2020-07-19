@@ -69,8 +69,13 @@ func SaveDashboard(c *gin.Context) {
 
 
 	jsonData, err := dash.Data.Encode()
+ 
+	if !update { 
+		if !acl.CanAddDashboard(models.GlobalTeamId,c) {
+			c.JSON(403, common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
+			return 
+		}
 
-	if !update {
 		res, err := db.SQL.Exec(`INSERT INTO dashboard (uid, title, version,owned_by, created_by, folder_id, data,created,updated) VALUES (?,?,?,?,?,?,?,?,?)`,
 			dash.Uid, dash.Title, dash.Version,models.GlobalTeamId, dash.CreatedBy, dash.FolderId, jsonData, dash.Created, dash.Updated)
 		if err != nil {
@@ -79,11 +84,11 @@ func SaveDashboard(c *gin.Context) {
 			return
 		}
 
-		id, _ := res.LastInsertId()
+		id, _ := res.LastInsertId() 
 		dash.Id = id
 	} else {
 		meta := QueryDashboardMeta(dash.Id)
-		if meta != nil && !acl.CanSaveDashboard(dash.Id,meta.OwnedBy,c) {
+		if meta != nil && !acl.CanSaveDashboard(meta.OwnedBy,c) {
 			c.JSON(403, common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
 			return 
 		}
@@ -134,7 +139,7 @@ func UpdateOwnedBy(c *gin.Context) {
 	currentOwnedBy := meta.OwnedBy
 
 	// check we have permission to do this
-	if !acl.IsGlobalAdmin(c) && !acl.IsTeamAdmin(currentOwnedBy,c) {
+	if !acl.CanAdminDashboard(currentOwnedBy,c) {
 		c.JSON(403, common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
 		return
 	}
@@ -187,9 +192,9 @@ func GetDashboard(c *gin.Context) {
 
 		
 	dashMeta.CanStar = true
-	dashMeta.CanEdit = acl.CanEditDashboard(id,dashMeta.OwnedBy,c)
-	dashMeta.CanSave = acl.CanSaveDashboard(id,dashMeta.OwnedBy,c)
-	dashMeta.CanAdmin = acl.CanAdminDashboard(id,dashMeta.OwnedBy,c)
+	dashMeta.CanEdit = acl.CanEditDashboard(dashMeta.OwnedBy,c)
+	dashMeta.CanSave = acl.CanSaveDashboard(dashMeta.OwnedBy,c)
+	dashMeta.CanAdmin = acl.CanAdminDashboard(dashMeta.OwnedBy,c)
 
 
 	data := simplejson.New()
@@ -262,7 +267,10 @@ func ImportDashboard(c *gin.Context) {
 	}
 
 
-
+	if !acl.CanSaveDashboard(models.GlobalTeamId,c) {
+		c.JSON(403,common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
+		return 
+	}
  
 
 	jsonData, err := dash.Data.Encode()
@@ -366,6 +374,17 @@ func UpdateAcl(c *gin.Context) {
 	
 	if req.DashId == 0 {
 		c.JSON(400, common.ResponseErrorMessage(nil,i18n.OFF, "bad dashboard id"))
+		return 
+	}
+
+	meta := QueryDashboardMeta(req.DashId)
+	if meta == nil {
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF,"dashboar meta not found"))
+		return
+	}
+
+	if !acl.CanAdminDashboard(meta.OwnedBy, c) {
+		c.JSON(403,common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
 		return 
 	}
 

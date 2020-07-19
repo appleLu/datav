@@ -43,8 +43,9 @@ export function initDashboard(uid: string | undefined,initOrigin: any): ThunkRes
 function getNewDashboardModelData(): DashboardDTO {
   const data = {
     meta: {
-      canStar: false,
-      canShare: false,
+      canStar: true,
+      canShare: true,
+      canSave: true,
       isNew: true,
       folderId: 0,
     },

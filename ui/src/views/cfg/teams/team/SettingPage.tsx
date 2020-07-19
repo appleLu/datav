@@ -11,6 +11,7 @@ import { Button, Input,notification, message } from 'antd';
 import TeamMemberPicker from 'src/views/components/Pickers/TeamMemberPicker'
 import globalEvents from 'src/views/App/globalEvents';
 import { getState } from 'src/store/store';
+import TeamPermission from './TeamPermission'
 
 export interface Props {
     routeID: string;
@@ -170,7 +171,11 @@ export class TeamSettingPage extends PureComponent<Props, State> {
                                  </Button>
                                 </div>
                             </form>
+                            
+                            <h3 className="page-sub-heading">Dashboard Permission</h3>
+                            <TeamPermission teamId={team.id}/>
 
+                            
                             <h3 className="page-sub-heading">Trasnfer Team</h3>
                             <form name="teamDetailsForm" className="gf-form-group" onSubmit={(e) => this.updateSetting(e)}>
                                 <div className="gf-form max-width-30">

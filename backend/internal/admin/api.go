@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"github.com/apm-ai/datav/backend/internal/teams"
 	"github.com/apm-ai/datav/backend/internal/acl"
 	"fmt"
 	"strconv"
@@ -316,6 +317,9 @@ func NewTeam(c *gin.Context) {
 		return
 	}
 
+	// init team permission
+	teams.InitTeamPermission(id)
+	
 	c.JSON(200, common.ResponseSuccess(&models.Team{
 		Id:       id,
 		Name:  name,

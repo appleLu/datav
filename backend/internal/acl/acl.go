@@ -99,7 +99,7 @@ func CanViewDashboard(dashId int64,ownedBy int64, c *gin.Context) bool {
 	return false
 }
 
-func CanEditDashboard(dashId int64, ownedBy int64, c*gin.Context) bool {
+func CanEditDashboard(ownedBy int64, c*gin.Context) bool {
 	if IsGlobalAdmin(c) {
 		return true
 	}
@@ -116,14 +116,16 @@ func CanEditDashboard(dashId int64, ownedBy int64, c*gin.Context) bool {
 		return false
 	}
 
-	if member.Role.IsEditor() {
-		return true
+	ok,err := models.TeamRoleHasPermission(ownedBy,member.Role,models.CanEdit)
+	if err != nil {
+		logger.Warn("get team permission error","error",err)
+		return false
 	}
 
-	return false
+	return ok
 }
 
-func CanSaveDashboard(dashId int64, ownedBy int64, c*gin.Context) bool {
+func CanAddDashboard(ownedBy int64, c*gin.Context) bool {
 	if IsGlobalAdmin(c) {
 		return true
 	}
@@ -140,14 +142,42 @@ func CanSaveDashboard(dashId int64, ownedBy int64, c*gin.Context) bool {
 		return false
 	}
 
-	if member.Role.IsEditor() {
+	ok,err := models.TeamRoleHasPermission(ownedBy,member.Role,models.CanAdd)
+	if err != nil {
+		logger.Warn("get team permission error","error",err)
+		return false
+	}
+
+	return ok
+}
+
+func CanSaveDashboard(ownedBy int64, c*gin.Context) bool {
+	if IsGlobalAdmin(c) {
 		return true
 	}
 
-	return false
+	userId := session.CurrentUserId(c)
+
+	member, err := models.QueryTeamMember(ownedBy,userId)
+	if err != nil {
+		logger.Warn("get team error","error",err)
+		return false
+	}
+
+	if member.Id != userId {
+		return false
+	}
+
+	ok,err := models.TeamRoleHasPermission(ownedBy,member.Role,models.CanSave)
+	if err != nil {
+		logger.Warn("get team permission error","error",err)
+		return false
+	}
+
+	return ok
 }
 
-func CanAdminDashboard(dashId int64, ownedBy int64, c*gin.Context) bool {
+func CanAdminDashboard(ownedBy int64, c*gin.Context) bool {
 	if IsGlobalAdmin(c) {
 		return true
 	}

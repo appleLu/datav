@@ -280,7 +280,7 @@ func UpdateTeam(c *gin.Context) {
 		c.JSON(403, common.ResponseErrorMessage(nil, i18n.ON, i18n.NoPermissionMsg))
 		return
 	}
-	
+
 	_, err := db.SQL.Exec("UPDATE team SET name=? WHERE id=?", team.Name, team.Id)
 	if err != nil {
 		logger.Warn("update team error", "error", err)
@@ -434,6 +434,75 @@ func LeaveTeam(c *gin.Context) {
 	}
 
 	c.JSON(200, common.ResponseSuccess(nil))
+}
+
+func GetTeamPermissions(c *gin.Context) {
+	teamId,_ := strconv.ParseInt(c.Param("teamId"), 10, 64)
+	if teamId == 0 {
+		invasion.Add(c)
+		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "bad data"))
+		return
+	}
+
+	permissions,err := models.QueryTeamPermissions(teamId)
+	if err != nil {
+		logger.Warn("query team permission error","error",err)
+	}
+
+	c.JSON(200, common.ResponseSuccess(permissions))
+}
+
+type UpdatePermissionReq struct {
+	Role models.RoleType `json:"role"`
+	Permission []int `json:"permission"`
+}
+
+func UpdateTeamPermission(c *gin.Context) {
+	req := &UpdatePermissionReq{}
+	c.Bind(&req)
+
+	teamId,_ := strconv.ParseInt(c.Param("teamId"), 10, 64)
+	if teamId == 0 {
+		invasion.Add(c)
+		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "bad data"))
+		return
+	}
+
+	if !acl.IsTeamAdmin(teamId,c) {
+		c.JSON(403, common.ResponseErrorMessage(nil, i18n.ON, i18n.NoPermissionMsg))
+		return
+	}
+
+	// must have CanView permission
+	canViewExist := false 
+	for _,p := range req.Permission {
+		if p == models.CanView {
+			canViewExist = true
+		}
+	}
+
+	if (!canViewExist) {
+		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "CanView is needed for this role"))
+		return
+	}
+	
+	_,err := db.SQL.Exec("DELETE FROM team_acl WHERE team_id=? and role=?",teamId,req.Role)
+	if err != nil {
+		logger.Warn("delete from team_acl error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
+
+
+	err = updatePermission(teamId, req.Role, req.Permission)
+	if err != nil {
+		logger.Warn("update team permission error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
+	c.JSON(200,common.ResponseSuccess(nil))
 }
 
 func canChangeTeamMember(teamId, memberId int64, c *gin.Context) bool {
