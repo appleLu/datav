@@ -55,7 +55,7 @@ const AddMember = (props: Props) => {
                             <Field
                                 label="Team Member"
                             >
-                                <UserPicker onSelectUser={selectMember} selectedUsers={selectedMembers} excludedUsers={props.inTeamMembers}/>
+                                <UserPicker onChange={selectMember} value={selectedMembers} excludedUsers={props.inTeamMembers} multiple/>
                             </Field>
 
                             <Field label="Member Role">

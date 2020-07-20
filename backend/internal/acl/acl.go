@@ -72,16 +72,26 @@ func IsTeamCreator(teamId int64,c *gin.Context) bool {
 }
 
 func CanViewDashboard(dashId int64,ownedBy int64, c *gin.Context) bool {
-	if IsGlobalAdmin(c) {
+	userId := session.CurrentUserId(c)
+	userPermission := models.QueryUserHasDashboardPermssion(dashId,userId,models.CanView)
+
+	if userPermission == models.UserAcl_PermissionForbidden {
+		return false
+	}
+
+	if userPermission == models.UserAcl_PermissionAllow {
 		return true
 	}
 
+	if IsGlobalAdmin(c) {
+		return true
+	}
 
 	teamIds,_ := models.QueryAclTeamIds(dashId)
 
 	teamIds = append(teamIds,ownedBy)
 
-	userId := session.CurrentUserId(c)
+
 
 	// check user is in these teams
 	for _,teamId := range teamIds {
@@ -99,12 +109,21 @@ func CanViewDashboard(dashId int64,ownedBy int64, c *gin.Context) bool {
 	return false
 }
 
-func CanEditDashboard(ownedBy int64, c*gin.Context) bool {
+func CanEditDashboard(dashId int64,ownedBy int64, c*gin.Context) bool {
+	userId := session.CurrentUserId(c)
+	userPermission := models.QueryUserHasDashboardPermssion(dashId,userId,models.CanEdit)
+	if userPermission == models.UserAcl_PermissionForbidden {
+		return false
+	}
+
+	if userPermission == models.UserAcl_PermissionAllow {
+		return true
+	}
+
 	if IsGlobalAdmin(c) {
 		return true
 	}
 
-	userId := session.CurrentUserId(c)
 
 	member, err := models.QueryTeamMember(ownedBy,userId)
 	if err != nil {
@@ -151,12 +170,24 @@ func CanAddDashboard(ownedBy int64, c*gin.Context) bool {
 	return ok
 }
 
-func CanSaveDashboard(ownedBy int64, c*gin.Context) bool {
+func CanSaveDashboard(dashId int64, ownedBy int64, c*gin.Context) bool {
+	userId := session.CurrentUserId(c)
+	if dashId != 0 {
+		userPermission := models.QueryUserHasDashboardPermssion(dashId,userId,models.CanSave)
+		if userPermission == models.UserAcl_PermissionForbidden {
+			return false
+		}
+
+		if userPermission == models.UserAcl_PermissionAllow {
+			return true
+		}
+	}
+
+
 	if IsGlobalAdmin(c) {
 		return true
 	}
-
-	userId := session.CurrentUserId(c)
+ 
 
 	member, err := models.QueryTeamMember(ownedBy,userId)
 	if err != nil {
@@ -177,12 +208,21 @@ func CanSaveDashboard(ownedBy int64, c*gin.Context) bool {
 	return ok
 }
 
-func CanAdminDashboard(ownedBy int64, c*gin.Context) bool {
+func CanAdminDashboard(dashId int64,ownedBy int64, c*gin.Context) bool {
+	userId := session.CurrentUserId(c)
+	userPermission := models.QueryUserHasDashboardPermssion(dashId,userId,models.CanMangePermission)
+	if userPermission == models.UserAcl_PermissionForbidden {
+		return false
+	}
+
+	if userPermission == models.UserAcl_PermissionAllow {
+		return true
+	}
+
 	if IsGlobalAdmin(c) {
 		return true
 	}
 
-	userId := session.CurrentUserId(c)
 
 	member, err := models.QueryTeamMember(ownedBy,userId)
 	if err != nil {

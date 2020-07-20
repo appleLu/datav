@@ -1,36 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import _ from 'lodash'
 import { InlineFormLabel} from 'src/packages/datav-core/src'
-import { Select, notification } from 'antd'
+import { notification } from 'antd'
 import { LockOutlined } from '@ant-design/icons'
 import { getBackendSrv } from 'src/core/services/backend'
 import { Role } from 'src/types'
-const {Option} = Select
+import PermissionPicker from 'src/views/components/Pickers/PermissionPicker'
 
 interface Props {
     teamId: number
 }
 
-// CanView, CanAdd, CanEdit, CanSave, CanDelete, CanMangePermission
-
-const PermissionPicker = (props) => {
-    return (
-        <Select 
-            value={props.value} 
-            onChange={props.onChange} 
-            mode="multiple"
-            style={{maxWidth: '100%',minWidth: '100px'}}
-            disabled={props.disabled}
-        >     
-            <Option value={1}>View</Option>
-            <Option value={2}>Add</Option>
-            <Option value={3}>Edit</Option>
-            <Option value={4}>Save</Option>
-            <Option value={5}>Delete</Option>
-            <Option value={6}>Permission</Option>
-        </Select>
-    )
-}
 const TeamPermission = (props:Props) =>{      
     const [permissions,setPermissions] = useState(null)
     useEffect(() => {
@@ -57,7 +37,7 @@ const TeamPermission = (props:Props) =>{
     return (
         <>
              {
-                permissions && <form name="teamDetailsForm" className="gf-form-group" onSubmit={(e) => this.updateSetting(e)}>
+                permissions && <form name="teamDetailsForm" className="gf-form-group">
                     <div className="gf-form max-width-50">
                         <InlineFormLabel>Admin(Role)</InlineFormLabel>
                         <span className="color-primary ub-mr2">Can</span><PermissionPicker value={permissions[Role.Admin]}  disabled/>

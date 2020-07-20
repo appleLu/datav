@@ -77,17 +77,14 @@ func QueryDashboardsByIds(ids []string) []*models.Dashboard {
 	return dashes
 }
 
-func QueryDashboardMeta(id int64) *models.DashboardMeta {
+func QueryDashboardMeta(id int64) (*models.DashboardMeta,error) {
 	dashMeta := &models.DashboardMeta{}
 	err := db.SQL.QueryRow(`SELECT version, owned_by,created_by, folder_id, created,updated FROM dashboard WHERE id=?`, id).Scan(
 		&dashMeta.Version, &dashMeta.OwnedBy, &dashMeta.CreatedBy, &dashMeta.FolderId, &dashMeta.Created, &dashMeta.Updated,
 	)
 	if err != nil {
-		if err != sql.ErrNoRows {
-			logger.Warn("get dashboard meta error", "error", err)
-		}
-		return nil
+		return nil,err
 	}
 
-	return dashMeta
+	return dashMeta,nil
 }

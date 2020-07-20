@@ -95,8 +95,12 @@ func (s *Server) Start() error {
 				dashboardR.GET("/uid/:uid", dashboard.GetDashboard)
 				dashboardR.POST("/import", dashboard.ImportDashboard)
 				dashboardR.GET("/tags", dashboard.GetAllTags)
-				dashboardR.GET("/acl/:id", dashboard.GetAcl)
-				dashboardR.POST("/acl", dashboard.UpdateAcl)
+				dashboardR.GET("/acl/team/:id", dashboard.GetTeamAcl)
+				dashboardR.POST("/acl/team", dashboard.UpdateTeamAcl)
+				dashboardR.POST("/acl/user", dashboard.AddUserAcl)
+				dashboardR.PUT("/acl/user", dashboard.UpdateUserAcl)
+				dashboardR.DELETE("/acl/user/:dashId/:userId", dashboard.DeleteUserAcl)
+				dashboardR.GET("/acl/user/:dashId", dashboard.GetUserAcl)
 				dashboardR.PUT("/ownedBy", dashboard.UpdateOwnedBy)
 			} 
 

@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	"encoding/json"
 	"github.com/apm-ai/datav/backend/internal/acl"
 	"sort"
 	"github.com/apm-ai/datav/backend/internal/cache"
@@ -87,13 +88,19 @@ func SaveDashboard(c *gin.Context) {
 		id, _ := res.LastInsertId() 
 		dash.Id = id
 	} else {
-		meta := QueryDashboardMeta(dash.Id)
-		if meta != nil && !acl.CanSaveDashboard(meta.OwnedBy,c) {
+		meta,err := QueryDashboardMeta(dash.Id)
+		if err != nil {
+			logger.Warn("update dashboard error", "error", err)
+			c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+			return
+		}
+
+		if !acl.CanSaveDashboard(dash.Id,meta.OwnedBy,c) {
 			c.JSON(403, common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
 			return 
 		}
 
-		_, err := db.SQL.Exec(`UPDATE dashboard SET uid=?, title=?, version=?, folder_id=?, data=?,updated=? WHERE id=?`,
+		_, err = db.SQL.Exec(`UPDATE dashboard SET uid=?, title=?, version=?, folder_id=?, data=?,updated=? WHERE id=?`,
 			dash.Uid, dash.Title, dash.Version, dash.FolderId, jsonData, dash.Updated, dash.Id)
 		if err != nil {
 			logger.Warn("update dashboard error", "error", err)
@@ -135,11 +142,17 @@ func UpdateOwnedBy(c *gin.Context) {
 	}
 	
 	// get current ownedby
-	meta := QueryDashboardMeta(dashId)
+	meta,err := QueryDashboardMeta(dashId)
+	if err != nil {
+		logger.Warn("query team error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
 	currentOwnedBy := meta.OwnedBy
 
 	// check we have permission to do this
-	if !acl.CanAdminDashboard(currentOwnedBy,c) {
+	if !acl.CanAdminDashboard(dashId,currentOwnedBy,c) {
 		c.JSON(403, common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
 		return
 	}
@@ -192,9 +205,9 @@ func GetDashboard(c *gin.Context) {
 
 		
 	dashMeta.CanStar = true
-	dashMeta.CanEdit = acl.CanEditDashboard(dashMeta.OwnedBy,c)
-	dashMeta.CanSave = acl.CanSaveDashboard(dashMeta.OwnedBy,c)
-	dashMeta.CanAdmin = acl.CanAdminDashboard(dashMeta.OwnedBy,c)
+	dashMeta.CanEdit = acl.CanEditDashboard(id,dashMeta.OwnedBy,c)
+	dashMeta.CanSave = acl.CanSaveDashboard(id,dashMeta.OwnedBy,c)
+	dashMeta.CanAdmin = acl.CanAdminDashboard(id,dashMeta.OwnedBy,c)
 
 
 	data := simplejson.New()
@@ -267,11 +280,11 @@ func ImportDashboard(c *gin.Context) {
 	}
 
 
-	if !acl.CanSaveDashboard(models.GlobalTeamId,c) {
+	if !acl.CanSaveDashboard(0,models.GlobalTeamId,c) {
 		c.JSON(403,common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
 		return 
 	}
- 
+  
 
 	jsonData, err := dash.Data.Encode()
 
@@ -335,7 +348,7 @@ func GetAllTags(c *gin.Context) {
 	c.JSON(200,common.ResponseSuccess(tags))
 }
 
-func GetAcl(c *gin.Context) {
+func GetTeamAcl(c *gin.Context) {
 	dashId,_ := strconv.ParseInt(c.Param("id"),10,64)
 	if dashId == 0 {
 		c.JSON(400, common.ResponseErrorMessage(nil,i18n.OFF, "bad dashboard id"))
@@ -368,7 +381,7 @@ type UpdateAclReq struct {
 	DashId int64 `json:"dashId"`
 	TeamIds []int64 `json:"teamIds"`
 }
-func UpdateAcl(c *gin.Context) {
+func UpdateTeamAcl(c *gin.Context) {
 	req := &UpdateAclReq{}
 	c.Bind(&req)
 	
@@ -377,18 +390,18 @@ func UpdateAcl(c *gin.Context) {
 		return 
 	}
 
-	meta := QueryDashboardMeta(req.DashId)
-	if meta == nil {
-		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF,"dashboar meta not found"))
+	meta,err := QueryDashboardMeta(req.DashId)
+	if err != nil {
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF,err.Error()))
 		return
 	}
 
-	if !acl.CanAdminDashboard(meta.OwnedBy, c) {
+	if !acl.CanAdminDashboard(req.DashId,meta.OwnedBy, c) {
 		c.JSON(403,common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
 		return 
 	}
 
-	_,err :=db.SQL.Exec("DELETE from dashboard_acl WHERE dashboard_id=?",req.DashId)
+	_,err =db.SQL.Exec("DELETE from dashboard_acl WHERE dashboard_id=?",req.DashId)
 	if err != nil {
 		logger.Warn("update dashboard acl error", "error", err)
 		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
@@ -406,4 +419,174 @@ func UpdateAcl(c *gin.Context) {
 	}
 
 	c.JSON(200, common.ResponseSuccess(nil))
+}
+
+type UserAclReq struct {
+	DashId int64 `json:"dashId"`
+	UserId int64 `json:"userId"`
+	Permission []int64 `json:"permission"`
+}
+func AddUserAcl(c *gin.Context) {
+	req := &UserAclReq{}
+	c.Bind(&req)
+	
+	if req.DashId == 0 || req.UserId == 0 {
+		c.JSON(400, common.ResponseErrorMessage(nil,i18n.OFF, "bad data"))
+		return 
+	}
+
+	meta,err := QueryDashboardMeta(req.DashId)
+	if err != nil {
+		logger.Warn("get dashboard meta error","dash_id",req.DashId,"error",err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return 
+	}
+
+	if !acl.CanAdminDashboard(req.DashId,meta.OwnedBy,c) {
+		c.JSON(403,common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
+		return 
+	}
+
+	var id int64 
+	err = db.SQL.QueryRow("SELECT id FROM dashboard_user_acl WHERE dashboard_id=? and user_id=?",req.DashId,req.UserId).Scan(&id)
+	if err != nil && err != sql.ErrNoRows {
+		logger.Warn("get dashboard user acl error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
+	if id != 0 {
+		c.JSON(409, common.ResponseErrorMessage(nil,i18n.OFF, "user permission already exists"))
+		return 
+	}
+
+	permissionStr,_ := json.Marshal(req.Permission)
+	_,err = db.SQL.Exec("INSERT INTO dashboard_user_acl (dashboard_id,user_id,permission,created) VALUES (?,?,?,?)",
+	req.DashId,req.UserId,permissionStr,time.Now())
+	if err != nil {
+		logger.Warn("set dashboard user acl error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
+	c.JSON(200, common.ResponseSuccess(nil))
+}
+
+func UpdateUserAcl(c *gin.Context) {
+	req := &UserAclReq{}
+	c.Bind(&req)
+	
+	if req.DashId == 0 || req.UserId == 0 {
+		c.JSON(400, common.ResponseErrorMessage(nil,i18n.OFF, "bad data"))
+		return 
+	}
+
+	meta,err := QueryDashboardMeta(req.DashId)
+	if err != nil {
+		logger.Warn("get dashboard meta error","dash_id",req.DashId,"error",err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return 
+	}
+
+	if !acl.CanAdminDashboard(req.DashId,meta.OwnedBy,c) {
+		c.JSON(403,common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
+		return 
+	}
+
+	var id int64 
+	err = db.SQL.QueryRow("SELECT dashboard_id FROM dashboard_user_acl WHERE dashboard_id=? and user_id=?",req.DashId,req.UserId).Scan(&id)
+	if err != nil && err != sql.ErrNoRows {
+		logger.Warn("get dashboard user acl error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
+	if id != req.DashId {
+		c.JSON(400, common.ResponseErrorMessage(nil,i18n.OFF, "dashboard user permission not exist"))
+		return 
+	}
+
+	permissionStr,_ := json.Marshal(req.Permission)
+	_,err = db.SQL.Exec("UPDATE dashboard_user_acl set permission=? WHERE dashboard_id=? and user_id=?",
+	permissionStr,req.DashId,req.UserId)
+	if err != nil {
+		logger.Warn("set dashboard user acl error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
+	c.JSON(200, common.ResponseSuccess(nil))
+}
+
+
+func DeleteUserAcl(c *gin.Context) {
+	dashId,_ := strconv.ParseInt(c.Param("dashId"),10,64)
+	userId,_ := strconv.ParseInt(c.Param("userId"),10,64)
+	if dashId == 0 || userId == 0{
+		c.JSON(400, common.ResponseErrorMessage(nil,i18n.OFF, "bad data"))
+		return 
+	}
+
+	meta,err := QueryDashboardMeta(dashId)
+	if err != nil {
+		logger.Warn("get dashboard meta error","dash_id",dashId,"error",err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return 
+	}
+
+	if !acl.CanAdminDashboard(dashId,meta.OwnedBy,c) {
+		c.JSON(403,common.ResponseErrorMessage(nil,i18n.ON,i18n.NoPermissionMsg))
+		return 
+	}
+
+	_,err  = db.SQL.Exec("DELETE FROM dashboard_user_acl WHERE dashboard_id =? and user_id=?",dashId,userId)
+	if err != nil {
+		logger.Warn("delete dashboard user acl error","dash_id",dashId,"error",err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return 
+	}
+
+	c.JSON(200, common.ResponseSuccess(nil))
+}
+
+type UserAcl struct {
+	UserId int64 `json:"userId"`
+	Username string `json:"username"`
+	Name string `json:"name"`
+	Permission []int64 `json:"permission"`
+}
+
+func GetUserAcl(c *gin.Context) {
+	dashId,_ := strconv.ParseInt(c.Param("dashId"),10,64)
+	if dashId == 0 {
+		c.JSON(400, common.ResponseErrorMessage(nil,i18n.OFF, "bad data"))
+		return 
+	}
+
+	userAcls := make([]*UserAcl,0)
+	rows,err := db.SQL.Query("SELECT user_id,permission FROM dashboard_user_acl WHERE dashboard_id=?",dashId)
+	if err != nil && err != sql.ErrNoRows{
+		logger.Warn("get dashboard user acl error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
+	for rows.Next() {
+		uacl := &UserAcl{}
+		var permission []byte
+		err := rows.Scan(&uacl.UserId,&permission)
+		if err != nil {
+			logger.Warn("get dashboard user acl scan error", "error", err)
+			continue
+		}
+
+		json.Unmarshal(permission, &uacl.Permission)
+
+		user,_ := models.QueryUser(uacl.UserId,"","")
+		uacl.Username = user.Username
+		uacl.Name = user.Name
+		userAcls = append(userAcls,uacl)
+	}
+
+	c.JSON(200, common.ResponseSuccess(userAcls))
 }

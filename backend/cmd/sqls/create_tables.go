@@ -216,6 +216,20 @@ var CreateTableSqls = map[string]string {
 		ON dashboard_acl (dashboard_id,team_id);
 	`,
 	
+	"dashboard_user_acl": `CREATE TABLE IF NOT EXISTS dashboard_user_acl (
+		id 					INTEGER PRIMARY KEY AUTOINCREMENT,
+		dashboard_id        INTEGER NOT NULL,
+		user_id             INTEGER NOT NULL,
+		permission          VARCHAR(40) NOT NULL,
+		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+	);
+
+	CREATE INDEX IF NOT EXISTS dashboard_user_acl_dash_id
+		ON dashboard_user_acl (dashboard_id);
+	CREATE UNIQUE INDEX IF NOT EXISTS dashboard_user_acl_dash_id_user_id
+		ON dashboard_user_acl (dashboard_id,user_id);
+	`,
+	
 	"team_acl": `CREATE TABLE IF NOT EXISTS team_acl (
 		id 					INTEGER PRIMARY KEY AUTOINCREMENT,
 		team_id        		INTEGER NOT NULL,

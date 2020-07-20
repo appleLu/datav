@@ -7,7 +7,10 @@
   .filter-table {
     width: 100%;
     border-collapse: collapse;
-  
+    
+    tr {
+      padding: 5px 10px;
+    }
     tbody {
       tr:nth-child(odd) {
         background: @item-hover-bg;
@@ -16,7 +19,6 @@
   
     th {
       width: auto;
-      padding: 4px 8px !important;
       text-align: left;
       line-height: 30px;
       height: 30px;
@@ -24,7 +26,7 @@
     }
   
     td {
-      padding: 4px 8px !important;
+      // padding: 4px 8px !important;
       line-height: 30px;
       height: 30px;
       white-space: nowrap;

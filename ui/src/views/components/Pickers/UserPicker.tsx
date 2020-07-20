@@ -5,17 +5,23 @@ import { UserState } from 'src/store/reducers/user'
 const {Option} = Select
 
 interface Props {
-    onSelectUser : any
-    selectedUsers: number[]
-    excludedUsers: {}
+    onChange : any
+    value: number[]
+    excludedUsers?: any
+    multiple?: boolean
 }
 
 const UserPicker = (props:Props) =>{
+    const {multiple=false} = props
     const [users,setUsers]: [UserState[],any] = useState([])
     const loadUsers = async () => {
         const res = await getBackendSrv().get('/api/users')
         const users = []
         res.data.forEach((user) => {
+            if (!props.excludedUsers) {
+                users.push(user)
+                return 
+            }
             if (!props.excludedUsers[user.id]) {
                 users.push(user)
             }
@@ -31,13 +37,15 @@ const UserPicker = (props:Props) =>{
         return <Option key={user.id} value={user.id}>{user.username}</Option>
     })
 
+    console.log(props.multiple)
+    
     return (
         <>
             <Select 
-                value={props.selectedUsers} 
+                value={props.value} 
                 className="width-14" 
-                mode="multiple" 
-                onChange={props.onSelectUser} 
+                mode={multiple  ? "multiple" : null}
+                onChange={props.onChange} 
                 showSearch
                 filterOption={(input, option) =>
                     option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0

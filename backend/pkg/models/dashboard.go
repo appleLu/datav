@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"database/sql"
 	"github.com/apm-ai/datav/backend/pkg/db"
 	"github.com/apm-ai/datav/backend/pkg/utils"
@@ -131,3 +132,28 @@ func QueryAclTeamIds(dashId int64) ([]int64,error) {
 
 	return teamIds,nil
 }
+
+const (
+	UserAcl_NoPermissionRules = 0
+	UserAcl_PermissionAllow= 1
+	UserAcl_PermissionForbidden = 2
+)
+// the second param stands for 'user can do nothing to the dashboard'
+func QueryUserHasDashboardPermssion(dashId int64, userId int64,permission int) int8 {
+	var rawJSON []byte
+	err := db.SQL.QueryRow("SELECT permission from dashboard_user_acl WHERE dashboard_id=? and user_id=?",dashId,userId).Scan(&rawJSON)
+	if err != nil {
+		return UserAcl_NoPermissionRules
+	}
+	
+	var permissions []int
+	json.Unmarshal(rawJSON,&permissions)
+
+	for _,p := range permissions {
+		if p == permission {
+			return UserAcl_PermissionAllow
+		}
+	}
+
+	return UserAcl_PermissionForbidden
+} 
