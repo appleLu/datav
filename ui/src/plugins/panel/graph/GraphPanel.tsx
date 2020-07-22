@@ -75,15 +75,14 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
     // global events
     this.onGraphHover = this.onGraphHover.bind(this)
     this.onGraphHoverClear = this.onGraphHoverClear.bind(this)
+    this.showAnnotationEditor = this.showAnnotationEditor.bind(this)
+    this.showAnnotationTooltip = this.showAnnotationTooltip.bind(this)
+
     appEvents.on(CoreEvents.graphHover, this.onGraphHover);
     appEvents.on(CoreEvents.graphHoverClear, this.onGraphHoverClear);
 
-    appEvents.on('showAnnotationEditor', (data) => {
-      this.showAnnotationEditor(data)
-    })
-    appEvents.on('showAnnotationTooltip', (data) => {
-      this.showAnnotationTooltip(data)
-    })
+    appEvents.on('showAnnotationEditor', this.showAnnotationEditor)
+    appEvents.on('showAnnotationTooltip', this.showAnnotationTooltip)
   }
 
   componentWillMount() {
@@ -95,6 +94,8 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
 
     appEvents.off(CoreEvents.graphHover, this.onGraphHover);
     appEvents.off(CoreEvents.graphHoverClear, this.onGraphHoverClear);
+    appEvents.off('showAnnotationEditor', this.showAnnotationEditor)
+    appEvents.off('showAnnotationTooltip', this.showAnnotationTooltip)
   }
   
   componentDidUpdate(prevProps) {  

@@ -11,6 +11,7 @@ export interface DashboardState {
     panels: { [id: string]: PanelState }
     isInitSlow: boolean
     initPhase: DashboardInitPhase
+    initErrorStatus: number
 }
 
 export const initialState: DashboardState = {
@@ -19,10 +20,12 @@ export const initialState: DashboardState = {
     isInitSlow: false,
     dashboard: null,
     panels: {},
+    initErrorStatus: null
   };
   
 
 export const dashboardInitCompleted = createAction<DashboardModel>('dashboard/initCompleted');
+export const dashboardInitError= createAction<number>('dashboard/initError');
 export const updatePanel = createAction<{ panelId: number,plugin: PanelPlugin;}>('dashboard/updatePanel');
 export const cleanUpEditPanel =  createAction('dashboard/cleanUpEditPanel');
 export const isInDashboardPage = createAction<boolean>('dashboard/isInDashboardPage')
@@ -75,7 +78,15 @@ export const dashboardReducer = (state = initialState, action: any) => {
             dashboard:null,
             panels :{},
             initPhase : DashboardInitPhase.NotStarted,
-            isInitSlow : false
+            isInitSlow : false,
+            initErrorStatus: null
+        }
+    }
+
+    if (dashboardInitError.match(action)) {
+        return {
+            ...state,
+            initErrorStatus: action.payload
         }
     }
     return state;

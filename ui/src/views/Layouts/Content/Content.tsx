@@ -15,7 +15,7 @@ function ContentWrapper(porps:any){
                     {
                         routers.map((route, i) => {
                             return(
-                                <Route key={i.toString()} path={route.url} render={(props) => <route.component key={props.match.params.uid} routeID={route.id} parentRouteID={route.parentID}  {...props}/>} />
+                                <Route exact={route.exact} key={i.toString()} path={route.url} render={(props) => <route.component key={props.match.params.uid} routeID={route.id} parentRouteID={route.parentID}  {...props}/>} />
                             )
                         })
                     }

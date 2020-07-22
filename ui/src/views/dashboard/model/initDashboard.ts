@@ -4,7 +4,7 @@ import { DashboardDTO,ThunkResult } from "src/types";
 import { getBackendSrv, config } from "src/packages/datav-core/src";
 import {store} from 'src/store/store'
 import { initDashboardTemplating, processVariables, completeDashboardTemplating } from "src/views/variables/state/actions";
-import { dashboardInitCompleted } from "src/store/reducers/dashboard";
+import { dashboardInitCompleted, dashboardInitError } from "src/store/reducers/dashboard";
 import { annotationsSrv } from 'src/core/services/annotations';
 import { message } from "antd";
 
@@ -16,9 +16,15 @@ export function initDashboard(uid: string | undefined,initOrigin: any): ThunkRes
       // return new dashboard
       ds = new DashboardModel(getNewDashboardModelData().dashboard, getNewDashboardModelData().meta)
     } else {
-      const res = await getBackendSrv().get(`/api/dashboard/uid/${uid}`)
-      ds = new DashboardModel(res.data.dashboard,res.data.meta)
+      try {
+        const res = await getBackendSrv().get(`/api/dashboard/uid/${uid}`)
+        ds = new DashboardModel(res.data.dashboard,res.data.meta)
+      } catch (error) {
+        dispatch(dashboardInitError(error.status))
+        return 
+      }
     }
+
 
     // template values service needs to initialize completely before
     // the rest of the dashboard can load

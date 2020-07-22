@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import _ from 'lodash'
 import classNames from 'classnames'
 
 import { DashboardModel } from './model/DashboardModel'
-import { Button } from 'antd'
+import { Button,Result, notification} from 'antd'
 import { DashboardGrid } from './DashGrid'
 import { getTimeSrv } from 'src/core/services/time'
 import { TimeRange, CustomScrollbar, Icon, config } from 'src/packages/datav-core'
@@ -27,8 +27,10 @@ import { SubMenu } from './components/SubMenu/SubMenu';
 import { BackButton } from '../components/BackButton/BackButton';
 import { PanelInspector, InspectTab } from '../components/Inspector/PanelInspector';
 import impressionSrv from 'src/core/services/impression'
+import { getBackendSrv } from 'src/core/services/backend';
 
 interface DashboardPageProps {
+    routeID?: string
     dashboard: DashboardModel | null;
     editPanelId?: string | null 
     viewPanelId?: string | null
@@ -36,6 +38,7 @@ interface DashboardPageProps {
     inspectPanelId?: string | null 
     inspectTab? : InspectTab
     initDashboard: typeof initDashboard
+    initErrorStatus: number
 }
 
 interface State {
@@ -46,10 +49,6 @@ interface State {
 
     editPanel: PanelModel | null
     viewPanel: PanelModel | null
-}
-
-const pathToUID = {
-    '/dashboard': 'test',
 }
 
 class DashboardPage extends React.PureComponent<DashboardPageProps & RouteComponentProps, State> {
@@ -72,7 +71,7 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
 
     // uid有两种方式传入：路径名的一部分或者通过路径名去查询uid
     getUID() {
-        return this.props.match.params['uid'] || pathToUID[this.props.location.pathname] || null
+        return this.props.match.params['uid'] || this.props.routeID && !_.startsWith(this.props.routeID, 'datav-fix-menu') && this.props.routeID || null
     }
 
     componentDidMount() {
@@ -81,6 +80,7 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
         // tracker.register(this.hasChanges.bind(this))
 
         this.init = this.init.bind(this)
+        this.setOriginDash = this.setOriginDash.bind(this)
         this.props.initDashboard(this.state.uid, (ds) => this.init(ds))
 
         // register time service notifier
@@ -91,15 +91,16 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
         appEvents.on(CoreEvents.keybindingSaveDashboard, this.saveDashboard)
 
 
-        appEvents.on(CoreEvents.dashboardSaved, () => {
-            this.originDash = _.cloneDeep(this.props.dashboard.getSaveModelClone());
-        });
+        appEvents.on(CoreEvents.dashboardSaved, this.setOriginDash);
 
 
         // because appEvents.off has no effect , so we introduce a state
         store.dispatch(isInDashboardPage(true))
     }
 
+    setOriginDash() {
+        this.originDash = _.cloneDeep(this.props.dashboard.getSaveModelClone());
+    }
     init(ds) {
         this.originDash = _.cloneDeep(ds)
 
@@ -121,6 +122,7 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
         tracker.unregister()
 
         appEvents.off(CoreEvents.keybindingSaveDashboard, this.saveDashboard)
+        appEvents.off(CoreEvents.dashboardSaved, this.setOriginDash);
 
         appEvents.emit('set-dashboard-page-header', null)
 
@@ -134,6 +136,10 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
     }
 
     componentDidUpdate() {
+        if (this.props.initErrorStatus === 403) {
+            return 
+        }
+        
         const { dashboard, editPanelId, viewPanelId } = this.props
         const { editPanel, viewPanel } = this.state
 
@@ -274,9 +280,21 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
         const target = e.target as HTMLElement;
         this.setState({ scrollTop: target.scrollTop, updateScrollTop: null });
     };
-
+    
     render() {
-        const { dashboard, settingView,inspectTab } = this.props
+        const { dashboard, settingView,inspectTab,initErrorStatus} = this.props
+        if (initErrorStatus == 403) {
+            return (
+                <div>
+                    <Result
+                        status="403"
+                        title="403"
+                        subTitle="Sorry, you are not authorized to access this page."
+                        extra={<Button type="primary">Apply for acess rights</Button>}
+                    />
+                </div>
+            )
+        }
         const { updateScrollTop, scrollTop, editPanel, viewPanel } = this.state
         if (!dashboard) {
             return null
@@ -316,29 +334,6 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
         )
     }
 }
-
-
-export const mapStateToProps = (state: StoreState) => {
-    return {
-        initPhase: state.dashboard.initPhase,
-        isInitSlow: state.dashboard.isInitSlow,
-        editPanelId: state.location.query.editPanel,
-        viewPanelId: state.location.query.viewPanel,
-        settingView: state.location.query.settingView,
-        dashboard: state.dashboard.dashboard,
-        isPanelEditorOpen: state.panelEditor.isOpen,
-        inspectPanelId: state.location.query.inspect,
-        inspectTab: state.location.query.inspectTab,
-    }
-}
-
-const mapDispatchToProps = {
-    initDashboard,
-};
-
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(DashboardPage))
-
-
 
 // remove stuff that should not count in diff
 function cleanDashboardFromIgnoredChanges(dashData: any) {
@@ -380,3 +375,28 @@ function cleanDashboardFromIgnoredChanges(dashData: any) {
 
     return dash;
 }
+
+
+export const mapStateToProps = (state: StoreState) => {
+    return {
+        initPhase: state.dashboard.initPhase,
+        isInitSlow: state.dashboard.isInitSlow,
+        editPanelId: state.location.query.editPanel,
+        viewPanelId: state.location.query.viewPanel,
+        settingView: state.location.query.settingView,
+        dashboard: state.dashboard.dashboard,
+        initErrorStatus: state.dashboard.initErrorStatus,
+        isPanelEditorOpen: state.panelEditor.isOpen,
+        inspectPanelId: state.location.query.inspect,
+        inspectTab: state.location.query.inspectTab,
+    }
+}
+
+const mapDispatchToProps = {
+    initDashboard,
+};
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(DashboardPage))
+
+
+

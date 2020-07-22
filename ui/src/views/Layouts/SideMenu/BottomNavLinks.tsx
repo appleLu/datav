@@ -54,7 +54,7 @@ export const BottomNavLinks = (props:Props) => {
     }
    
 
-    if (link.id === 'help') {
+    if (link.id === 'datav-fix-menu-help') {
       children = getFooterLinks();
     }
 
@@ -102,7 +102,7 @@ export const BottomNavLinks = (props:Props) => {
             </li>
           )} */}
 
-          {link.id === 'user' && (
+          {link.id === 'datav-fix-menu-user' && (
             <li key="change-theme">
               <a onClick={() => {
                 if (props.theme === ThemeType.Light) {
@@ -118,7 +118,7 @@ export const BottomNavLinks = (props:Props) => {
             </li>
           )}
 
-          {link.id === 'user' && (
+          {link.id === 'datav-fix-menu-user' && (
             <li key="change-lang">
               <a onClick={() => {
                 store.dispatch(updateLocale())
@@ -135,16 +135,16 @@ export const BottomNavLinks = (props:Props) => {
               'sidemenu-dropdown-item-selected' : subMenuItemSelected
             }) 
             return (
-              <li key={`${child.text}-${index}`} className={subMenuItemClasses}>
+              <li key={`${child.title}-${index}`} className={subMenuItemClasses}>
                 <Link to={child.url} rel="noopener">
                   {/* {child.icon && <Icon name={child.icon as IconName} className={subMenuIconClassName} />} */}
-                  {child.text}
+                  {child.title}
                 </Link>
               </li>
             );
           })}
 
-          {link.id === 'user' && (
+          {link.id === 'datav-fix-menu-user' && (
             <li key="signout">
               <a onClick={logout}>
                 {/* <Icon name="keyboard" className={subMenuIconClassName} />  */}
@@ -153,7 +153,7 @@ export const BottomNavLinks = (props:Props) => {
             </li>
           )}
 
-          {link.id === 'help' && (
+          {link.id === 'datav-fix-menu-help' && (
             <li key="keyboard-shortcuts">
               <a onClick={() => this.onOpenShortcuts()}>
                 {/* <Icon name="keyboard" className={subMenuIconClassName} />  */}
@@ -163,7 +163,7 @@ export const BottomNavLinks = (props:Props) => {
           )}
 
           <li className="side-menu-header">
-            <span className="sidemenu-item-text">{link.text}</span>
+            <span className="sidemenu-item-text">{link.title}</span>
           </li>
         </ul>
       </div>

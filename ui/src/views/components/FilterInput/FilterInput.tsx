@@ -13,7 +13,6 @@ export interface Props {
 export const FilterInput: FC<Props> = props => (
   <Input
     // Replaces the usage of ref
-    autoFocus
     prefix={<Icon name="search" />}
     width={40}
     type="text"

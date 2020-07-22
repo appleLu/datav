@@ -22,9 +22,8 @@ const TopSection = () => {
     return true
   });
   const searchLink:MenuItem= {
-    text: 'Search',
+    title: 'Search',
     icon: 'search',
-    sortWeight: -50,
     url: ''
   };
 

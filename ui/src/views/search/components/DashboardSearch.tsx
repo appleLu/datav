@@ -23,7 +23,7 @@ export const DashboardSearch: FC<Props> = memo(({ onCloseSearch, folder }) => {
     <div tabIndex={0} className={styles.overlay}>
       <div className={styles.container}>
         <div className={styles.searchField}>
-          <SearchField query={query} onChange={onQueryChange} onKeyDown={onKeyDown} autoFocus clearable />
+          <SearchField query={query} onChange={onQueryChange} onKeyDown={onKeyDown}  clearable />
           <div className={styles.closeBtn}>
             <IconButton name="times" surface="panel" onClick={onCloseSearch} size="xxl" tooltip="Close search" />
           </div>

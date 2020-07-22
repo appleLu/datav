@@ -1,6 +1,7 @@
 package sqls
 
 import (
+	"encoding/json"
 	"github.com/apm-ai/datav/backend/internal/teams"
 	"github.com/apm-ai/datav/backend/pkg/utils"
 	"time"
@@ -49,23 +50,24 @@ func CreateTables() {
 		}
 	}
 	
+	now := time.Now()
 	// insert init data
 	_,err := db.SQL.Exec(`INSERT INTO user (id,username,password,salt,email,created,updated) VALUES (?,?,?,?,?,?,?)`,
-		models.SuperAdminId,models.SuperAdminUsername,adminPW,adminSalt,models.SuperAdminUsername+"@localhost",time.Now(),time.Now())
+		models.SuperAdminId,models.SuperAdminUsername,adminPW,adminSalt,models.SuperAdminUsername+"@localhost",now,now)
 	if err != nil {
 		log.RootLogger.Crit("init super admin error","error:",err)
 		panic(err)
 	}
 
 	_,err = db.SQL.Exec(`INSERT INTO team (id,name,created_by,created,updated) VALUES (?,?,?,?,?)`,
-		models.GlobalTeamId,models.GlobalTeamName,models.SuperAdminId,time.Now(),time.Now())
+		models.GlobalTeamId,models.GlobalTeamName,models.SuperAdminId,now,now)
 	if err != nil {
 		log.RootLogger.Crit("init global team error","error:",err)
 		panic(err)
 	}
 
 	_,err = db.SQL.Exec(`INSERT INTO team_member (team_id,user_id,role,created,updated) VALUES (?,?,?,?,?)`,
-		models.GlobalTeamId,models.SuperAdminId,models.ROLE_ADMIN,time.Now(),time.Now())
+		models.GlobalTeamId,models.SuperAdminId,models.ROLE_ADMIN,now,now)
 	if err != nil {
 		log.RootLogger.Crit("init global team member error","error:",err)
 		panic(err)
@@ -73,6 +75,28 @@ func CreateTables() {
 
 	// init global team permission
 	teams.InitTeamPermission(models.GlobalTeamId)
+
+	// insert default sidemenu
+	menu := []map[string]string {
+		{
+			"id": "home",
+			"url": "/dashboard",
+			"title": "Home Dashboard",
+			"icon": "home-alt",
+		},
+	}
+	menuStr, err := json.Marshal(menu)
+	if err != nil {
+		log.RootLogger.Crit("json encode default menu error ","error:",err)
+		panic(err)
+	}
+
+	_,err = db.SQL.Exec(`INSERT INTO sidemenu (id,team_id,desc,data,created_by,created,updated) VALUES (?,?,?,?,?,?,?)`,
+		models.DefaultMenuId,models.GlobalTeamId, models.DefaultMenuDesc, menuStr,models.SuperAdminId,now,now)
+	if err != nil {
+		log.RootLogger.Crit("init default side menu  error","error:",err)
+		panic(err)
+	}
 }
 
 
@@ -286,6 +310,22 @@ var CreateTableSqls = map[string]string {
 		ON team_member (user_id);
 	CREATE UNIQUE INDEX IF NOT EXISTS team_member_team_user_id 
 		ON team_member (team_id, user_id);
+	`,
+
+	"sidemenu" : `
+	CREATE TABLE IF NOT EXISTS sidemenu (
+		id 					INTEGER PRIMARY KEY AUTOINCREMENT,
+		team_id             INTEGER NOT NULL,
+		desc                TEXT DEFAUlT '',
+		data                MEDIUMTEXT NOT NULL,
+		created_by          INTEGER NOT NULL,
+		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
+		updated 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+	);
+	CREATE INDEX IF NOT EXISTS sidemenu_team_id
+		ON sidemenu (team_id);
+	CREATE UNIQUE INDEX IF NOT EXISTS sidemenu_team_id
+		ON sidemenu (team_id);
 	`,
 }
 

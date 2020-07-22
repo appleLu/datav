@@ -29,6 +29,7 @@ const zhCN: localeData = {
     userNotExist: "用户名不存在",
     incorrectPW: "密码错误",
     needLogin: "未授权请求，请重新登录",
-    noPermission: "权限不足"
+    noPermission: "权限不足",
+    teamNotExist: "Team不存在"
 }
 export default zhCN

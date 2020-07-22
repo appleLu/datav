@@ -44,13 +44,13 @@ import { setContextSrv } from 'src/core/services/context';
 import { standardEditorsRegistry, getStandardOptionEditors } from 'src/packages/datav-core/src';
 import globalEvents from './globalEvents'
 import { getDefaultVariableAdapters, variableAdapters } from 'src/views/variables/adapters';
-import { initRoutes} from 'src/routes';
+import { initRoutes } from 'src/routes';
 interface Props {
   theme: string
 }
 
 const UIApp = (props: Props) => {
-  const [bootConfigInited, setBootConfigInited] = useState(false)
+  const [canRender, setCanRender] = useState(false)
   const { theme } = props
   setCurrentTheme(theme as ThemeType)
 
@@ -62,6 +62,22 @@ const UIApp = (props: Props) => {
 
   // only call in initial phase
   useEffect(() => {
+    initAll()
+  }, [])
+
+
+
+  const initAll = async () => {
+    // init backend service
+    initBackendService()
+
+    // init time service
+    initTimeService()
+
+    // load boot config
+    const res = await getBackendSrv().get('/api/bootConfig');
+    setBootConfig(res.data)
+
     variableAdapters.setInit(getDefaultVariableAdapters);
 
     globalEvents.init()
@@ -74,20 +90,12 @@ const UIApp = (props: Props) => {
     // init datasource service
     initDatasourceService()
 
-    // init backend service
-    initBackendService()
-
-    // init time service
-    initTimeService()
-
     // init keybinding service
     initKeybindingService()
 
     // set markdown options
     setMarkdownOptions({ sanitize: true })
 
-    // load boot config
-    initBootConfig()
 
     // init location service
     setLocationSrv({
@@ -95,7 +103,6 @@ const UIApp = (props: Props) => {
         store.dispatch(updateLocation(opt));
       },
     });
-
 
     // init context service
     setContextSrv(store.getState().user.id, store.getState().user.role)
@@ -107,37 +114,8 @@ const UIApp = (props: Props) => {
       },
     });
 
-    async function initBootConfig() {
-        const res = await getBackendSrv().get('/api/bootConfig');
-        setBootConfig(res.data)
-        setBootConfigInited(true)
-    }
-
-    function initDatasourceService() {
-      const ds = new DatasourceSrv()
-      setDataSourceService(ds);
-    }
-
-
-    function initBackendService() {
-      setBackendSrv(backendSrv)
-    }
-
-
-    function initTimeService() {
-      const ds = new TimeSrv()
-      setTimeSrv(ds);
-    }
-
-    function initKeybindingService() {
-      const kb = new KeybindingSrv()
-      setKeybindingSrv(kb)
-    }
-
-  }, [])
-
-
-
+    setCanRender(true)
+  }
 
   const customConfirm = (message, callback) => {
     Modal.confirm({
@@ -153,7 +131,7 @@ const UIApp = (props: Props) => {
   }
 
   const render =
-    bootConfigInited === true
+    canRender
       ?
       <ThemeContext.Provider value={getTheme(props.theme)}>
         <Intl >
@@ -170,6 +148,28 @@ const UIApp = (props: Props) => {
       :
       <></>
   return render
+}
+
+
+function initDatasourceService() {
+  const ds = new DatasourceSrv()
+  setDataSourceService(ds);
+}
+
+
+function initBackendService() {
+  setBackendSrv(backendSrv)
+}
+
+
+function initTimeService() {
+  const ds = new TimeSrv()
+  setTimeSrv(ds);
+}
+
+function initKeybindingService() {
+  const kb = new KeybindingSrv()
+  setKeybindingSrv(kb)
 }
 
 export const mapStateToProps = (state: StoreState) => ({

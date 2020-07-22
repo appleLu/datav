@@ -30,7 +30,8 @@ const enUS:localeData = {
     userNotExist: "user not exist",
     incorrectPW: "incorrect password",
     needLogin: "You need to be authorized,please login",
-    noPermission: "You  have no permisson"
+    noPermission: "You  have no permisson",
+    teamNotExist: "team not exist"
 
 }
 export default enUS

@@ -7,6 +7,7 @@ export interface BootConfig {
     datasourceMetas: {string:DataSourcePluginMeta}
     datasources: {string:DataSourceInstanceSettings}
     panels:{string: any}
+    sidemenu: any[]
 }
 let bootConfig:BootConfig = null
 export const setBootConfig = (config:BootConfig) => {

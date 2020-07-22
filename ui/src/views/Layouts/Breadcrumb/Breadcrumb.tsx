@@ -23,7 +23,7 @@ const BreadcrumbWrapper = (props:Props) =>{
         text = props.text
         icon = 'apps'
     } else {
-        text = route.text
+        text = route.title
         icon = route.icon
     }
     

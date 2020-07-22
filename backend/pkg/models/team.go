@@ -71,6 +71,23 @@ func QueryTeam(id int64, name string) (*Team, error) {
 	return team, nil
 }
 
+func IsTeamExist(id int64, name string) (bool) {
+	var qid int64
+	err := db.SQL.QueryRow(`SELECT id FROM team WHERE id=? or name=?`,
+		id, name).Scan(&qid)
+	if err != nil {
+		return false
+	}
+
+	if qid == id {
+		return true
+	}
+
+	return false
+}
+
+
+
 func QueryTeamMember(teamId int64, userId int64) (*TeamMember, error) {
 	member := &TeamMember{}
 	member.Role = ROLE_VIEWER

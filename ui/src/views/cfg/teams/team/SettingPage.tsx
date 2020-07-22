@@ -141,7 +141,7 @@ export class TeamSettingPage extends PureComponent<Props, State> {
                 n.url = n.url.replace(":id", team.id)
             })
 
-            navModel.main.text = navModel.main.text + ' / ' + team.name
+            navModel.main.title = navModel.main.title + ' / ' + team.name
         } else {
             navModel = _.cloneDeep(getNavModel(routeID, parentRouteID))
         }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import _ from 'lodash'
 import { Modal, Form, Input, Button, message,Select,notification} from 'antd'
 import {  DashboardModel,PanelModel } from 'src/views/dashboard/model'
 import { getBackendSrv } from 'src/core/services/backend';
@@ -8,6 +9,7 @@ import { useHistory } from 'react-router-dom';
 import appEvents from 'src/core/library/utils/app_events';
 import { CoreEvents, FolderDTO } from 'src/types';
 import globalEvents from 'src/views/App/globalEvents';
+import { getUrlParams } from 'src/core/library/utils/url';
 
 const {Option} = Select
 
@@ -51,8 +53,8 @@ const SaveDashboard = (props: Props) => {
         dashboard.meta.folderId = val.folderId
         const clone = getSaveAsDashboardClone(dashboard);
 
-        
-        const res = await  getBackendSrv().saveDashboard(clone,{folderId:val.folderId})
+        const fromTeam = _.toNumber(getUrlParams()['fromTeam'])
+        const res = await  getBackendSrv().saveDashboard(clone,{folderId:val.folderId,fromTeam: fromTeam})
 
         appEvents.emit(CoreEvents.dashboardSaved, dashboard);
 

@@ -1,9 +1,10 @@
 export interface NavModelItem {
-  text: string;
+  text?: string;
+  title?: string;
   url?: string;
   subTitle?: string;
   icon?: string;
-  img?: string;
+  img?: string; 
   id?: string;
   active?: boolean;
   hideFromTabs?: boolean;

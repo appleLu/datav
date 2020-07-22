@@ -11,10 +11,13 @@ import AddMember from './Member/AddMember'
 import { TeamMember } from 'src/types';
 import appEvents from 'src/core/library/utils/app_events';
 import { getState } from 'src/store/store';
+import { Button } from 'antd';
+import { LinkButton } from 'src/packages/datav-core/src';
 
 export interface Props {
     routeID: string;
     parentRouteID: string;
+    history?: any
 }
 
 interface State {
@@ -34,12 +37,14 @@ export class TeamMemberPage extends PureComponent<Props, State> {
             teamMemberOfCurrentUser: null
         }
 
-        appEvents.on('update-team-member', () => {
-            this.loadMembers()
-        })
+        this.loadMembers = this.loadMembers.bind(this)
+        appEvents.on('update-team-member', this.loadMembers)
     }
         
-    
+    componentWillMount() {
+        appEvents.off('update-team-member', this.loadMembers)
+    }
+
     loadMembers = async () => {
         const res =  await getBackendSrv().get(`/api/teams/members/${this.state.team.id}`)
         const members = res.data 
@@ -76,7 +81,7 @@ export class TeamMemberPage extends PureComponent<Props, State> {
     }
 
     render() {
-        const { routeID, parentRouteID } = this.props
+        const { routeID, parentRouteID ,history} = this.props
 
         const {team,hasFetched,members,teamMemberOfCurrentUser} = this.state
         let navModel;
@@ -88,7 +93,7 @@ export class TeamMemberPage extends PureComponent<Props, State> {
                   n.url = n.url.replace(":id",team.id)
               })
     
-            navModel.main.text = navModel.main.text + ' / ' + team.name
+            navModel.main.title = navModel.main.title + ' / ' + team.name
         } else {
             navModel = _.cloneDeep(getNavModel(routeID,parentRouteID))
         }
@@ -114,9 +119,14 @@ export class TeamMemberPage extends PureComponent<Props, State> {
                 <Page.Contents isLoading={!hasFetched}>
                     { 
                         hasFetched &&  
-                        <>
-                            {isAdmin(teamMemberOfCurrentUser.role) && <div style={{float: 'right'}}><AddMember teamId={team.id} inTeamMembers={teamMemberIds}/></div>}
-                            <div style={{ marginTop: isAdmin(teamMemberOfCurrentUser.role) ? '40px' : '0px'}} ><MemberTable teamCreatedBy={team.createdById} teamId={team.id} members={members} teamMemberOfCurrentUser={teamMemberOfCurrentUser}/></div>
+                        <>  
+                             <LinkButton onClick={() => history.push(`/new/dashboard?fromTeam=${team.id}`)} className="ub-mr2" variant="secondary">Add Dashboard</LinkButton>
+
+                            {(isAdmin(getState().user.role) || isAdmin(teamMemberOfCurrentUser.role)) && 
+                            <div style={{float: 'right'}}>
+                                <AddMember teamId={team.id} inTeamMembers={teamMemberIds}/>
+                            </div>}
+                            <div style={{ marginTop: '10px'}} ><MemberTable teamCreatedBy={team.createdById} teamId={team.id} members={members} teamMemberOfCurrentUser={teamMemberOfCurrentUser}/></div>
                         </>
                     }
                 </Page.Contents>

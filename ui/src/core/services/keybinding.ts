@@ -11,9 +11,15 @@ export class KeybindingSrv {
   }
 
   setupGlobal() {
-    this.bind('g h', this.goToHome);
-    this.bind('g p', this.goToPlugins);
+    this.bind('h', this.goToHome);
+    this.bind('p', this.goToPlugins);
+    this.bind('t', this.gotoTeams);
+    this.bind('u', this.gotoUsers);
+    this.bind('n', this.gotoNewDashboard);
     this.bind('mod+s', this.saveDashboard);
+    this.bind('s', this.openSerach);
+    this.bind('b', this.goBack);
+    this.bind('f', this.goForward);
     this.bind('esc', this.exit);
   }
 
@@ -41,6 +47,29 @@ export class KeybindingSrv {
     appEvents.emit(CoreEvents.keybindingSaveDashboard)
   }
 
+  openSerach() {
+    getLocationSrv().update({query: {search: 'open'},partial:true})
+  }
+
+  gotoTeams() {
+    getHistory().push('/cfg/teams')
+  }
+
+  gotoUsers() {
+    getHistory().push('/cfg/users')
+  }
+
+  gotoNewDashboard() {
+    getHistory().push('/new/dashboard')
+  }
+
+  goBack() {
+    getHistory().goBack()
+  }
+
+  goForward() {
+    getHistory().goForward()
+  }
   exit() {
     const search = getUrlParams()
     if (search.settingView) {

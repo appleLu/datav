@@ -21,7 +21,7 @@ export default function BottomSection() {
     return true
   });
   // const isSignedIn = contextSrv.isSignedIn;
-
+  
   return (
     <div className="sidemenu__bottom">
       {bottomNav.map((link, index) => {

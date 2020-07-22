@@ -37,9 +37,9 @@ function HeaderWrapper(props: Props) {
 
    const [backButtonComponent, setBackButtonComponent] = useState(null)
    appEvents.on('set-panel-viewing-back-button',(component) => {
-    if (!backButtonComponent) {
-        setBackButtonComponent(component)
-    }
+        if (!backButtonComponent) {
+            setBackButtonComponent(component)
+        }
     })
    
     return (

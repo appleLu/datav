@@ -48,7 +48,7 @@ const SelectNav = ({ children, customCss }: { children: MenuItem[]; customCss: s
           }
           return (
             <option key={navItem.url} value={navItem.url}>
-              {navItem.text}
+              {navItem.title}
             </option>
           );
         })}
@@ -77,7 +77,7 @@ const Navigation = ({ children }: { children: MenuItem[] }) => {
           return (
             !child.hideFromTabs && (
               <Tab
-                label={child.text}
+                label={child.title}
                 active={child.active}
                 key={`${child.url}-${index}`}
                 icon={child.icon as IconName}
@@ -137,8 +137,8 @@ const PageHeader = (props) => {
         </span>
 
         <div className="page-header__info-block">
-          {renderTitle(main.text, main.breadcrumbs ?? [])}
-          {main.title && <div className="page-header__sub-title">{main.title}</div>}
+          {renderTitle(main.title, main.breadcrumbs ?? [])}
+          {main.subTitle && <div className="page-header__sub-title">{main.subTitle}</div>}
         </div>
       </div>
     );

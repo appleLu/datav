@@ -6,9 +6,9 @@ import {store} from 'src/store/store'
 function getNotFoundModel(): NavModel {
     const node: MenuItem = {
         id: 'not-found',
-        text: 'Page not found',
+        title: 'Page not found',
         icon: 'exclamation-triangle',
-        title: '404 Error',
+        subTitle: '404 Error',
         url: 'not-found',
     };
 
@@ -72,9 +72,9 @@ export function getNotFoundNav(): NavModel {
     return getWarningNav('Page not found', '404 Error');
   }
   
-  export function getWarningNav(text: string, subTitle?: string): NavModel {
+  export function getWarningNav(title: string, subTitle?: string): NavModel {
     const node = {
-      text,
+      title,
       subTitle,
       icon: 'exclamation-triangle',
     };

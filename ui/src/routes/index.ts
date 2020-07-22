@@ -3,271 +3,296 @@ import React from 'react'
 
 import _ from 'lodash'
 import { StoreState, MenuPosition, Role, MenuItem } from 'src/types'
-import { Store } from 'redux'; 
+import { Store } from 'redux';
 import { updateMenuItems } from 'src/store/reducers/menu';
-export const routers = []
+import { getBootConfig } from 'src/packages/datav-core/src';
+export let routers = []
 export const initRoutes = (store: Store<StoreState>) => {
-    const menuItems: MenuItem[] = [
+    console.log(getBootConfig().sidemenu)
+    getBootConfig().sidemenu.forEach((item: MenuItem) => {
+        item.showPosition = MenuPosition.Top
+        item.exact = true
+        if (item.children && item.children.length != 0) {
+            item.children.forEach((child) => {
+                child.exact = true
+                child.component = React.lazy(() => import('src/views/dashboard/DashboardPage'))
+            })
+        }
+
+        item.component = React.lazy(() => import('src/views/dashboard/DashboardPage'))
+    })
+
+    const dashboardMenumItems = getBootConfig().sidemenu
+
+    const fixMenuItems: MenuItem[] = [
         {
-            id: 'dashboard',
-            url: '/dashboard',
-            text: 'Home Dashboard',
-            icon: 'home-alt',
-            title: 'DataV Home Page',
-            showPosition: MenuPosition.Top,
-            sortWeight: 0,
-            component: React.lazy(() => import('src/views/dashboard/DashboardPage'))
-        },
-        {
-            id: 'd',
+            id: 'datav-fix-menu-d',
             url: '/d/:uid',
-            text: 'Dashboard Page',
-            icon: 'home-alt',
             title: 'Dashboard Page',
+            icon: 'home-alt',
+            subTitle: 'Dashboard Page',
             showPosition: null,
-            sortWeight: 0,
+            exact:false,
             component: React.lazy(() => import('src/views/dashboard/DashboardPage'))
         },
 
         {
-            id: 'plugin',
+            id: 'datav-fix-menu-plugin',
             url: '/plugin/:pluginID',
-            text: 'Plugin Info',
+            title: 'Plugin Info',
             icon: 'home-alt',
             component: React.lazy(() => import('src/views/cfg/plugins/PluginPage')),
-            title: 'Plugin Info',
+            subTitle: 'Plugin Info',
             showPosition: null,
-            sortWeight: 0,
-            parentID: null
+            parentID: null,
+            exact:false,
         },
         {
-            id: 'newDataSource',
+            id: 'datav-fix-menu-newDataSource',
             url: '/datasources/new',
-            text: 'New Datasource',
+            title: 'New Datasource',
             icon: 'home-alt',
             component: React.lazy(() => import('src/views/cfg/datasources/NewDataSourcePage')),
-            title: 'New Datasource',
+            subTitle: 'New Datasource',
             showPosition: null,
-            sortWeight: 0,
-            parentID: null
+            parentID: null,
+            exact: true
         },
         {
-            id: 'editDataSource',
+            id: 'datav-fix-menu-editDataSource',
             url: '/datasources/edit/:datasourceID',
-            text: 'Edit DataSource',
+            title: 'Edit DataSource',
             icon: 'home-alt',
             component: React.lazy(() => import('src/views/cfg/datasources/EditDataSourcePage')),
-            title: 'Edit DataSource',
+            subTitle: 'Edit DataSource',
             showPosition: null,
-            sortWeight: 0,
-            parentID: null
+            parentID: null,
+            exact:false
         },
-        {
-            id: 'trace',
-            url: '/trace',
-            text: 'trace',
-            title: 'Distributed trcacing',
-            icon: 'compass',
-            showPosition: MenuPosition.Top,
-            redirectTo: '/trace/1',
-            children: [
-                {
-                    id: '1',
-                    url: '/1',
-                    text: 'Trace Search',
-                    component: React.lazy(() => import('src/views/TraceSearch'))
-                },
-                {
-                    id: '2',
-                    url: '/2',
-                    text: 'Trace Search',
-                    component: React.lazy(() => import('src/views/TraceSearch'))
-                }
-            ],
-            sortWeight: -100
-        },
-
         // these two are core menu items, be careful to modify
         {
-            id: 'new',
+            id: 'datav-fix-menu-new',
             url: '/new',
-            text: 'New',
-            title: 'Add something new',
+            title: 'New',
+            subTitle: 'Add something new',
             icon: 'plus',
             showPosition: MenuPosition.Bottom,
             redirectTo: null,
             needRole: Role.Editor,
+            exact: true,
             children: [
                 {
                     icon: 'database',
-                    id: 'create-dashboard',
-                    url: '/dashboard',
-                    text: 'Dashboard',
+                    id: 'datav-fix-menu-create-dashboard',
+                    url: '/new/dashboard',
+                    title: 'Dashboard',
+                    exact: true,
                     component: React.lazy(() => import('src/views/dashboard/DashboardPage'))
                 },
                 {
                     icon: 'database',
-                    id: 'import-dashboard',
-                    url: '/import',
-                    text: 'Import',
+                    id: 'datav-fix-menu-import-dashboard',
+                    url: '/new/import',
+                    title: 'Import',
+                    exact: true,
                     component: React.lazy(() => import('src/views/dashboard/ImportPage'))
                 },
                 {
                     icon: 'database',
-                    id: 'new-folder',
-                    text: 'Folder',
-                    url: '/folder',
+                    id: 'datav-fix-menu-new-folder',
+                    title: 'Folder',
+                    url: '/new/folder',
                     needRole: Role.Editor,
+                    exact: true,
                     component: React.lazy(() => import('src/views/search/components/DashboardListPage'))
                 },
                 {
                     icon: 'database',
-                    id: 'new-team',
-                    text: 'Team',
-                    url: '/team',
+                    id: 'datav-fix-menu-new-team',
+                    title: 'Team',
+                    url: '/new/team',
                     needRole: Role.Admin,
+                    exact: true,
                     component: React.lazy(() => import('src/views/cfg/teams/TeamsPage'))
                 },
             ],
-            sortWeight: -100
         },
         {
-            id: 'cfg',
+            id: 'datav-fix-menu-cfg',
             url: '/cfg',
-            text: 'Configuration',
+            title: 'Configuration',
             icon: 'cog',
-            title: 'Settings for datav',
+            subTitle: 'Settings for datav',
             showPosition: MenuPosition.Bottom,
             redirectTo: null,
+            exact: true,
             children: [
                 {
                     icon: "database",
-                    id: "datasources",
-                    text: "Data Sources",
-                    url: "/datasources",
+                    id: "datav-fix-menu-datasources",
+                    title: "Data Sources",
+                    url: "/cfg/datasources",
                     needRole: Role.Admin,
+                    exact: true,
                     component: React.lazy(() => import('src/views/cfg/datasources/DataSourceListPage'))
                 },
                 {
                     icon: "plug",
-                    id: "plugins",
-                    text: "Plugins",
-                    url: "/plugins",
+                    id: "datav-fix-menu-plugins",
+                    title: "Plugins",
+                    url: "/cfg/plugins",
+                    exact: true,
                     component: React.lazy(() => import('src/views/cfg/plugins/Plugins'))
                 },
                 {
                     icon: "folder",
-                    id: "folders",
-                    text: "Folders",
-                    url: "/folders",
+                    id: "datav-fix-menu-folders",
+                    title: "Folders",
+                    url: "/cfg/folders",
                     needRole: Role.Editor,
+                    exact: true,
                     component: React.lazy(() => import('src/views/search/components/DashboardListPage'))
                 },
                 {
                     icon: "users-alt",
-                    id: "users",
-                    text: "Users",
-                    url: "/users",
+                    id: "datav-fix-menu-users",
+                    title: "Users",
+                    url: "/cfg/users",
+                    exact: true,
                     component: React.lazy(() => import('src/views/cfg/users/UserPage'))
                 },
                 {
                     icon: "users-alt",
-                    id: "teams",
-                    text: "Teams",
-                    url: "/teams",
+                    id: "datav-fix-menu-teams",
+                    title: "Teams",
+                    url: "/cfg/teams",
+                    exact: true,
                     component: React.lazy(() => import('src/views/cfg/teams/TeamsPage'))
                 },
             ]
         },
         {
-            id: 'team-manage',
+            id: 'datav-fix-menu-team-manage',
             url: null,
-            text: 'Team',
+            title: 'Team',
             icon: 'users-alt',
-            title: 'Manage team members & settings',
+            subTitle: 'Manage team members & settings',
             showPosition: null,
             redirectTo: null,
+            exact: true,
             children: [
                 {
                     icon: "users-alt",
-                    id: "team-members",
-                    text: "Members",
+                    id: "datav-fix-menu-team-members",
+                    title: "Members",
                     url: "/team/members/:id",
+                    exact: false,
                     component: React.lazy(() => import('src/views/cfg/teams/team/MemberPage'))
                 },
                 {
+                    icon: "list-ul",
+                    id: "datav-fix-menu-team-sidemenu",
+                    title: "Side Menu",
+                    url: "/team/sidemenu/:id",
+                    exact: false,
+                    component: React.lazy(() => import('src/views/cfg/teams/team/SideMenuPage'))
+                },
+                {
                     icon: "cog",
-                    id: "team-setting",
-                    text: "Setting",
+                    id: "datav-fix-menu-team-setting",
+                    title: "Setting",
                     url: "/team/setting/:id",
+                    exact: false,
                     component: React.lazy(() => import('src/views/cfg/teams/team/SettingPage'))
                 },
             ]
         },
         {
-            id: 'manage-folder',
+            id: 'datav-fix-menu-manage-folder',
             url: null,
-            text: 'Folder',
+            title: 'Folder',
             icon: 'folder-open',
-            title: 'Manage folder dashboards & permissions',
+            subTitle: 'Manage folder dashboards & permissions',
             showPosition: null,
             redirectTo: null,
+            exact: true,
             children: [
                 {
                     icon: "th-large",
-                    id: "folder-dashboard",
-                    text: "Dashboards",
+                    id: "datav-fix-menu-folder-dashboard",
+                    title: "Dashboards",
                     url: "/f/:uid/dashboards",
+                    exact: false,
                     component: React.lazy(() => import('src/views/search/components/DashboardListPage'))
                 },
                 {
                     icon: "cog",
-                    id: "folder-settings",
-                    text: "Settings",
+                    id: "datav-fix-menu-folder-settings",
+                    title: "Settings",
                     url: "/f/:uid/settings",
+                    exact: false,
                     component: React.lazy(() => import('src/views/search/components/DashboardListPage'))
                 },
             ]
         },
         {
-            id: 'user',
+            id: 'datav-fix-menu-user',
             url: '/user',
-            text: store.getState().user.name == '' ? store.getState().user.username : store.getState().user.username + ' / ' + store.getState().user.name,
+            title: store.getState().user.name == '' ? store.getState().user.username : store.getState().user.username + ' / ' + store.getState().user.name,
             icon: 'user',
             showPosition: MenuPosition.Bottom,
             redirectTo: '/user/preferences',
+            exact: true,
             children: [
                 {
                     icon: "sliders-v-alt",
-                    id: "preferences",
-                    text: "Preferences",
+                    id: "datav-fix-menu-preferences",
+                    title: "Preferences",
                     url: "/preferences",
+                    exact: true,
                     component: React.lazy(() => import('src/views/Test'))
                 }
             ]
         },
         {
-            id: 'help',
+            id: 'datav-fix-menu-help',
             url: '/help',
-            text: 'Help',
+            title: 'Help',
             icon: 'question-circle',
             redirectTo: null,
+            exact: true,
             showPosition: MenuPosition.Bottom,
         }
     ]
 
+    const menuItems = _.concat(dashboardMenumItems, fixMenuItems)
     store.dispatch(updateMenuItems(menuItems))
 
-    menuItems.map((menuItem: any) => {
+    const dashRouters = []
+
+    dashboardMenumItems.map((menuItem: any) => {
+        dashRouters.push(menuItem)
         if (!_.isEmpty(menuItem.children)) {
             menuItem.children.map(r => {
-                    r.url = menuItem.url != null ? menuItem.url + r.url : r.url
-                    r.parentID = menuItem.id
-                    // concat route.path and its child's path
-                    routers.push(r)
-                })
-            } else {
-                routers.push(menuItem)
-            }
-        })
+                r.url =  menuItem.url + r.url 
+                r.parentID = menuItem.id
+                // concat route.path and its child's path
+                dashRouters.push(r)
+            })
+        }
+    })
+    const fixRouters = []
+    fixMenuItems.map((menuItem: any) => {
+        if (!_.isEmpty(menuItem.children)) {
+            menuItem.children.map(r => {
+                r.parentID = menuItem.id
+                // concat route.path and its child's path
+                fixRouters.push(r)
+            })
+        } else {
+            fixRouters.push(menuItem)
+        }
+    })
+
+    routers = _.concat(dashRouters,fixRouters)
 }

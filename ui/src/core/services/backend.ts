@@ -266,13 +266,14 @@ export class BackendSrv implements BackendService {
 
   saveDashboard(
     dashboard: DashboardDataDTO,
-    { message = '', folderId, overwrite = false }: { message?: string; folderId?: number; overwrite?: boolean } = {}
+    { message = '', folderId, overwrite = false,fromTeam=0}: { message?: string; folderId?: number; overwrite?: boolean;fromTeam?:number} = {}
   ) {
     return this.post('/api/dashboard/save', {
       dashboard,
       folderId,
       overwrite,
       message,
+      fromTeam
     });
   }
 

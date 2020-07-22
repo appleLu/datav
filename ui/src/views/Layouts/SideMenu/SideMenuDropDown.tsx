@@ -29,25 +29,25 @@ const SideMenuDropDown: FC<Props> = props => {
     renderLink =
     // eslint-disable-next-line 
       <a className="side-menu-header-link" onClick={onHeaderClick}>
-        <span className="sidemenu-item-text">{link.text}</span>
+        <span className="sidemenu-item-text">{link.title}</span>
       </a>
   } else {
       if (!link.redirectTo) {
         renderLink = 
         <Link className="side-menu-header-link" to={link.url} onClick={onHeaderClick}>
-          <span className="sidemenu-item-text">{link.text}</span>
+          <span className="sidemenu-item-text">{link.title}</span>
         </Link>
       } else {
         link.redirectTo === null
         ?
         renderLink = 
         <span className="side-menu-header-link" >
-          <span className="sidemenu-item-text">{link.text}</span>
+          <span className="sidemenu-item-text">{link.title}</span>
         </span>
         :
         renderLink = 
         <Link className="side-menu-header-link" to={link.redirectTo} onClick={onHeaderClick}>
-          <span className="sidemenu-item-text">{link.text}</span>
+          <span className="sidemenu-item-text">{link.title}</span>
         </Link>
       }
   }

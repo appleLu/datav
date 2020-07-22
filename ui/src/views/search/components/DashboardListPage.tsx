@@ -69,7 +69,7 @@ export class DatasourceListPage extends PureComponent<Props&any,State> {
               n.url = n.url.replace(":uid",this.props.match.params['uid'])
           })
 
-        navModel.main.text = navModel.main.text + ' / ' + folder.title
+        navModel.main.title = navModel.main.title + ' / ' + folder.title
     } else {
         navModel = _.cloneDeep(getNavModel(routeID,parentRouteID))
     }

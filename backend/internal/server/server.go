@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/apm-ai/datav/backend/internal/bootConfig"
 	"github.com/apm-ai/datav/backend/internal/acl"
 	"github.com/apm-ai/datav/backend/internal/users"
 	"github.com/apm-ai/datav/backend/internal/datasources"
@@ -25,6 +26,7 @@ import (
 	"github.com/apm-ai/datav/backend/internal/folders"
 	"github.com/apm-ai/datav/backend/internal/teams"
 	"github.com/apm-ai/datav/backend/internal/admin"
+	"github.com/apm-ai/datav/backend/internal/sidemenu"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -36,9 +38,10 @@ type Server struct {
 // New ... 
 func New() *Server {
 	return &Server{}
-}
+} 
 
 var logger = log.RootLogger.New("logger","server")
+
 // Start ...1
 func (s *Server) Start() error {
 	logger.Debug("server config", "config",*config.Data)
@@ -61,13 +64,13 @@ func (s *Server) Start() error {
 		gin.SetMode(gin.ReleaseMode)
 		r := gin.New()
 		r.Use(Cors())
-		
+		 
 		// no auth apis
 		{
 			r.POST("/api/login",session.Login)
 			r.POST("/api/logout",session.Logout)
 			r.GET("/api/proxy/:datasourceID/*target", proxy)
-			r.GET("/api/bootConfig", getBootConfig)
+			r.GET("/api/bootConfig", bootConfig.QueryBootConfig)
 		}
 
 		// auth apis
@@ -140,7 +143,13 @@ func (s *Server) Start() error {
 				teamR.GET("/permissions/:teamId", teams.GetTeamPermissions)
 				teamR.POST("/permissions/:teamId", teams.UpdateTeamPermission)	
 			} 
-  
+			
+			sidemenuR := authR.Group("/api/sidemenu")
+			{
+				sidemenuR.GET(":teamId", sidemenu.GetMenu)
+				sidemenuR.PUT(":teamId", sidemenu.UpdateMenu)
+			}
+
 			adminR := authR.Group("/api/admin",AdminAuth())
 			{
 				adminR.PUT("/password", admin.UpdatePassword)

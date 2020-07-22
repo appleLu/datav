@@ -1,10 +1,14 @@
-package server
+package bootConfig
 
 import (
+	"github.com/apm-ai/datav/backend/pkg/i18n"
+	"github.com/apm-ai/datav/backend/pkg/models"
+	"github.com/apm-ai/datav/backend/internal/sidemenu"
 	"github.com/apm-ai/datav/backend/internal/datasources"
 	// "fmt"
 	"github.com/apm-ai/datav/backend/internal/plugins"
 	"github.com/apm-ai/datav/backend/pkg/common"
+	"github.com/apm-ai/datav/backend/pkg/log"
 	"github.com/gin-gonic/gin"
 	
 	"strconv"
@@ -14,9 +18,11 @@ type bootConfig struct {
 	DataSourceMetas map[string]*plugins.DataSourcePlugin `json:"datasourceMetas"`
 	DataSources map[string]interface{} `json:"datasources"`
 	Panels      map[string]interface{} `json:"panels"`
+	SideMenu    interface{} `json:"sidemenu"`
 }
 
-func getBootConfig(c *gin.Context) {
+var logger = log.RootLogger.New("logger","bootConfig")
+func QueryBootConfig(c *gin.Context) {
 	// load datasources from sqlstore
 	rawDatasources := datasources.LoadAllDataSources()
 
@@ -56,9 +62,23 @@ func getBootConfig(c *gin.Context) {
 			"skipDataQuery": panel.SkipDataQuery,
 			"state":         panel.State,
 		}
+	} 
+
+	// load side menu
+	menu,err  := sidemenu.QuerySideMenu(models.DefaultMenuId,0)
+	if err != nil {
+		logger.Error("query side menu error","error",err)
+		c.JSON(500, common.ResponseErrorMessage(nil,i18n.ON, i18n.DbErrMsg))
+		return 
 	}
 
-	c.JSON(200, common.ResponseSuccess(bootConfig{plugins.DataSources,datasources, panels}))
+	if menu == nil {
+		c.JSON(500, common.ResponseErrorMessage(nil,i18n.OFF, "cant find default menu"))
+		return 
+	}
+
+
+	c.JSON(200, common.ResponseSuccess(bootConfig{plugins.DataSources,datasources, panels,menu.Data}))
 }
 
 func getPanelSort(id string) int {

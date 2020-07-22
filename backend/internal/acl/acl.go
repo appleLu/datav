@@ -56,6 +56,27 @@ func IsTeamAdmin(teamId int64,c *gin.Context) bool {
 	return false
 }
 
+func IsTeamEditor(teamId int64,c *gin.Context) bool {
+	user := session.CurrentUser(c)
+	if user.Role.IsAdmin() { //global admin is also team editor
+		return true
+	}
+
+
+	teamMember, err := models.QueryTeamMember(teamId,user.Id)
+	if err != nil {
+		logger.Warn("query team member error","error",err)
+		return false
+	}
+
+	if teamMember.Role.IsEditor() {
+		return true
+	}
+
+	return false
+}
+
+
 func IsTeamCreator(teamId int64,c *gin.Context) bool {
 	team,err := models.QueryTeam(teamId,"")
 	if err != nil {
@@ -137,7 +158,7 @@ func CanEditDashboard(dashId int64,ownedBy int64, c*gin.Context) bool {
 
 	ok,err := models.TeamRoleHasPermission(ownedBy,member.Role,models.CanEdit)
 	if err != nil {
-		logger.Warn("get team permission error","error",err)
+		logger.Warn("get team permission error","error",err,"team_id",ownedBy,"role",member.Role)
 		return false
 	}
 
@@ -163,7 +184,7 @@ func CanAddDashboard(ownedBy int64, c*gin.Context) bool {
 
 	ok,err := models.TeamRoleHasPermission(ownedBy,member.Role,models.CanAdd)
 	if err != nil {
-		logger.Warn("get team permission error","error",err)
+		logger.Warn("get team permission error","error",err,"team_id",ownedBy,"role",member.Role)
 		return false
 	}
 
@@ -201,7 +222,7 @@ func CanSaveDashboard(dashId int64, ownedBy int64, c*gin.Context) bool {
 
 	ok,err := models.TeamRoleHasPermission(ownedBy,member.Role,models.CanSave)
 	if err != nil {
-		logger.Warn("get team permission error","error",err)
+		logger.Warn("get team permission error","error",err,"team_id",ownedBy,"role",member.Role)
 		return false
 	}
 
