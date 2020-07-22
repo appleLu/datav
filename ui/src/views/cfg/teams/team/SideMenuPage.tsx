@@ -9,7 +9,7 @@ import { getBackendSrv } from 'src/core/services/backend';
 import { InlineFormLabel,IconName } from 'src/packages/datav-core'
 import { Button, Input,notification, Tree } from 'antd';
 import EmptyListCTA from 'src/views/components/EmptyListCTA/EmptyListCTA';
-import MenuManage from './MenuManage'
+import MenuManage from './MenuManage/MenuManage'
 
 export interface Props {
     routeID: string;
@@ -83,6 +83,7 @@ export class TeamSettingPage extends PureComponent<Props, State> {
             description: `Team SideMenu Updated!`,
             duration: 5
         });
+        window.location.reload()
     }
     
     onChangeMenu(v) {
@@ -93,8 +94,6 @@ export class TeamSettingPage extends PureComponent<Props, State> {
                 data : v
             }
         })
-
-        // window.location.reload()
     }
     
     render() {
@@ -138,7 +137,7 @@ export class TeamSettingPage extends PureComponent<Props, State> {
                             <h3 className="page-sub-heading">Menu Manage</h3>
                             <MenuManage value={sidemenu.data} onChange={(v) => this.onChangeMenu(v)}/>
                             <div className="gf-form-button-row">
-                                <Button  type="primary" onClick={() => this.updateSideMenu()} ghost>
+                                <Button  type="primary" onClick={() => this.updateSideMenu()}>
                                     Update
                                 </Button>
                             </div>

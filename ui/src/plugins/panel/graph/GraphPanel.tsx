@@ -69,7 +69,7 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
 
     this.onPanelTeardown = this.onPanelTeardown.bind(this)
     this.onRender = this.onRender.bind(this)
-    this.ctrl.events.on(PanelEvents.panelTeardown,this.onPanelTeardown);
+    this.ctrl.events.on(PanelEvents.panelTeardown, this.onPanelTeardown);
     this.ctrl.events.on(PanelEvents.render, this.onRender);
 
     // global events
@@ -89,7 +89,7 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
   }
 
   componentWillUnmount() {
-    this.ctrl.events.off(PanelEvents.panelTeardown,this.onPanelTeardown);
+    this.ctrl.events.off(PanelEvents.panelTeardown, this.onPanelTeardown);
     this.ctrl.events.off(PanelEvents.render, this.onRender);
 
     appEvents.off(CoreEvents.graphHover, this.onGraphHover);
@@ -97,19 +97,19 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
     appEvents.off('showAnnotationEditor', this.showAnnotationEditor)
     appEvents.off('showAnnotationTooltip', this.showAnnotationTooltip)
   }
-  
-  componentDidUpdate(prevProps) {  
+
+  componentDidUpdate(prevProps) {
   }
 
   showAnnotationEditor(data) {
-    let drop:any;
+    let drop: any;
     const setAnnotation = (v) => {
       //@todo
       // add source for test
       v.id = 1
-      v.source = {"builtIn":1,"datasource":"-- Grafana --","enable":true,"hide":true,"iconColor":"rgba(0, 211, 255, 1)","name":"Annotations & Alerts","type":"dashboard"}
+      v.source = { "builtIn": 1, "datasource": "-- Grafana --", "enable": true, "hide": true, "iconColor": "rgba(0, 211, 255, 1)", "name": "Annotations & Alerts", "type": "dashboard" }
       this.ctrl.annotations.push(_.cloneDeep(v))
-    } 
+    }
 
     const delAnnotation = (v) => {
       _.remove(this.ctrl.annotations, (n: any) => n.id === v.id);
@@ -117,23 +117,23 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
 
     drop = new Drop({
       target: data.ele,
-      content:  `<div id="annotation-editor">1111</div>`,
+      content: `<div id="annotation-editor">1111</div>`,
       position: 'bottom center',
-        classes: 'drop-popover drop-popover--form',
-        openOn: 'click',
-        tetherOptions: {
-          constraints: [{ to: 'window', pin: true, attachment: 'both' }],
-        }
+      classes: 'drop-popover drop-popover--form',
+      openOn: 'click',
+      tetherOptions: {
+        constraints: [{ to: 'window', pin: true, attachment: 'both' }],
+      }
     });
 
     drop.open();
-    
+
     const close = () => {
       drop.close()
     }
 
     ReactDOM.render(
-      <AnnotationEdior rawEvent={data.event} close={close} onSaved={setAnnotation} onDel={delAnnotation}/>
+      <AnnotationEdior rawEvent={data.event} close={close} onSaved={setAnnotation} onDel={delAnnotation} />
       , document.getElementById('annotation-editor'));
 
     drop.on('close', () => {
@@ -145,10 +145,10 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
   }
 
   showAnnotationTooltip(data) {
-    let drop : any;
+    let drop: any;
     drop = new Drop({
       target: data.ele,
-      content:  `<div id="annotation-tooltip"></div>`,
+      content: `<div id="annotation-tooltip"></div>`,
       position: 'bottom center',
       classes: 'drop-popover drop-popover--annotation',
       openOn: 'hover',
@@ -177,14 +177,13 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
   }
 
   onPanelTeardown() {
-    if (this.plot) {
-      this.plot.destroy();
-      this.plot = null;
-    }
+    this.plot?.destroy();
+    this.plot = null;
 
-    this.tooltip.destroy();
-    this.elem.off();
-    this.elem.remove();
+    this.tooltip?.destroy();
+    
+    this.elem?.off();
+    this.elem?.remove();
   }
 
   onRender() {
@@ -220,7 +219,7 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
       this.plot.clearSelection();
       return;
     }
-    
+
     if ((ranges.ctrlKey || ranges.metaKey) && (this.ctrl.dashboard.meta.canEdit || this.ctrl.dashboard.meta.canMakeEditable)) {
       this.eventManager.updateTime(ranges.xaxis)
     } else {
@@ -417,7 +416,7 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
 
   buildFlotOptions(ctrl: GraphPanelCtrl) {
     let gridColor = '#c8c8c8';
-    if (currentTheme=== ThemeType.Light) {
+    if (currentTheme === ThemeType.Light) {
       gridColor = '#a1a1a1';
     }
     const stack = ctrl.graphOptions.stack ? true : null;
@@ -520,7 +519,7 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
     const graphHeight = this.ctrl.panelHeight;
     updateLegendValues(this.ctrl.seriesList, this.ctrl.graphOptions, graphHeight);
 
-    
+
     // give space to alert editing
     this.thresholdManager.prepare(this.elem, this.ctrl.seriesList);
 
@@ -534,15 +533,15 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
     this.thresholdManager.addFlotOptions(options, this.ctrl);
     this.eventManager.addFlotEvents(this.ctrl.annotations, options);
     this.sortedSeries = this.ctrl.sortSeries();
-    
-    
+
+
     // optimize the performance when re-sizing the graph
     // if (this.currentRenderTimer) {
     //   console.log('graph clear last render timer,and set a new one')
     //   clearTimeout(this.currentRenderTimer)
     // }
 
-   setTimeout(() => {
+    setTimeout(() => {
       this.currentRenderTimer = null;
       this.callPlot(options)
     }, 100)
@@ -569,7 +568,7 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
       onColorChange: this.ctrl.onColorChange,
       onToggleAxis: this.ctrl.onToggleAxis,
     };
-    
+
     return (
       <div className={cssClasses}>
         <div className="graph-panel__chart" id={`datav-graph-${this.props.panel.id}`}>

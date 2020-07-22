@@ -10,8 +10,7 @@ import { InlineFormLabel, ConfirmModal, getHistory } from 'src/packages/datav-co
 import { Button, Input,notification, message } from 'antd';
 import TeamMemberPicker from 'src/views/components/Pickers/TeamMemberPicker'
 import globalEvents from 'src/views/App/globalEvents';
-import { getState } from 'src/store/store';
-import TeamPermission from './TeamPermission'
+import TeamPermission from './Setting/TeamPermission'
 
 export interface Props {
     routeID: string;
