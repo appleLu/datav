@@ -83,7 +83,7 @@ func IsTeamCreator(teamId int64,c *gin.Context) bool {
 		logger.Warn("query team  error","error",err)
 		return false
 	}
-
+	
 	userId := session.CurrentUserId(c)
 	if team.CreatedById == userId {
 		return true

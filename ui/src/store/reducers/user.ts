@@ -11,6 +11,7 @@ export interface UserState {
   username: string;
   name: string;
   email: string;
+  sidemenu: number;
   role: Role;
   mobile?: string;
   lastSeenAt?: string;

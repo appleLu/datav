@@ -1,6 +1,12 @@
 package users
 
 import (
+	"github.com/apm-ai/datav/backend/internal/invasion"
+	"database/sql"
+	"github.com/apm-ai/datav/backend/internal/sidemenu"
+	"github.com/apm-ai/datav/backend/pkg/utils"
+	"github.com/apm-ai/datav/backend/internal/session"
+	// "fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -10,6 +16,7 @@ import (
 	"github.com/apm-ai/datav/backend/pkg/i18n"
 	"github.com/apm-ai/datav/backend/pkg/models"
 	"github.com/gin-gonic/gin"
+	"time"
 )
 
 func GetUsers(c *gin.Context) {
@@ -60,4 +67,131 @@ func GetUser(c *gin.Context) {
 	}
 
 	c.JSON(200, common.ResponseSuccess(user))
+}
+
+type PasswordReq struct {
+	New string `json:"new"`
+	Old string `json:"old"`
+	Confirm string `json:"confirm"`
+}
+
+func ChangePassword(c *gin.Context) {
+	req := &PasswordReq{}
+	c.Bind(&req)
+
+	user := session.CurrentUser(c)
+
+	if req.New == "" || req.Old == "" || req.Confirm == "" {
+		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "password cannot be empty"))
+		return
+	}
+
+	if req.New != req.Confirm {
+		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "the new password does not match the confirm one"))
+		return
+	}
+
+	// check old password matched
+	password,_ := utils.EncodePassword(req.Old, user.Salt)
+	if password != user.Password {
+		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "old password is not correct"))
+		return
+	}
+
+	newPassword,_ := utils.EncodePassword(req.New,user.Salt)
+	_, err := db.SQL.Exec("UPDATE user SET password=?,updated=? WHERE id=?",
+	newPassword, time.Now(), user.Id)
+	if err != nil {
+		logger.Warn("update user password error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
+	c.JSON(200, common.ResponseSuccess(nil))
+}	
+
+
+func GetSideMenus(c *gin.Context) {
+	userId := session.CurrentUserId(c)
+
+	members,err := models.QueryTeamMembersByUserId(userId)
+	if err != nil {
+		logger.Warn("query team members by userId error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
+	sidemenus := make([]*models.SideMenu,0) 
+
+	for _,member := range members {
+		sm,err := sidemenu.QuerySideMenu(0,member.TeamId)
+		if err != nil  {
+			if  err != sql.ErrNoRows {
+				logger.Error("query sidemenu error","teamId:",member.TeamId,"error",err)
+			}		
+			continue
+		}
+		
+		team,err := models.QueryTeam(member.TeamId,"")
+		if err != nil {
+			logger.Error("query team error","teamId:",member.TeamId,"error",err)
+			continue
+		}
+
+		sidemenus = append(sidemenus, &models.SideMenu{
+			Id: sm.Id,
+			Desc : sm.Desc,
+			TeamId: team.Id,
+			TeamName: team.Name,
+		})
+	}
+
+	c.JSON(200, common.ResponseSuccess(sidemenus))
+}
+
+type UpdateSideMenuReq struct {
+	MenuId int64 `json:"menuId"`
+}
+
+func UpdateSideMenu(c *gin.Context) {
+	userId := session.CurrentUserId(c)
+	req := &UpdateSideMenuReq{}
+	c.Bind(&req)
+
+	_,err := db.SQL.Exec("UPDATE user SET sidemenu=? WHERE id=?",req.MenuId,userId)
+	if err != nil {
+		logger.Warn("update side menu error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
+	c.JSON(200, common.ResponseSuccess(nil))
+}
+
+func UpdateUserInfo(c *gin.Context) {
+	user := &models.User{}
+	c.Bind(&user)
+
+	if !user.Role.IsValid() {
+		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "bad user role"))
+		return
+	}
+	
+	now := time.Now()
+
+	userId := session.CurrentUserId(c)
+	if user.Id != userId {
+		logger.Warn("update user invasion", "target_user_id", user.Id, "current_user_id", userId)
+		invasion.Add(c)
+	}
+	
+	_, err := db.SQL.Exec("UPDATE user SET name=?,email=?,updated=? WHERE id=?",
+		 user.Name, user.Email, now, userId)
+	if err != nil {
+		logger.Warn("update user error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
+	c.JSON(200, common.ResponseSuccess(nil))
 }

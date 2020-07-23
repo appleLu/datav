@@ -20,8 +20,6 @@ interface State {
     team: Team
     sidemenu: SideMenu
     hasFetched: boolean
-    confirmVisible: boolean
-    confirmContent: any
 }
 
 
@@ -41,9 +39,7 @@ export class TeamSettingPage extends PureComponent<Props, State> {
         this.state = {
             team: null,
             sidemenu:null,
-            hasFetched: true,
-            confirmVisible: false,
-            confirmContent: {}
+            hasFetched: true
         }
         //@ts-ignore
         this.teamId = this.props.match.params['id'] 
@@ -83,7 +79,7 @@ export class TeamSettingPage extends PureComponent<Props, State> {
             description: `Team SideMenu Updated!`,
             duration: 5
         });
-        window.location.reload()
+        // window.location.reload()
     }
     
     onChangeMenu(v) {
@@ -96,10 +92,37 @@ export class TeamSettingPage extends PureComponent<Props, State> {
         })
     }
     
+    async createSideMenu() {
+        const sidemenu:SideMenu = {
+            id: 0,
+            teamId : _.toNumber(this.teamId),
+            desc: 'A menu customized for team',
+            data: [{
+                id: 'home',
+                title: 'home',
+                url: '/home',
+                icon: 'home'
+            }]
+        }
+
+        const res = await getBackendSrv().post(`/api/sidemenu/${this.teamId}`,sidemenu)
+        notification['success']({
+            message: "Success",
+            description: `Team SideMenu Updated!`,
+            duration: 5
+        });
+
+        sidemenu.id = res.data
+        this.setState({
+            ...this.state,
+            sidemenu: sidemenu
+        })
+    }
+
     render() {
         const { routeID, parentRouteID } = this.props
 
-        const { sidemenu,team,hasFetched,confirmVisible,confirmContent} = this.state
+        const { sidemenu,team,hasFetched} = this.state
         let navModel;
         if (team) {
             navModel = _.cloneDeep(getNavModel(routeID, parentRouteID))
@@ -141,9 +164,8 @@ export class TeamSettingPage extends PureComponent<Props, State> {
                                     Update
                                 </Button>
                             </div>
-
                         </div> :
-                        <EmptyListCTA {...emptyListModel}  onClick={() => alert(1)} />
+                        <EmptyListCTA {...emptyListModel}  onClick={() => this.createSideMenu()} />
                     }
                 </Page.Contents>
             </Page>

@@ -84,8 +84,7 @@ const ManageMenuItem = (props:Props) =>{
                             >
                                     <Input placeholder="sub url for menu ,only one level,e.g : /test" />
                             </Form.Item> 
-                            <Button htmlType="submit" type="primary" className="ub-mt2">Submit</Button>
-                            <Button className="ub-mt2 ub-ml2" onClick={() =>props.onCancelDrawer() }>Cancel</Button>
+                            <Button htmlType="submit" type="primary" className="ub-mt4" ghost block>Submit</Button>
                         </Col>
                     </Row>
                 </Form>

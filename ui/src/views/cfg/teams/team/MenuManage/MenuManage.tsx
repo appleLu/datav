@@ -66,23 +66,49 @@ class MenuMange extends React.Component<Props, State> {
 
         // Find dragObject
         let dragObj;
+        let index0
+        let arr0
         loop(data, dragKey, (item, index, arr) => {
-            arr.splice(index, 1);
+            index0 = index 
+            arr0 = arr
             dragObj = item;
         });
+
+        if (!info.dropToGap && dragObj.children.length > 0) {
+            notification['error']({
+                message: "Error",
+                description: `cant move a menu item with children into another menu item`,
+                duration: 5
+            });
+            return
+        }
+        arr0.splice(index0, 1);
 
         if (!info.dropToGap) {
             // Drop on the content
             loop(data, dropKey, item => {
-                item.children = item.children || [];
-                // where to insert 示例添加到尾部，可以是随意位置
-                item.children.push(dragObj);
+                if (item.level === 1) {
+                    item.children = item.children || [];
+                    dragObj.level = 2
+                    // where to insert 示例添加到尾部，可以是随意位置
+                    item.children.push(dragObj);
+                } else {
+                    for (let i=0;i<data.length;i++) {
+                        for (let j=0;j<data[i].children.length;j++) {
+                            if (data[i].children[j].key == dropKey) {
+                                dragObj.level=2
+                                data[i].children.splice(j+1,0,dragObj)
+                            }
+                        }
+                    }
+                }
             });
         } else if (
             (info.node.props.children || []).length > 0 && // Has children
             info.node.props.expanded && // Is expanded
             dropPosition === 1 // On the bottom gap
         ) {
+            alert(1)
             loop(data, dropKey, item => {
                 item.children = item.children || [];
                 // where to insert 示例添加到头部，可以是随意位置
@@ -91,10 +117,14 @@ class MenuMange extends React.Component<Props, State> {
         } else {
             let ar;
             let i;
+            let level;
             loop(data, dropKey, (item, index, arr) => {
+                level = item.level
                 ar = arr;
                 i = index;
             });
+
+            dragObj.level = level
             if (dropPosition === -1) {
                 ar.splice(i, 0, dragObj);
             } else {

@@ -66,7 +66,13 @@ func GetTeam(c *gin.Context) {
 
 	team, err := models.QueryTeam(id, name)
 	if err != nil {
-		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		if err != sql.ErrNoRows {
+			logger.Warn("get team  error", "error", err)
+			c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+			return 
+		}
+		
+		c.JSON(200, common.ResponseSuccess(models.Team{}))
 		return
 	}
 
@@ -222,12 +228,12 @@ func DeleteTeamMember(c *gin.Context) {
 	}
 
 	team, err := models.QueryTeam(teamId, "")
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
 		return
 	}
 
-	if team.Id == 0 {
+	if err == sql.ErrNoRows  {
 		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "this team not exist"))
 		return
 	}
@@ -301,6 +307,11 @@ func UpdateTeamMember(c *gin.Context) {
 	}
 
 	team, err := models.QueryTeam(member.TeamId, "")
+	if err != nil {
+		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
 	if member.Id == team.CreatedById && !member.Role.IsAdmin() {
 		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "Team creator's role must be 'Admin'"))
 		return

@@ -181,6 +181,7 @@ func UpdateOwnedBy(c *gin.Context) {
 		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
 		return
 	}
+	
 	if team.Id != ownedBy {
 		c.JSON(400, common.ResponseErrorMessage(nil, i18n.OFF, "bad owned by"))
 		return

@@ -20,7 +20,7 @@ const AddTeam = (props: Props) => {
         props.onAddTeam(res.data)
         notification['success']({
             message: "Success",
-            description: `Tea, ${team.name} has been added`,
+            description: `Team ${team.name} has been added`,
             duration: 5
           });
         setModalVisible(false)

@@ -18,6 +18,7 @@ type User struct {
 	Name       string    `json:"name"`
 	Email      string    `json:"email"`
 	Mobile     string    `json:"mobile"`
+	SideMenu   int64     `json:"sidemenu"`
 	Role       RoleType  `json:"role"`
 	LastSeenAt time.Time `json:"last_seen_at,omitempty"`
 	Created    time.Time `json:"created,omitempty"`
@@ -38,8 +39,8 @@ func (s Users) Less(i, j int) bool {
 
 func QueryUser(id int64, username string, email string) (*User,error) {
 	user := &User{}
-	err := db.SQL.QueryRow(`SELECT id,username,name,email,mobile,password,salt,last_seen_at FROM user WHERE id=? or username=? or email=?`,
-		id, username, email).Scan(&user.Id, &user.Username, &user.Name, &user.Email, &user.Mobile, &user.Password, &user.Salt, &user.LastSeenAt)
+	err := db.SQL.QueryRow(`SELECT id,username,name,email,mobile,password,salt,sidemenu,last_seen_at FROM user WHERE id=? or username=? or email=?`,
+		id, username, email).Scan(&user.Id, &user.Username, &user.Name, &user.Email, &user.Mobile, &user.Password, &user.Salt,&user.SideMenu, &user.LastSeenAt)
 	if err != nil && err != sql.ErrNoRows{
 		return user,err
 	}

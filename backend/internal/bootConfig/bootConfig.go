@@ -1,6 +1,7 @@
 package bootConfig
 
 import (
+	"github.com/apm-ai/datav/backend/internal/session"
 	"github.com/apm-ai/datav/backend/pkg/i18n"
 	"github.com/apm-ai/datav/backend/pkg/models"
 	"github.com/apm-ai/datav/backend/internal/sidemenu"
@@ -23,6 +24,8 @@ type bootConfig struct {
 
 var logger = log.RootLogger.New("logger","bootConfig")
 func QueryBootConfig(c *gin.Context) {
+	user := session.CurrentUser(c)
+
 	// load datasources from sqlstore
 	rawDatasources := datasources.LoadAllDataSources()
 
@@ -65,18 +68,16 @@ func QueryBootConfig(c *gin.Context) {
 	} 
 
 	// load side menu
-	menu,err  := sidemenu.QuerySideMenu(models.DefaultMenuId,0)
+	smId := int64(models.DefaultMenuId)
+	if user != nil {
+		smId = user.SideMenu 
+	}
+	menu,err  := sidemenu.QuerySideMenu(smId,0)
 	if err != nil {
 		logger.Error("query side menu error","error",err)
 		c.JSON(500, common.ResponseErrorMessage(nil,i18n.ON, i18n.DbErrMsg))
 		return 
 	}
-
-	if menu == nil {
-		c.JSON(500, common.ResponseErrorMessage(nil,i18n.OFF, "cant find default menu"))
-		return 
-	}
-
 
 	c.JSON(200, common.ResponseSuccess(bootConfig{plugins.DataSources,datasources, panels,menu.Data}))
 }

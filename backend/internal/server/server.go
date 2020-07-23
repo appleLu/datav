@@ -124,7 +124,11 @@ func (s *Server) Start() error {
 			userR := authR.Group("/api/users") 
 			{ 
 				userR.GET("", users.GetUsers)
-				userR.GET("/user", users.GetUser)		
+				userR.GET("/user", users.GetUser)	
+				userR.PUT("/user/password", users.ChangePassword)		
+				userR.GET("/user/sidemenus",users.GetSideMenus)
+				userR.PUT("/user/sidemenu",users.UpdateSideMenu)
+				userR.PUT("/user/info",users.UpdateUserInfo)
 			}
 
 			teamR := authR.Group("/api/teams") 
@@ -147,6 +151,7 @@ func (s *Server) Start() error {
 			sidemenuR := authR.Group("/api/sidemenu")
 			{
 				sidemenuR.GET(":teamId", sidemenu.GetMenu)
+				sidemenuR.POST(":teamId", sidemenu.CreateMenu)
 				sidemenuR.PUT(":teamId", sidemenu.UpdateMenu)
 			}
 

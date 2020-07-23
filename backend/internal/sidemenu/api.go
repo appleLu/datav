@@ -1,6 +1,9 @@
 package sidemenu
 
 import (
+	"database/sql"
+	"github.com/apm-ai/datav/backend/internal/session"
+	// "fmt"
 	"time"
 	"encoding/json"
 	"github.com/apm-ai/datav/backend/pkg/db"
@@ -24,12 +27,44 @@ func GetMenu(c *gin.Context) {
 
 	menu,err := QuerySideMenu(0,teamId)
 	if err != nil {
-		logger.Error("query side menu error","error",err)
-		c.JSON(500, common.ResponseErrorMessage(nil,i18n.ON, i18n.DbErrMsg))
+		if err != sql.ErrNoRows {
+			logger.Error("query side menu error","error",err)
+			c.JSON(500, common.ResponseErrorMessage(nil,i18n.ON, i18n.DbErrMsg))
+		}
 		return 
 	}
 
 	c.JSON(200, common.ResponseSuccess(menu))
+}
+
+func CreateMenu(c *gin.Context) {
+	req := &models.SideMenu{}
+	c.Bind(&req)
+
+	if req.TeamId == 0 {
+		invasion.Add(c)
+		c.JSON(400, common.ResponseErrorMessage(nil,i18n.OFF,"bad team id"))
+		return 
+	}
+
+	if !acl.IsTeamAdmin(req.TeamId, c) {
+		c.JSON(403, common.ResponseErrorMessage(nil, i18n.ON, i18n.NoPermissionMsg))
+		return
+	}
+
+	userId := session.CurrentUserId(c)
+	data,_ := json.Marshal(req.Data)
+	now := time.Now()
+	res,err := db.SQL.Exec("INSERT INTO sidemenu (team_id,desc,data,created_by,created,updated) VALUES (?,?,?,?,?,?)",
+		req.TeamId,req.Desc,data,userId,now,now)
+	if err != nil {
+		logger.Error("create sidemenu error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
+	id,_:=res.LastInsertId()
+	c.JSON(200, common.ResponseSuccess(id))
 }
 
 func UpdateMenu(c *gin.Context) {

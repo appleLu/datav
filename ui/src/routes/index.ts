@@ -8,7 +8,6 @@ import { updateMenuItems } from 'src/store/reducers/menu';
 import { getBootConfig } from 'src/packages/datav-core/src';
 export let routers = []
 export const initRoutes = (store: Store<StoreState>) => {
-    console.log(getBootConfig().sidemenu)
     getBootConfig().sidemenu.forEach((item: MenuItem) => {
         item.showPosition = MenuPosition.Top
         item.exact = true
@@ -235,10 +234,11 @@ export const initRoutes = (store: Store<StoreState>) => {
                 },
             ]
         },
-        {
+        { 
             id: 'datav-fix-menu-user',
             url: '/user',
             title: store.getState().user.name == '' ? store.getState().user.username : store.getState().user.username + ' / ' + store.getState().user.name,
+            subTitle: 'Configure your preferences',
             icon: 'user',
             showPosition: MenuPosition.Bottom,
             redirectTo: '/user/preferences',
@@ -248,9 +248,9 @@ export const initRoutes = (store: Store<StoreState>) => {
                     icon: "sliders-v-alt",
                     id: "datav-fix-menu-preferences",
                     title: "Preferences",
-                    url: "/preferences",
+                    url: "/user/preferences",
                     exact: true,
-                    component: React.lazy(() => import('src/views/Test'))
+                    component: React.lazy(() => import('src/views/cfg/users/UserPreferencePage'))
                 }
             ]
         },

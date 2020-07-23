@@ -52,8 +52,8 @@ func CreateTables() {
 	
 	now := time.Now()
 	// insert init data
-	_,err := db.SQL.Exec(`INSERT INTO user (id,username,password,salt,email,created,updated) VALUES (?,?,?,?,?,?,?)`,
-		models.SuperAdminId,models.SuperAdminUsername,adminPW,adminSalt,models.SuperAdminUsername+"@localhost",now,now)
+	_,err := db.SQL.Exec(`INSERT INTO user (id,username,password,salt,email,sidemenu,created,updated) VALUES (?,?,?,?,?,?,?,?)`,
+		models.SuperAdminId,models.SuperAdminUsername,adminPW,adminSalt,models.SuperAdminUsername+"@localhost",models.DefaultMenuId,now,now)
 	if err != nil {
 		log.RootLogger.Crit("init super admin error","error:",err)
 		panic(err)
@@ -153,6 +153,8 @@ var CreateTableSqls = map[string]string {
 
 		mobile VARCHAR(11) DEFAULT '',
 		email VARCHAR(255) NOT NULL UNIQUE,
+
+		sidemenu INTEGER   NOT NULL DEFAULT '1',
 
 		last_seen_at DATETIME DEFAULT CURRENT_DATETIME,
 		is_diabled BOOL NOT NULL DEFAULT 'false',

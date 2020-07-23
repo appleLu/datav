@@ -64,8 +64,8 @@ func QueryTeam(id int64, name string) (*Team, error) {
 	team := &Team{}
 	err := db.SQL.QueryRow(`SELECT id,name,created_by FROM team WHERE id=? or name=?`,
 		id, name).Scan(&team.Id, &team.Name, &team.CreatedById)
-	if err != nil && err != sql.ErrNoRows {
-		return team, err
+	if err != nil {
+		return nil, err
 	}
 
 	return team, nil
@@ -187,6 +187,26 @@ func TeamRoleHasPermission(teamId int64, role RoleType, permission int) (bool, e
 	}
 
 	return true, nil
+}
+
+func QueryTeamMembersByUserId(userId int64) ([]*TeamMember,error) {
+	members := make([]*TeamMember,0)
+	rows,err := db.SQL.Query("SELECT team_id,role from team_member WHERE user_id=?",userId)
+	if err != nil && err != sql.ErrNoRows {
+		return nil,err
+	}
+
+	for rows.Next() {
+		m := &TeamMember{}
+		err := rows.Scan(&m.TeamId,&m.Role)
+		if err != nil {
+			return nil, err
+		}
+
+		members = append(members,m)
+	}
+
+	return  members,nil
 }
 
 func isInminPermission(role RoleType, permission int) bool {
