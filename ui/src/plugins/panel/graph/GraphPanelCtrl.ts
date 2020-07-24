@@ -16,6 +16,7 @@ import { getTimeSrv } from 'src/core/services/time';
 import { GraphContextMenuCtrl } from './GraphContextMenuCtrl';
 import {store} from 'src/store/store'
 import { updateLocation } from 'src/store/reducers/location';
+import { annotationsSrv } from 'src/core/services/annotations';
 
 export class GraphPanelCtrl {
     id: number;
@@ -43,7 +44,6 @@ export class GraphPanelCtrl {
     renderError: boolean;
     error:any;
     
-    //@todo 需要初始化，在grafana对应graph插件的module.ts中实现
     annotations: AnnotationEvent[] = [];
 
     hiddenSeriesTainted = false;
@@ -73,11 +73,22 @@ export class GraphPanelCtrl {
 
        
         this.events = this.panel.events;
-
-        this.annotations = []
+        
+  
+        this.setAnnotations()
         this.prepareRenderData(props)
     }
 
+    setAnnotations() {
+      this.annotations = []
+      if (annotationsSrv.annotations) {
+        for (const an of annotationsSrv.annotations) {
+          if (an.panelId === this.id) {
+            this.annotations.push(an)
+          }
+        }
+      }
+    }
     updateOptions(options) {
       this.graphOptions = options
     }

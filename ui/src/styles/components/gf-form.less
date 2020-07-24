@@ -208,8 +208,9 @@ textarea {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  
-
+  textarea& {
+    padding: 0px 8px !important;
+  }
 
   // Unstyle the caret on `<select>`s in IE10+.
   &::-ms-expand {

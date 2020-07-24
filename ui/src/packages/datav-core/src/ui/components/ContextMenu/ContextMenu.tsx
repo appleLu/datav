@@ -62,6 +62,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = React.memo(({ x, y, onClo
       <div ref={menuRef} style={positionStyles} className={"context-menu-wrapper"}>
         {header && <div className={"context-menu-header"}>{header}</div>}
         <List
+          className="context-menu-body"
           items={items || []}
           renderItem={(item, index) => {
             return (

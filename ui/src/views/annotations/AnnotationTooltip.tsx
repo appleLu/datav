@@ -1,6 +1,7 @@
 import React from 'react'
 import { AnnotationEvent } from 'src/packages/datav-core'
 import { DashboardModel } from 'src/views/dashboard/model/DashboardModel'
+import {Button} from 'antd'
 
 interface Props {
     event: AnnotationEvent
@@ -18,8 +19,6 @@ const AnnotationTooltip = (props: Props) => {
 
                 <div className="graph-annotation__title">
                     <span>Annotation</span>
-
-
                 </div>
 
                 <div className="graph-annotation__time">{timeFormated}</div>
@@ -29,11 +28,11 @@ const AnnotationTooltip = (props: Props) => {
                 <div style={{ display: "inline-block" }}>
                     <div className="gf-form gf-form--v-stretch">
                         <span className="gf-form-label width-7">Description</span>
-                        <div className="width-20" >{props.event.text}</div>
+                        <div className="width-20 input-line-height">{props.event.text}</div>
                     </div>
 
                     <div className="gf-form-button-row">
-                        <button className="btn btn-primary" onClick={props.onEdit}>Edit</button>
+                        <Button className="btn btn-primary" onClick={props.onEdit} type="primary" ghost>Edit</Button>
                     </div>
                 </div>
             </div>

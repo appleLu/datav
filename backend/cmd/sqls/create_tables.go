@@ -156,11 +156,11 @@ var CreateTableSqls = map[string]string {
 
 		sidemenu INTEGER   NOT NULL DEFAULT '1',
 
-		last_seen_at DATETIME DEFAULT CURRENT_DATETIME,
+		last_seen_at DATETIME,
 		is_diabled BOOL NOT NULL DEFAULT 'false',
 
-		created DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
-		updated DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+		created DATETIME NOT NULL,
+		updated DATETIME NOT NULL
 	);
 	CREATE INDEX IF NOT EXISTS user_username
 		ON user (username);
@@ -197,8 +197,8 @@ var CreateTableSqls = map[string]string {
 		secure_json_data TEXT DEFAULT '{}',
 
 		created_by  INTEGER NOT NULL,
-		created DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
-		updated DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+		created DATETIME NOT NULL,
+		updated DATETIME NOT NULL 
 	);
 	CREATE INDEX IF NOT EXISTS datasource_name
 		ON data_source (name);
@@ -215,8 +215,8 @@ var CreateTableSqls = map[string]string {
 		created_by 			INTEGER NOT NULL,
 		folder_id           INT NOT NULL DEFAULT '0',
 		data				MEDIUMTEXT NOT NULL,
-		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
-		updated 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+		created 			DATETIME NOT NULL,
+		updated 			DATETIME NOT NULL 
 	);
 	CREATE INDEX IF NOT EXISTS dashboard_uid
 		ON dashboard (uid);
@@ -232,7 +232,7 @@ var CreateTableSqls = map[string]string {
 		id 					INTEGER PRIMARY KEY AUTOINCREMENT,
 		dashboard_id        INTEGER NOT NULL,
 		team_id             INTEGER NOT NULL,
-		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+		created 			DATETIME NOT NULL 
 	);
 	CREATE INDEX IF NOT EXISTS dashboard_acl_dashboard_id
 		ON dashboard_acl (dashboard_id);
@@ -247,7 +247,7 @@ var CreateTableSqls = map[string]string {
 		dashboard_id        INTEGER NOT NULL,
 		user_id             INTEGER NOT NULL,
 		permission          VARCHAR(40) NOT NULL,
-		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+		created 			DATETIME NOT NULL
 	);
 
 	CREATE INDEX IF NOT EXISTS dashboard_user_acl_dash_id
@@ -261,7 +261,7 @@ var CreateTableSqls = map[string]string {
 		team_id        		INTEGER NOT NULL,
 		role                VARCHAR(10) NOT NULL,
 		permission          INT NOT NULL,
-		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+		created 			DATETIME NOT NULL
 	);
 	CREATE INDEX IF NOT EXISTS team_acl_team_id
 		ON team_acl (team_id);
@@ -276,8 +276,8 @@ var CreateTableSqls = map[string]string {
 		title                VARCHAR(255) NOT NULL UNIQUE,
 		created_by 			INTEGER NOT NULL,
 		owned_by            INTEGER NOT NULL DEFAULT '1',
-		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
-		updated 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+		created 			DATETIME NOT NULL,
+		updated 			DATETIME NOT NULL
 	);
 	CREATE INDEX IF NOT EXISTS folder_parent_id
 		ON folder (parent_id);
@@ -289,8 +289,8 @@ var CreateTableSqls = map[string]string {
 		id 					INTEGER PRIMARY KEY AUTOINCREMENT,
 		name                VARCHAR(255) NOT NULL UNIQUE,
 		created_by          INTEGER NOT NULL,        
-		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
-		updated 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+		created 			DATETIME NOT NULL,
+		updated 			DATETIME NOT NULL
 	);
 	CREATE INDEX IF NOT EXISTS team_name
 		ON team (name);
@@ -303,8 +303,8 @@ var CreateTableSqls = map[string]string {
 		team_id             INTEGER NOT NULL,
 		user_id 			INTEGER NOT NULL,   
 		role 				VARCHAR(10) DEFAULT 'Viewer',
-		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
-		updated 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+		created 			DATETIME NOT NULL ,
+		updated 			DATETIME NOT NULL
 	);
 	CREATE INDEX IF NOT EXISTS team_member_team_id
 		ON team_member (team_id);
@@ -321,13 +321,36 @@ var CreateTableSqls = map[string]string {
 		desc                TEXT DEFAUlT '',
 		data                MEDIUMTEXT NOT NULL,
 		created_by          INTEGER NOT NULL,
-		created 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
-		updated 			DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+		created 			DATETIME NOT NULL,
+		updated 			DATETIME NOT NULL 
 	);
 	CREATE INDEX IF NOT EXISTS sidemenu_team_id
 		ON sidemenu (team_id);
 	CREATE UNIQUE INDEX IF NOT EXISTS sidemenu_team_id
 		ON sidemenu (team_id);
+	`,
+
+	"annotation" : `
+	CREATE TABLE IF NOT EXISTS annotation (
+		id 					INTEGER PRIMARY KEY AUTOINCREMENT,
+		dashboard_id        INTEGER,
+		panel_id            INTEGER,
+		text                TEXT NOT NULL,
+		alert_id            INTEGER,
+
+		time                INTEGER NOT NULL,
+		time_end            INTEGER NOT NULL,
+		
+		created_by          INTEGER NOT NULL,
+		created 			DATETIME NOT NULL,
+		updated 			DATETIME NOT NULL
+	);
+	CREATE INDEX IF NOT EXISTS annotation_dashboard_id
+		ON annotation (dashboard_id);
+	CREATE INDEX IF NOT EXISTS annotation_time
+		ON annotation (time);
+	CREATE INDEX IF NOT EXISTS annotation_time_end
+		ON annotation (time_end);
 	`,
 }
 

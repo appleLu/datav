@@ -5,13 +5,13 @@ import { dateTime } from 'src/packages/datav-core'
 import { AnnotationEvent } from 'src/packages/datav-core'
 import { DashboardModel } from 'src/views/dashboard/model/DashboardModel'
 import { annotationsSrv } from 'src/core/services/annotations'
+import { Button,notification } from 'antd'
 
 interface Props {
     rawEvent: AnnotationEvent
     close: any
-    onSaved : any
-    onDel: any
-}
+    onChange: any
+} 
 
 
 const AnnotationEditor = (props: Props) => {
@@ -19,14 +19,17 @@ const AnnotationEditor = (props: Props) => {
 
     let event: AnnotationEvent = {};
     
+    event.id = props.rawEvent.id
     event.panelId = props.rawEvent.panelId
     event.dashboardId = props.rawEvent.dashboardId
     event.time = tryEpochToMoment(props.rawEvent.time)
-    if (event.isRegion) {
-        event.timeEnd = tryEpochToMoment(event.timeEnd);
+    event.isRegion = props.rawEvent.isRegion
+    if (event.isRegion ) {
+        event.timeEnd = tryEpochToMoment(props.rawEvent.timeEnd);
     }
 
-    const saveAnnotation = () => {
+
+    const saveAnnotation = async () => {
         event.text = text
         const saveModel = _.cloneDeep(event);
         saveModel.time = saveModel.time.valueOf();
@@ -42,38 +45,39 @@ const AnnotationEditor = (props: Props) => {
         }
 
         if (saveModel.id) {
-            annotationsSrv
-                .updateAnnotationEvent(saveModel)
-                .then(() => {
-                    props.close();
-                })
-                .catch(() => {
-                    props.close();
-                });
+           await annotationsSrv.updateAnnotationEvent(saveModel)
+           notification['success']({
+            message: "Success",
+            description: 'Annotation updated',
+            duration: 5
+          });
         } else {
-            annotationsSrv
-                .saveAnnotationEvent(saveModel)
-                .then(() => {
-                    props.close();
-                })
-                .catch(() => {
-                    props.close();
-                });
+           await annotationsSrv.saveAnnotationEvent(saveModel)
+           notification['success']({
+            message: "Success",
+            description: 'Annotation created',
+            duration: 5
+          });
         }
 
-        props.onSaved(saveModel)
+        props.close()
+        // update annotations and re-render this panel
+        await annotationsSrv.getAnnotations()
+        props.onChange()
     }
 
-    const deleteAnnotation = () => {
-        props.onDel(props.rawEvent)
-        return annotationsSrv
-            .deleteAnnotationEvent(props.rawEvent)
-            .then(() => {
-                props.close();
-            })
-            .catch(() => {
-                props.close();
-            });
+    const deleteAnnotation = async () => {
+        await annotationsSrv.deleteAnnotationEvent(props.rawEvent)     
+        // update annotations and re-render this panel
+        await annotationsSrv.getAnnotations()
+        notification['success']({
+            message: "Success",
+            description: 'Annotation deleted',
+            duration: 5
+          });
+
+        props.close()
+        props.onChange(props.rawEvent)
     }
 
     const handelChange = (e) => {
@@ -89,8 +93,6 @@ const AnnotationEditor = (props: Props) => {
 
                 <div className="graph-annotation__title">
                     {props.rawEvent.id === undefined ? <span>Add Annotation</span> : <span>Edit Annotation</span>}
-
-
                 </div>
 
                 <div className="graph-annotation__time">{timeFormated}</div>
@@ -100,14 +102,14 @@ const AnnotationEditor = (props: Props) => {
                 <div style={{ display: "inline-block" }}>
                     <div className="gf-form gf-form--v-stretch">
                         <span className="gf-form-label width-7">Description</span>
-                        <textarea className="gf-form-input width-20" value={text} onChange={handelChange} rows={3} ></textarea>
+                        <textarea className="gf-form-input width-17" value={text} onChange={handelChange} rows={3} ></textarea>
                     </div>
 
 
 
                     <div className="gf-form-button-row">
-                        <button className="btn btn-primary" onClick={saveAnnotation}>Save</button>
-                        {props.rawEvent.id  !== undefined  && <button className="btn btn-danger" onClick={deleteAnnotation}>Delete</button>}
+                        <Button type="primary" onClick={saveAnnotation} ghost size="middle">Save</Button>
+                        {props.rawEvent.id  !== undefined  && <Button  onClick={deleteAnnotation} danger ghost>Delete</Button>}
                         {/* eslint-disable-next-line  */}
                         <a className="btn-text" onClick={props.close}>Cancel</a>
                     </div>

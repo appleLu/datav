@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/apm-ai/datav/backend/internal/annotation"
 	"github.com/apm-ai/datav/backend/internal/bootConfig"
 	"github.com/apm-ai/datav/backend/internal/acl"
 	"github.com/apm-ai/datav/backend/internal/users"
@@ -154,6 +155,14 @@ func (s *Server) Start() error {
 				sidemenuR.GET(":teamId", sidemenu.GetMenu)
 				sidemenuR.POST(":teamId", sidemenu.CreateMenu)
 				sidemenuR.PUT(":teamId", sidemenu.UpdateMenu)
+			}
+
+			annotationR := authR.Group("/api/annotations")
+			{
+				annotationR.GET("",annotation.GetAnnotations)
+				annotationR.POST("",annotation.CreateAnnotation)
+				annotationR.PUT("/:id",annotation.UpdateAnnotation)
+				annotationR.DELETE("/:id",annotation.DeleteAnnotation)
 			}
 
 			adminR := authR.Group("/api/admin",AdminAuth())

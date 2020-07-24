@@ -36,6 +36,7 @@ import { GraphContextMenuCtrl } from './GraphContextMenuCtrl';
 import { GraphContextMenu } from './GraphContextMenu';
 import AnnotationEdior from 'src/views/annotations/AnnotationEditor'
 import AnnotationTooltip from 'src/views/annotations/AnnotationTooltip'
+import { annotationsSrv } from 'src/core/services/annotations';
 
 interface State {
   contextMenuVisible: boolean
@@ -72,6 +73,7 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
     this.ctrl.events.on(PanelEvents.panelTeardown, this.onPanelTeardown);
     this.ctrl.events.on(PanelEvents.render, this.onRender);
 
+    
     // global events
     this.onGraphHover = this.onGraphHover.bind(this)
     this.onGraphHoverClear = this.onGraphHoverClear.bind(this)
@@ -98,21 +100,14 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
     appEvents.off('showAnnotationTooltip', this.showAnnotationTooltip)
   }
 
-  componentDidUpdate(prevProps) {
+  componentWillUpdate(prevProps) {
+    this.ctrl.setAnnotations()
   }
 
   showAnnotationEditor(data) {
     let drop: any;
-    const setAnnotation = (v) => {
-      //@todo
-      // add source for test
-      v.id = 1
-      v.source = { "builtIn": 1, "datasource": "-- Grafana --", "enable": true, "hide": true, "iconColor": "rgba(0, 211, 255, 1)", "name": "Annotations & Alerts", "type": "dashboard" }
-      this.ctrl.annotations.push(_.cloneDeep(v))
-    }
-
-    const delAnnotation = (v) => {
-      _.remove(this.ctrl.annotations, (n: any) => n.id === v.id);
+    const onChange = async (v) => {
+      this.ctrl.render()
     }
 
     drop = new Drop({
@@ -133,7 +128,7 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
     }
 
     ReactDOM.render(
-      <AnnotationEdior rawEvent={data.event} close={close} onSaved={setAnnotation} onDel={delAnnotation} />
+      <AnnotationEdior rawEvent={data.event} close={close} onChange={onChange}/>
       , document.getElementById('annotation-editor'));
 
     drop.on('close', () => {
@@ -145,6 +140,9 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
   }
 
   showAnnotationTooltip(data) {
+    if (!data.event.id) {
+      return 
+    }
     let drop: any;
     drop = new Drop({
       target: data.ele,
@@ -164,7 +162,7 @@ export class GraphPanel extends PureComponent<PanelProps<GraphPanelOptions>, Sta
       drop.close()
       this.showAnnotationEditor(data)
     }
-
+    
     ReactDOM.render(
       <AnnotationTooltip event={data.event} onEdit={openEditor} />
       , document.getElementById('annotation-tooltip'));

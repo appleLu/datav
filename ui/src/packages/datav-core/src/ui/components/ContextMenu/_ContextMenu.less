@@ -9,11 +9,13 @@
     border-radius: @border-radius-sm;
     .context-menu-header {
         padding: 4px;
-        border-bottom: 1px solid @border-color-base;
         margin-bottom: @margin-xs;
         border-radius: @border-radius-sm 0 0;
     }
 
+    .context-menu-body {
+      border-top: 1px solid @border-color-base
+    }
     .context-menu-link {
         display: flex;
         cursor: pointer;
@@ -28,7 +30,7 @@
       border-left: 2px solid transparent;
       cursor: pointer;
       &:hover {
-        border-image: linear-gradient(#f05a28 30%, #fbca0a 99%);
+        border-image: linear-gradient(@primary-color 30%, @success-color 99%);
         border-image-slice: 1;
       }
     }

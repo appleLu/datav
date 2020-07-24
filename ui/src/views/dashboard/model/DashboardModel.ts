@@ -9,6 +9,7 @@ import { getTimeSrv } from 'src/core/services/time'
 import {GetVariables,getVariables} from 'src/views/variables/state/selectors'
 import { variableAdapters } from 'src/views/variables/adapters'
 import sortByKeys from 'src/core/library/utils/sortByKeys'
+import { annotationsSrv } from 'src/core/services/annotations'
 
 export interface CloneOptions {
   saveVariables?: boolean;
@@ -146,7 +147,8 @@ export class DashboardModel {
       this.panelInEdit = undefined;
     }
     
-    startRefresh() {
+    async startRefresh() {
+        await annotationsSrv.getAnnotations()
         this.events.emit(PanelEvents.refresh);
 
         if (this.panelInEdit) {
