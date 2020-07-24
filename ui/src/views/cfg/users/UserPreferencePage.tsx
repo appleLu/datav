@@ -46,7 +46,20 @@ class UserPreferencePage extends PureComponent<Props, State> {
     async componentWillMount() {
         const res = await getBackendSrv().get("/api/users/user", { id: getState().user.id })
         const res0 = await getBackendSrv().get("/api/users/user/sidemenus")
-        console.log(res0)
+        let exist = false 
+        res0.data.forEach((sm:SideMenu) => {
+            if (sm.id === res.data.sidemenu) {
+                exist = true
+            }
+        }) 
+        if(!exist) {
+            notification['error']({
+                message: "Error",
+                description: `The sidemenu you are using is not exist any more,please choose another one instead`,
+                duration: 10
+            });
+        }
+
         this.setState({
             ...this.state,
             isLoaded: true,

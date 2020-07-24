@@ -184,7 +184,7 @@ func UpdateUserInfo(c *gin.Context) {
 		logger.Warn("update user invasion", "target_user_id", user.Id, "current_user_id", userId)
 		invasion.Add(c)
 	}
-	
+
 	_, err := db.SQL.Exec("UPDATE user SET name=?,email=?,updated=? WHERE id=?",
 		 user.Name, user.Email, now, userId)
 	if err != nil {
@@ -194,4 +194,21 @@ func UpdateUserInfo(c *gin.Context) {
 	}
 
 	c.JSON(200, common.ResponseSuccess(nil))
+}
+
+// the roles of current user in team
+func GetUserTeamRoles(c *gin.Context) {
+	members,err := models.QueryTeamMembersByUserId(session.CurrentUserId(c))
+	if err != nil {
+		logger.Warn("get team members by user id error", "error", err)
+		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+		return
+	}
+
+	roles := make(map[int64]models.RoleType) 
+	for _,m := range members {
+		roles[m.TeamId] = m.Role
+	}
+
+	c.JSON(200, common.ResponseSuccess(roles))
 }

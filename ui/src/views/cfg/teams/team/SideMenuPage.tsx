@@ -83,6 +83,7 @@ export class TeamSettingPage extends PureComponent<Props, State> {
     }
     
     onChangeMenu(v) {
+        console.log(v)
         this.setState({
             ...this.state,
             sidemenu : {

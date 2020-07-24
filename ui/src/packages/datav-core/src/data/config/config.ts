@@ -64,6 +64,7 @@ export const setCurrentTheme = (tt: ThemeType) => {
 //@legacy
 // config examples, remove in future
 export const config = {
+    productName: 'datav',
     baseUrl: 'http://localhost:9085/',
     appSubUrl: '/',
     minRefreshInterval: '5s',

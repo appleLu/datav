@@ -6,6 +6,7 @@ import { DownOutlined } from '@ant-design/icons';
 import { getBackendSrv } from 'src/core/services/backend';
 import AddMenuItem from './AddMenuItem'
 import ManageMenuItem from './ManageMenuItem'
+import { reservedUrls } from 'src/routes';
 
 interface Props {
     value: MenuItem[]
@@ -45,6 +46,14 @@ class MenuMange extends React.Component<Props, State> {
         // this.onDragEnd = this.onDragEnd.bind(this)
     }
 
+    componentDidUpdate(prevProps) {
+        if (prevProps !== this.props) {
+            this.setState({
+                ...this.state,
+                menuItems: _.cloneDeep(this.props.value),
+            })
+        }
+    }
 
     onDrop = info => {
         const dropKey = info.node.props.eventKey;
@@ -69,7 +78,7 @@ class MenuMange extends React.Component<Props, State> {
         let index0
         let arr0
         loop(data, dragKey, (item, index, arr) => {
-            index0 = index 
+            index0 = index
             arr0 = arr
             dragObj = item;
         });
@@ -93,11 +102,11 @@ class MenuMange extends React.Component<Props, State> {
                     // where to insert 示例添加到尾部，可以是随意位置
                     item.children.push(dragObj);
                 } else {
-                    for (let i=0;i<data.length;i++) {
-                        for (let j=0;j<data[i].children.length;j++) {
+                    for (let i = 0; i < data.length; i++) {
+                        for (let j = 0; j < data[i].children.length; j++) {
                             if (data[i].children[j].key == dropKey) {
-                                dragObj.level=2
-                                data[i].children.splice(j+1,0,dragObj)
+                                dragObj.level = 2
+                                data[i].children.splice(j + 1, 0, dragObj)
                             }
                         }
                     }
@@ -205,7 +214,7 @@ class MenuMange extends React.Component<Props, State> {
         }
         v.url = v.url.trim()
 
-        if (!_.startsWith(v.url,'/')) {
+        if (!_.startsWith(v.url, '/')) {
             notification['error']({
                 message: "Error",
                 description: `Url must be start with '/'`,
@@ -213,16 +222,16 @@ class MenuMange extends React.Component<Props, State> {
             });
             return false
         }
-        
+
         let count = 0
-        for (let i=0;i<v.url.length;i++) {
+        for (let i = 0; i < v.url.length; i++) {
             const alpha = v.url[i]
             if (alpha == '/') {
                 count++
                 continue
             }
-            
-            if (!(alpha>= 'a' && alpha <= 'z') && !(alpha>= 'A' && alpha <= 'Z')) {
+
+            if (!(alpha >= 'a' && alpha <= 'z') && !(alpha >= 'A' && alpha <= 'Z')) {
                 notification['error']({
                     message: "Error",
                     description: `Url  can only have '/' and 'aAzZ' letters`,
@@ -240,8 +249,19 @@ class MenuMange extends React.Component<Props, State> {
             return false
         }
 
+        // url mustn't conflict with fix routes
+        for (let i = 0; i < reservedUrls.length; i++) {
+            if (v.url === reservedUrls[i]) {
+                notification['error']({
+                    message: "Error",
+                    description: `this url is reserved,please change one`,
+                    duration: 5
+                });
+                return false
+            }
+        }
 
-        if (v.id == undefined || v.id.trim() == '') {
+        if (v.id === undefined || v.id.trim() === '') {
             notification['error']({
                 message: "Error",
                 description: `Menu dashboard uid can't be empty`,
@@ -251,7 +271,7 @@ class MenuMange extends React.Component<Props, State> {
         }
         v.id = v.id.trim()
 
-        if (v.icon == undefined || v.icon.trim() == '') {
+        if (v.icon === undefined || v.icon.trim() === '') {
             notification['error']({
                 message: "Error",
                 description: `Menu icon can't be empty`,
@@ -304,12 +324,11 @@ class MenuMange extends React.Component<Props, State> {
             }
 
             if (selectedNode.level === 1 && v.position === 2) {
-                alert(1)
                 for (let i = 0; i < selectedNode.children.length; i++) {
                     if (selectedNode.children[i].url === v.url) {
                         notification['error']({
                             message: "Error",
-                            description: `The same url already exist at menu :${selectedNode.title} -> ${  selectedNode.children[i].title }`,
+                            description: `The same url already exist at menu :${selectedNode.title} -> ${selectedNode.children[i].title}`,
                             duration: 5
                         });
                         return
@@ -434,7 +453,7 @@ class MenuMange extends React.Component<Props, State> {
                         if (item.children[i].url === v.url) {
                             notification['error']({
                                 message: "Error",
-                                description: `The same url already exist at menu :${item.title} -> ${item.children[i].title }`,
+                                description: `The same url already exist at menu :${item.title} -> ${item.children[i].title}`,
                                 duration: 5
                             });
                             return
@@ -484,13 +503,12 @@ class MenuMange extends React.Component<Props, State> {
         } else {
             _.pullAt(menuItems[i].children, j)
         }
-        console.log(i, j)
+
         this.setState({
             ...this.state,
             menuItems: menuItems
         })
 
-        console.log(menuItems)
         this.onCancelDrawer()
         this.props.onChange(menuItems)
     }
@@ -500,7 +518,7 @@ class MenuMange extends React.Component<Props, State> {
         return (
             <>
                 <Tree
-                    style={{padding: '5px'}}
+                    style={{ padding: '5px' }}
                     blockNode
                     className="draggable-tree"
                     draggable

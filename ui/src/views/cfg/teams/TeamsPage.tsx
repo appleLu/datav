@@ -7,9 +7,8 @@ import { getBackendSrv } from 'src/packages/datav-core';
 import { getNavModel } from '../../Layouts/Page/navModel'
 import TeamTable from './TeamTable'
 import AddTeam from './AddTeam'
-import { Team, isAdmin } from 'src/types';
+import { Team, isAdmin, Role } from 'src/types';
 import { getState } from 'src/store/store';
-import { Button } from 'antd';
 
 export interface Props {
     routeID: string;
@@ -18,6 +17,9 @@ export interface Props {
 
 interface State {
     teams: Team[]
+    teamRoles: {
+        number : Role
+    }
     hasFetched: boolean
 }
 
@@ -26,7 +28,8 @@ export class TeamPage extends PureComponent<Props, State> {
         super(props)
         this.state = {
             teams: null,
-            hasFetched: true
+            hasFetched: true,
+            teamRoles: null
         }
 
         this.onAddTeam = this.onAddTeam.bind(this)
@@ -38,9 +41,11 @@ export class TeamPage extends PureComponent<Props, State> {
 
     async fetchData() {
         const res = await getBackendSrv().get('/api/teams')
+        const res0 = await getBackendSrv().get('/api/users/user/teamRoles')
         if (res.data) {
             this.setState({
                 teams: res.data,
+                teamRoles: res.data,
                 hasFetched: true
             })
         }
@@ -60,7 +65,7 @@ export class TeamPage extends PureComponent<Props, State> {
         const { routeID, parentRouteID } = this.props
         const navModel = getNavModel(routeID, parentRouteID)
 
-        const { hasFetched, teams } = this.state
+        const { hasFetched, teams ,teamRoles} = this.state
         return (
             <Page navModel={navModel}>
                 <Page.Contents isLoading={!hasFetched}>
@@ -68,7 +73,7 @@ export class TeamPage extends PureComponent<Props, State> {
                         {isAdmin(getState().user.role) && <AddTeam onAddTeam={this.onAddTeam} /> }
                     </div>
                     <div style={{ marginTop: isAdmin(getState().user.role) ? '40px' :'0' }}>
-                        {hasFetched && <TeamTable teams={teams} reloadTeams={this.fetchData} />}
+                        {hasFetched && <TeamTable teams={teams} reloadTeams={this.fetchData} teamRoles={teamRoles}/>}
                     </div>
                 </Page.Contents>
             </Page>

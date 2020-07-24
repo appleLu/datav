@@ -296,3 +296,6 @@ export const initRoutes = (store: Store<StoreState>) => {
 
     routers = _.concat(dashRouters,fixRouters)
 }
+
+// urls are reserved in datav, cant be used by users
+export const reservedUrls = ['/d','/plugin','/datasources','/new','/cfg','/team','/f','/user','/help']

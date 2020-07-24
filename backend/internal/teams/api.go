@@ -8,7 +8,7 @@ import (
 	"github.com/apm-ai/datav/backend/internal/invasion"
 	"github.com/apm-ai/datav/backend/pkg/utils"
 
-	// "fmt"
+	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -22,14 +22,51 @@ import (
 )
 
 func GetTeams(c *gin.Context) {
-	rows, err := db.SQL.Query(`SELECT id,name,created_by FROM team`)
+	teams := make(models.Teams, 0)
+
+	// user can see the teams he is in
+	q := `SELECT id,name,created_by FROM team`
+	if (!acl.IsGlobalAdmin(c)) {
+		userId := session.CurrentUserId(c)
+		members,err := models.QueryTeamMembersByUserId(userId)
+		if err != nil {
+			logger.Warn("get all teams error", "error", err)
+			c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
+			return
+		}
+
+		if len(members) == 0 {
+			c.JSON(200,common.ResponseSuccess(teams))
+			return 	
+		}
+		
+		if len(members) == 1 {
+			q = fmt.Sprintf("%s WHERE id = '%d'",q,members[0].TeamId)
+		} else {
+			for i,m := range members {
+				if (i == 0) {
+					q = fmt.Sprintf("%s WHERE id in ('%d'",q,m.TeamId)
+					continue
+				}
+
+				if (i == len(members)-1) {
+					q = fmt.Sprintf("%s,'%d')",q,m.TeamId)
+					continue
+				}
+
+				q = fmt.Sprintf("%s,'%d'",q,m.TeamId)
+			}
+		}
+	}
+
+	rows, err := db.SQL.Query(q)
 	if err != nil {
 		logger.Warn("get all teams error", "error", err)
 		c.JSON(500, common.ResponseErrorMessage(nil, i18n.OFF, err.Error()))
 		return
 	}
 
-	teams := make(models.Teams, 0)
+
 	for rows.Next() {
 		team := &models.Team{}
 		err := rows.Scan(&team.Id, &team.Name, &team.CreatedById)
@@ -37,7 +74,7 @@ func GetTeams(c *gin.Context) {
 			logger.Warn("get all users scan error", "error", err)
 			continue
 		}
-
+	
 		user, _ := models.QueryUser(team.CreatedById, "", "")
 		team.CreatedBy = user.Username
 
@@ -410,6 +447,12 @@ func DeleteTeam(c *gin.Context) {
 	}
 
 	_, err = db.SQL.Exec("DELETE FROM team_member WHERE team_id=?", teamId)
+	if err != nil {
+		logger.Warn("delete team member error", "error", err)
+	}
+
+	// delete team sidemenu
+	_, err = db.SQL.Exec("DELETE FROM sidemenu WHERE team_id=?",teamId)
 	if err != nil {
 		logger.Warn("delete team member error", "error", err)
 	}

@@ -12,15 +12,11 @@ import { setToken } from 'src/core/library/utils/auth';
 
 import { store } from 'src/store/store';
 import { updateUser } from 'src/store/reducers/user';
-import { getBackendSrv } from 'src/packages/datav-core'
+import { getBackendSrv, config } from 'src/packages/datav-core'
 
 import './Login.less'
 
 function Login() {
-    const layout = {
-        wrapperCol: { span: 20, offset: 2 },
-    };
-
     const history = useHistory()
 
     const onFinish = (values: any) => {
@@ -47,29 +43,32 @@ function Login() {
     return (
         <div className="datav-login">
             <div className="datav-rectangle">
+                <h3>Welcome to {config.productName}</h3>
                 <Form
-                    {...layout}
                     name="basic"
                     initialValues={{ remember: true }}
                     onFinish={onFinish}
+                    layout="vertical"
                 >
                     <Form.Item
                         name="username"
+                        label="Username"
                     >
-                        <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="username..." />
+                        <Input />
                     </Form.Item>
 
                     <Form.Item
                         name="password"
+                        label="Password"
                     >
-                        <Input prefix={<LockOutlined className="site-form-item-icon" />} type="password" placeholder="Password" />
+                        <Input  type="password" />
                     </Form.Item>
 
 
                     <Form.Item >
-                        <Button type="primary" htmlType="submit" block>
+                        <Button type="primary" htmlType="submit" className="ub-mt2" block>
                             Log in
-              </Button>
+                        </Button>
                     </Form.Item>
                 </Form>
             </div>
